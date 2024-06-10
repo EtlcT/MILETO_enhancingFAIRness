@@ -1,0 +1,28 @@
+[build-system]
+requires = ["poetry"] #? to check
+build-backend = "poetry.build" #?
+
+[project]
+name = "spreadsheets_to_sqlite"
+dynamic = ["version"]
+
+requires-python = ">=3.9"
+authors = [
+    { name="Agathe Casalta-Badetti", email="a.casaltab@gmail.com"},
+]
+description = "A package to convert spreadsheets into .sqlite files with PDF documentation"
+readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+    "Programing Language :: Python :: 3.9",
+    # "License :: GPL", # creative common attribution, non comercial and share alike 
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/EtlcT/" #! to change
+
+[tool.poetry.dependencies]
+
+[tool.pytest.ini_options]
+pythonpath = "src"
