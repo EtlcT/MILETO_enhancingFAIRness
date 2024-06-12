@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it with these metadata"
+title: "FAIR_spreadlite"
+authors:
+  - family-names: Casalta-Badetti
+  - given-names: Agathe
+  - affiliation: "Università degli Studi di Sassari (UNISS)"
+  - orcid: 0009-0000-2101-6800
+repository-code: "https://github.com/EtlcT/MILETTO_enhancingFAIRness"
+repository-artifact: "https://gitlab.com/NuoroForestrySchool/miletto_enhancingfairness"
