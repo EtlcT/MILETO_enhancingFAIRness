@@ -34,7 +34,7 @@ class sqliteCreate():
 
         This function create a sqlite file
         """
-        
+
         filename = f"{self.dbname}.sqlite"
         conn = sqlite3.connect(database=filename)
         
@@ -49,7 +49,7 @@ class sqliteCreate():
 
             # if there are some FK constraint            
             if (fk_info.empty != True):
-                fk_statement = self._add_FK_constraint()
+                fk_statement = self._add_FK_constraint(fk_info)
                 query += fk_statement
             
             query += ")"
@@ -58,8 +58,22 @@ class sqliteCreate():
 
         conn.close()
 
+    def insert_data(self) -> None:
+        """
+        Insert data into database
+        """
 
-    def _add_PK_constraint(table_name: str, column_list: list, pk_attribute: list) -> str:
+        filename = f"{self.dbname}.sqlite"
+        conn = sqlite3.connect(filename)
+        for table in self.datatable_list:
+            self.dict_tables[table].to_sql(name=table,
+                                           con=conn,
+                                           if_exists='append',
+                                           index=False)
+        return
+
+
+    def _add_PK_constraint(self, table_name: str, column_list: list, pk_attribute: list) -> str:
         """
         return a valid sql query for sqlite database CREATE TABLE <> 
         with primary key constraint
@@ -77,7 +91,7 @@ class sqliteCreate():
 
         return query
 
-    def _add_FK_constraint(fk_info: pd.DataFrame) -> str:
+    def _add_FK_constraint(self, fk_info: pd.DataFrame) -> str:
         """
         Return a part of sql statement relative to Foreign keys constraint
         FOREIGN KEYS (field_name) REFERENCES ref_table_name(field_name)
@@ -137,8 +151,6 @@ class sqliteCreate():
     #     conn.close()
 
 
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filepath", help="path to the spreadsheet you want to convert")
@@ -146,4 +158,6 @@ if __name__ == "__main__":
     # if args.filepath is None:
     #     raise TypeError("filepath to your spreadsheet is required")
     getData = GetSpreadsheetData(filepath=args.filepath)
-    sqliteCreate(getData).create_db()
+    dbCreate = sqliteCreate(getData)
+    dbCreate.create_db()
+    dbCreate.insert_data()
