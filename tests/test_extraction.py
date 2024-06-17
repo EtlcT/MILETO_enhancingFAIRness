@@ -24,13 +24,21 @@ def _read_spreadsheet_mock():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_C = ['Attribute_A1', 'Attribute_B1', 'Attribute_C1', 'Attribute_C2', 'Attribute_C3']
+    fields_C = ['Attribute_A1', 'Attribute_B1', 'Attribute_C1', 'Attribute_D1', 'Attribute_C3']
     values_C = [
-        ['Ref_A1', 'Ref_B1', 'Ref_C1', 'value_a', 12],
-        ['Ref_A2', 'Ref_B1', 'Ref_C2', 'value_b', 42],
-        ['Ref_A1', 'Ref_B1', 'Ref_C3', 'value_b', 200]
+        ['Ref_A1', 'Ref_B1', 'Ref_C1', 'Ref_D2', 12],
+        ['Ref_A2', 'Ref_B1', 'Ref_C2', 'Ref_D3', 42],
+        ['Ref_A1', 'Ref_B1', 'Ref_C3', 'Ref_D1', 200]
     ]
     table_C = pd.DataFrame(data=values_C, columns=fields_C)
+
+    fields_D = ['Attribute_D1', 'Attribute_D2']
+    values_D = [
+        ['Ref_D1', 'value_aa'],
+        ['Ref_D2', 'value_ab'],
+        ['Ref_D3', 'value_aa']
+    ]
+    table_D = pd.DataFrame(data=values_D, columns=fields_D)
 
     fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
     values_KEYS = [
@@ -43,8 +51,10 @@ def _read_spreadsheet_mock():
         ['Table_C', 'Attribute_A1', np.nan, 'Y', 'Table_A'],
         ['Table_C', 'Attribute_B1', np.nan, 'Y', 'Table_B'],
         ['Table_C', 'Attribute_C1', 'Y', np.nan, np.nan],
-        ['Table_C', 'Attribute_C2', np.nan, np.nan, np.nan],
-        ['Table_C', 'Attribute_C3', np.nan, np.nan, np.nan]
+        ['Table_C', 'Attribute_D1', np.nan, 'Y', 'Table_D'],
+        ['Table_C', 'Attribute_C3', np.nan, np.nan, np.nan],
+        ['Table_D', 'Attribute_D1', 'Y', np.nan, np.nan],
+        ['Table_D', 'Attribute_D2', np.nan, np.nan, np.nan],
     ]
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
@@ -61,6 +71,7 @@ def _read_spreadsheet_mock():
         'Table_A': table_A,
         'Table_B': table_B,
         'Table_C': table_C,
+        'Table_D': table_D,
         'KEYS': table_KEYS,
         'meta.REFERENCES': table_REF
     }
@@ -92,15 +103,16 @@ class TestExtraction(unittest.TestCase):
         
         getData = retrieve_data.GetSpreadsheetData('fakepath')
         getData._read_spreadsheet = MagicMock(_read_spreadsheet_mock)
-        result = getData.get_datatables_list()
+        result = getData._get_datatables_list()
 
-        self.assertListEqual(result, ['Table_A', 'Table_B', 'Table_C'])
+        self.assertListEqual(result, ['Table_A', 'Table_B', 'Table_C', 'Table_D'])
 
     def test_get_keys_df(self):
-        """Check that we retrieve all attributes that are either defined as PK or FK and not the others"""
+        """Check that we retrieve all attributes that are either defined
+        as PK or FK and not the others
+        """
 
         getData = retrieve_data.GetSpreadsheetData('fakepath')
-        getData._read_spreadsheet = MagicMock(_read_spreadsheet_mock)
         result = getData._get_keys_df()
 
         expected_result = pd.DataFrame(
@@ -111,8 +123,10 @@ class TestExtraction(unittest.TestCase):
                 ['Table_B', 'Attribute_B1', 'Y', np.nan, np.nan],
                 ['Table_C', 'Attribute_A1', np.nan, 'Y', 'Table_A'],
                 ['Table_C', 'Attribute_B1', np.nan, 'Y', 'Table_B'],
-                ['Table_C', 'Attribute_C1', 'Y', np.nan, np.nan]
+                ['Table_C', 'Attribute_C1', 'Y', np.nan, np.nan],
+                ['Table_C', 'Attribute_D1', np.nan, 'Y', 'Table_D'],
+                ['Table_D', 'Attribute_D1', 'Y', np.nan, np.nan]
             ]
         )
 
-        self.assertEqual(expected_result.equals(result), True)
+        self.assertEqual(expected_result.equals(result), True) # use Dataframe.equals from pandas library to check
