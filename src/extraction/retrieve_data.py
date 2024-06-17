@@ -6,7 +6,7 @@ extract data required for conversion into Relationnal DB
 """
 
 import pandas as pd
-import openpyxl # engine used by pandas.read_excel
+#import openpyxl # engine used by pandas.read_excel
 import re
 
 class GetSpreadsheetData:
@@ -16,8 +16,10 @@ class GetSpreadsheetData:
 
     def __init__(self, filepath) -> None:
         self.sheets_dict = self._read_spreadsheet(filepath)
-        self.dbname = self.get_dbname()
-        self.keys = self._get_keys_df()
+        self.db_name = self._get_dbname()
+        #self.keys = self.get_keys_df()
+        self.datatables_list = self._get_datatables_list()
+        self.table_structure = self._get_table_structure()
     
     def _read_spreadsheet(self, filepath) -> dict:
         """
@@ -36,8 +38,7 @@ class GetSpreadsheetData:
         no_extra = re.search("(?i)extra_sheet\.", text)
         return any([no_keys, no_meta, no_extra])
 
-
-    def get_datatables_list(self) -> list:
+    def _get_datatables_list(self) -> list:
         """
         return a list containing the name of table that contains effective data
 
@@ -48,7 +49,18 @@ class GetSpreadsheetData:
             if(self._regex_exclude_meta(sheet_name) == False):
                 datatable_list.append(sheet_name)
         return datatable_list
+
+    def _get_table_structure(self) -> pd.DataFrame:
+        """
+        return a dataframe that contain rows from KEYS table
+        where 'Table' belong to data table list (ie self.datatables_list)
+        """
         
+        return self.sheets_dict['KEYS'][self.sheets_dict['KEYS']['Table']
+                                        .isin(self.datatables_list)] \
+                                        .iloc[:,:5]
+
+    #! not used anymore, see _get_table_structure instead    
     def _get_keys_df(self) -> pd.DataFrame:
         """
         return a dataframe that contain rows from KEYS table
@@ -59,10 +71,13 @@ class GetSpreadsheetData:
         
         return keys_df.reset_index(drop=True)
     
-    def get_dbname(self) -> str:
+    def _get_dbname(self) -> str:
         """
         return the database name as specified in the spreadsheet meta.References sheet
         """
+        db_name = self.sheets_dict['meta.REFERENCES'][self.sheets_dict['meta.REFERENCES']['key'] == 'DBfileName']['value'].values[0]
 
-        return self.sheets_dict['meta.REFERENCES'][self.sheets_dict['meta.REFERENCES']['key'] == 'DBfileName']['value'].values[0]
+        # remove unwanted character from file name
+        db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
+        return db_name
 

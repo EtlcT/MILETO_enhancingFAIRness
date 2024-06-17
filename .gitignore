@@ -2,3 +2,4 @@ venv/
 **/logs
 app_dev.ipynb
 Dockerfile
+**/__pycache__
