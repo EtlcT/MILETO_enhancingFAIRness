@@ -24,6 +24,7 @@ class GetSpreadsheetData:
         """
         return a dictionnary containing as many dataframes as sheets in the original file
         """
+        
         return pd.read_excel(filepath, sheet_name=None)
     
     def _regex_exclude_meta(self, text) -> bool:
@@ -74,9 +75,11 @@ class GetSpreadsheetData:
         db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
         return db_name
 
-    def check_PK_uniqness(self) -> bool:
+    #! modify parameter to self, table_name, pk_attribute
+    def check_PK_uniqness(self) -> None:
         """
-        check that fields sets are PK contain unique value
+        Raise assertion error if fields defined as Primary Key does not
+        respect uniqueness criteria
         """
 
         pk_constraint = self.table_structure[self.table_structure['isPK'] == 'Y'][['Table','Attribute']]
@@ -102,17 +105,42 @@ class GetSpreadsheetData:
                 \nPK should be unique"
 
         return
+    
+    def check_FK_exists(self) -> None:
+        """
+        Raise assertion error if FK is not present in Reference Table
+        """
 
-    #! not used anymore, see _get_table_structure instead    
-    def _get_keys_df(self) -> pd.DataFrame:
-        """
-        return a dataframe that contain rows from KEYS table
-        where either Primary Key OR Foreign Key is not null
-        """
-        keys_df = self.sheets_dict['KEYS'][self.sheets_dict['KEYS']['isPK'].notna()
-                                            | self.sheets_dict['KEYS']['isFK'].notna()].iloc[:,:5]
+        isFK_condition = self.table_structure['isFK']=='Y'
+        fk_constraint = self.table_structure[isFK_condition]['Table','Attribute','ReferenceTable']
+        fk_groupedby_table = fk_constraint.groupby(by='Table')
+
+        for table_name, fk_info in fk_groupedby_table:
+            for _, row in fk_info.iterrows():
+
+                assert row['Attribute'] in self.sheets_dict[row['ReferenceTable']],\
+                    f"invalid foreign key for {table_name}\
+                    \n{row['Attribute']} does not exist in {row['ReferenceTable']}"
+        return
+ 
+    def check_PK_defined(self) -> None:
+        """Raise AssertionError if a table has no Primary Key defined"""
+
+        for table, table_info in self.table_structure.groupby(by='Table'):
+            assert 'Y' in table_info['isPK'], f"Table {table} has no Primary Key defined"
         
-        return keys_df.reset_index(drop=True)
+        return
+
+
+    # def _list_pk(self) -> list:
+    #     """
+    #     return a dataframe that contain rows from KEYS table
+    #     where either Primary Key OR Foreign Key is not null
+    #     """
+    #     isPk_condition = self.sheets_dict['KEYS']['isPK'] == 'Y'
+    #     pk_list = self.sheets_dict['KEYS'][isPk_condition][['Table']]
+        
+    #     return pk_list
     
     
 
