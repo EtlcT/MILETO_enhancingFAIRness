@@ -17,7 +17,6 @@ class GetSpreadsheetData:
     def __init__(self, filepath) -> None:
         self.sheets_dict = self._read_spreadsheet(filepath)
         self.db_name = self._get_dbname()
-        #self.keys = self.get_keys_df()
         self.datatables_list = self._get_datatables_list()
         self.table_structure = self._get_table_structure()
     
@@ -50,6 +49,9 @@ class GetSpreadsheetData:
                 datatable_list.append(sheet_name)
         return datatable_list
 
+    #! may be deprecated in the future if spreadsheet template is modified
+    #? potential future behavior: directly modify sheet_dict['KEYS']
+    #? and access it instead of creating dedicated Df that is a duplication
     def _get_table_structure(self) -> pd.DataFrame:
         """
         return a dataframe that contain rows from KEYS table
@@ -59,6 +61,47 @@ class GetSpreadsheetData:
         return self.sheets_dict['KEYS'][self.sheets_dict['KEYS']['Table']
                                         .isin(self.datatables_list)] \
                                         .iloc[:,:5]
+
+    def _get_dbname(self) -> str:
+        """
+        return the database name as specified in the spreadsheet meta.References sheet
+        """
+        db_name = self.sheets_dict['meta.REFERENCES']\
+            [self.sheets_dict['meta.REFERENCES']['key'] == 'DBfileName']\
+            ['value'].values[0]
+
+        # remove unwanted character from file name
+        db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
+        return db_name
+
+    def check_PK_uniqness(self) -> bool:
+        """
+        check that fields sets are PK contain unique value
+        """
+
+        pk_constraint = self.table_structure[self.table_structure['isPK'] == 'Y'][['Table','Attribute']]
+        pk_groupedby_table = pk_constraint.groupby(by='Table')
+        for table_name, pk_info in pk_groupedby_table:
+            nb_pk = len(pk_info.tolist())
+            # check if it is a composite PK or not
+            if nb_pk == 1: 
+                assert self.sheets_dict[table_name][pk_info.loc[0]].is_unique == True,\
+                    f"invalid primary key constraint {pk_info.iloc[0]} for table {table_name}\
+                    \nPK should be unique"
+                
+            else: # this is a composite PK
+                count_combination = (
+                    self.sheets_dict[table_name]
+                    .groupby(by=[pk_info.iloc[i] for i in range(nb_pk)])
+                    .size()
+                    .reset_index(name='count')
+                )
+
+                assert (count_combination['count']==1).all() == True,\
+                f"invalid primary key constraint {[pk_info.iloc[i] for i in range(nb_pk)]} for table {table_name}\
+                \nPK should be unique"
+
+        return
 
     #! not used anymore, see _get_table_structure instead    
     def _get_keys_df(self) -> pd.DataFrame:
@@ -71,13 +114,5 @@ class GetSpreadsheetData:
         
         return keys_df.reset_index(drop=True)
     
-    def _get_dbname(self) -> str:
-        """
-        return the database name as specified in the spreadsheet meta.References sheet
-        """
-        db_name = self.sheets_dict['meta.REFERENCES'][self.sheets_dict['meta.REFERENCES']['key'] == 'DBfileName']['value'].values[0]
-
-        # remove unwanted character from file name
-        db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
-        return db_name
+    
 
