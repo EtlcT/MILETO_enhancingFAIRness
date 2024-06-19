@@ -8,7 +8,13 @@ extract data required for conversion into Relationnal DB
 import pandas as pd
 #import openpyxl # engine used by pandas.read_excel
 import re
-from utils import checkUniqueness
+import sys
+import os
+
+# Add the root directory of the project to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from src.extraction.utils import checkUniqueness
 
 class GetSpreadsheetData:
     """
@@ -29,6 +35,7 @@ class GetSpreadsheetData:
         
         return pd.read_excel(filepath, sheet_name=None)
     
+    #?
     def _regex_exclude_meta(self, text) -> bool:
         """
         return True if text match one of the regex to exclude, false either
@@ -40,9 +47,10 @@ class GetSpreadsheetData:
         no_extra = re.search("(?i)extra_sheet\.", text)
         return any([no_keys, no_meta, no_extra])
 
+    #?
     def _get_datatables_list(self) -> list:
         """
-        return a list containing the name of table that contains effective data
+        Return a list containing the name of table that contains effective data
 
         exclude KEYS, meta.* and DDict.*
         """
@@ -64,7 +72,7 @@ class GetSpreadsheetData:
         return self.sheets_dict['KEYS'][self.sheets_dict['KEYS']['Table']
                                         .isin(self.datatables_list)] \
                                         .iloc[:,:5]
-
+    #?
     def _get_dbname(self) -> str:
         """
         return the database name as specified in the spreadsheet meta.References sheet
@@ -77,6 +85,7 @@ class GetSpreadsheetData:
         db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
         return db_name
 
+    #?
     def _get_composite_pk(self) -> pd.DataFrame:
         """
         Return a Dataframe containing table name and composite key fields
@@ -96,7 +105,7 @@ class GetSpreadsheetData:
         return composite_pk_df
                 
     #! modify parameter to self, table_name, pk_attribute
-    def check_PK_uniqness(self) -> None:
+    def check_PK_uniqueness(self) -> None:
         """
         Raise assertion error if fields defined as Primary Key does not
         respect uniqueness criteria
@@ -104,11 +113,12 @@ class GetSpreadsheetData:
         pk_constraint = self.table_structure[self.table_structure['isPK'] == 'Y'][['Table','Attribute']]
         pk_groupedby_table = pk_constraint.groupby(by='Table')
         for table_name, pk_info in pk_groupedby_table:
-            pk_info = pk_info.tolist()
+            pk_info = pk_info['Attribute'].tolist()
 
             assert checkUniqueness(field=pk_info, table=self.sheets_dict[table_name]),\
                     f"invalid primary key constraint {pk_info} for table {table_name}\n\
                     Primary must be unique"
+            
             # nb_pk = len(pk_info.tolist())
             # # check if it is a composite PK or not
             # if nb_pk == 1: 
@@ -130,7 +140,7 @@ class GetSpreadsheetData:
 
         return
     
-    def check_FK_in_refTable(self) -> None:
+    def check_FK_existence_and_uniqueness(self) -> None:
         """
         Raise assertion error if FK is not present in Reference Table
         """
@@ -154,11 +164,6 @@ class GetSpreadsheetData:
                     f"invalid Foreign key {fk_info['Attribute']} for {table_name}\n\
                         all attributes must be present in {ref_table_name}"
 
-            # for _, row in fk_info.iterrows():
-
-            #     assert row['Attribute'] in self.sheets_dict[row['ReferenceTable']],\
-            #         f"invalid foreign key for {table_name}\
-            #         \n{row['Attribute']} does not exist in {row['ReferenceTable']}"
         return
 
     def check_PK_defined(self) -> None:
@@ -169,16 +174,16 @@ class GetSpreadsheetData:
         
         return
 
-
-    # def _list_pk(self) -> list:
-    #     """
-    #     return a dataframe that contain rows from KEYS table
-    #     where either Primary Key OR Foreign Key is not null
-    #     """
-    #     isPk_condition = self.sheets_dict['KEYS']['isPK'] == 'Y'
-    #     pk_list = self.sheets_dict['KEYS'][isPk_condition][['Table']]
+    #! deprecated
+    def _list_pk(self) -> list:
+        """
+        return a dataframe that contain rows from KEYS table
+        where either Primary Key OR Foreign Key is not null
+        """
+        isPk_condition = self.sheets_dict['KEYS']['isPK'] == 'Y'
+        pk_list = self.sheets_dict['KEYS'][isPk_condition][['Table']]
         
-    #     return pk_list
+        return pk_list
     
     
 
