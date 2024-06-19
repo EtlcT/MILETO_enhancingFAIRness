@@ -22,10 +22,8 @@ class sqliteCreate():
     """
 
     def __init__(self, getData: object) -> None:
-        self.dbname = getData.db_name
-        self.dict_tables = getData.sheets_dict
-        self.table_structure = getData.table_structure
-        self.datatable_list = getData.datatables_list
+        assert isinstance(getData, GetSpreadsheetData)
+        self.data = getData
 
     def create_db(self) -> None:
         """
@@ -35,10 +33,10 @@ class sqliteCreate():
         This function create a sqlite file
         """
 
-        filename = f"{self.dbname}.sqlite"
+        filename = f"{self.data.db_name}.sqlite"
         conn = sqlite3.connect(database=filename)
         
-        group_by_table = self.table_structure.groupby(by='Table')
+        group_by_table = self.data.table_structure.groupby(by='Table')
         for table_name, table_info in group_by_table:
 
             column_list = table_info['Attribute'].tolist()
@@ -63,13 +61,14 @@ class sqliteCreate():
         Insert data into database
         """
 
-        filename = f"{self.dbname}.sqlite"
+        filename = f"{self.data.db_name}.sqlite"
         conn = sqlite3.connect(filename)
-        for table in self.datatable_list:
-            self.dict_tables[table].to_sql(name=table,
+        for table in self.data.datatables_list:
+            self.data.sheets_dict[table].to_sql(name=table,
                                            con=conn,
                                            if_exists='append',
-                                           index=False)
+                                           index=False
+                                           )
         return
 
 
@@ -106,7 +105,7 @@ class sqliteCreate():
 
         fk_statement = str()
         for index, row in fk_info.iterrows():
-            fk_statement += f", FOREIGN KEY ({row['Attribute']}) REFERENCES {row['ReferenceTable']}({row['Attribute']})"
+            fk_statement += f", FOREIGN KEY ({row['Attribute']}) REFERENCES {row['ReferenceTable']}"
         return fk_statement
             
 

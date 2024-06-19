@@ -3,3 +3,4 @@ venv/
 app_dev.ipynb
 Dockerfile
 **/__pycache__
+old**

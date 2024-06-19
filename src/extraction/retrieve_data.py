@@ -104,7 +104,7 @@ class GetSpreadsheetData:
                 
         return composite_pk_df
                 
-    #! modify parameter to self, table_name, pk_attribute
+    #?
     def check_PK_uniqueness(self) -> None:
         """
         Raise assertion error if fields defined as Primary Key does not
@@ -119,25 +119,6 @@ class GetSpreadsheetData:
                     f"invalid primary key constraint {pk_info} for table {table_name}\n\
                     Primary must be unique"
             
-            # nb_pk = len(pk_info.tolist())
-            # # check if it is a composite PK or not
-            # if nb_pk == 1: 
-            #     assert self.sheets_dict[table_name][pk_info.iloc[0]].is_unique == True,\
-            #         f"invalid primary key constraint {pk_info.iloc[0]} for table {table_name}\
-            #         \nPK should be unique"
-                
-            # else: # this is a composite PK
-            #     count_combination = (
-            #         self.sheets_dict[table_name]
-            #         .groupby(by=[pk_info.iloc[i] for i in range(nb_pk)])
-            #         .size()
-            #         .reset_index(name='count')
-            #     )
-
-            #     assert (count_combination['count']==1).all() == True,\
-            #     f"invalid primary key constraint {[pk_info.iloc[i] for i in range(nb_pk)]} for table {table_name}\
-            #     \nPK should be unique"
-
         return
     
     def check_FK_existence_and_uniqueness(self) -> None:
@@ -173,17 +154,3 @@ class GetSpreadsheetData:
             assert 'Y' in table_info['isPK'], f"Table {table} has no Primary Key defined"
         
         return
-
-    #! deprecated
-    def _list_pk(self) -> list:
-        """
-        return a dataframe that contain rows from KEYS table
-        where either Primary Key OR Foreign Key is not null
-        """
-        isPk_condition = self.sheets_dict['KEYS']['isPK'] == 'Y'
-        pk_list = self.sheets_dict['KEYS'][isPk_condition][['Table']]
-        
-        return pk_list
-    
-    
-
