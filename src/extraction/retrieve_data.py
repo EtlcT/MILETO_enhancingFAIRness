@@ -8,6 +8,7 @@ extract data required for conversion into Relationnal DB
 import pandas as pd
 #import openpyxl # engine used by pandas.read_excel
 import re
+from utils import checkUniqueness
 
 class GetSpreadsheetData:
     """
@@ -19,6 +20,7 @@ class GetSpreadsheetData:
         self.db_name = self._get_dbname()
         self.datatables_list = self._get_datatables_list()
         self.table_structure = self._get_table_structure()
+        self.compositePK_df = self._get_composite_pk()
     
     def _read_spreadsheet(self, filepath) -> dict:
         """
@@ -75,54 +77,90 @@ class GetSpreadsheetData:
         db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
         return db_name
 
+    def _get_composite_pk(self) -> pd.DataFrame:
+        """
+        Return a Dataframe containing table name and composite key fields
+        """
+        composite_pk_df = pd.DataFrame(columns=['Table', 'pk_fields'])
+        group_by_table = self.table_structure.groupby(by='Table')
+
+        for table_name, table_info in group_by_table:
+            pk_attr = table_info[table_info['isPK']=='Y']['Attribute'].tolist()
+            if len(pk_attr)>1:
+                new_row = pd.DataFrame([{'Table': table_name,'pk_fields': pk_attr}])
+                composite_pk_df = pd.concat(
+                    [composite_pk_df, new_row],
+                    ignore_index=True
+                )
+                
+        return composite_pk_df
+                
     #! modify parameter to self, table_name, pk_attribute
     def check_PK_uniqness(self) -> None:
         """
         Raise assertion error if fields defined as Primary Key does not
         respect uniqueness criteria
         """
-
         pk_constraint = self.table_structure[self.table_structure['isPK'] == 'Y'][['Table','Attribute']]
         pk_groupedby_table = pk_constraint.groupby(by='Table')
         for table_name, pk_info in pk_groupedby_table:
-            nb_pk = len(pk_info.tolist())
-            # check if it is a composite PK or not
-            if nb_pk == 1: 
-                assert self.sheets_dict[table_name][pk_info.loc[0]].is_unique == True,\
-                    f"invalid primary key constraint {pk_info.iloc[0]} for table {table_name}\
-                    \nPK should be unique"
-                
-            else: # this is a composite PK
-                count_combination = (
-                    self.sheets_dict[table_name]
-                    .groupby(by=[pk_info.iloc[i] for i in range(nb_pk)])
-                    .size()
-                    .reset_index(name='count')
-                )
+            pk_info = pk_info.tolist()
 
-                assert (count_combination['count']==1).all() == True,\
-                f"invalid primary key constraint {[pk_info.iloc[i] for i in range(nb_pk)]} for table {table_name}\
-                \nPK should be unique"
+            assert checkUniqueness(field=pk_info, table=self.sheets_dict[table_name]),\
+                    f"invalid primary key constraint {pk_info} for table {table_name}\n\
+                    Primary must be unique"
+            # nb_pk = len(pk_info.tolist())
+            # # check if it is a composite PK or not
+            # if nb_pk == 1: 
+            #     assert self.sheets_dict[table_name][pk_info.iloc[0]].is_unique == True,\
+            #         f"invalid primary key constraint {pk_info.iloc[0]} for table {table_name}\
+            #         \nPK should be unique"
+                
+            # else: # this is a composite PK
+            #     count_combination = (
+            #         self.sheets_dict[table_name]
+            #         .groupby(by=[pk_info.iloc[i] for i in range(nb_pk)])
+            #         .size()
+            #         .reset_index(name='count')
+            #     )
+
+            #     assert (count_combination['count']==1).all() == True,\
+            #     f"invalid primary key constraint {[pk_info.iloc[i] for i in range(nb_pk)]} for table {table_name}\
+            #     \nPK should be unique"
 
         return
     
-    def check_FK_exists(self) -> None:
+    def check_FK_in_refTable(self) -> None:
         """
         Raise assertion error if FK is not present in Reference Table
         """
 
         isFK_condition = self.table_structure['isFK']=='Y'
         fk_constraint = self.table_structure[isFK_condition]['Table','Attribute','ReferenceTable']
-        fk_groupedby_table = fk_constraint.groupby(by='Table')
+        fk_by_table_and_ref = fk_constraint.groupby(by=['Table','ReferenceTable'])
 
-        for table_name, fk_info in fk_groupedby_table:
-            for _, row in fk_info.iterrows():
+        for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
+                exist_in_ref = (col in self.sheets_dict[ref_table_name].columns
+                                for col in fk_info['Attribute'])
+                
+                assert all(exist_in_ref),\
+                    f"invalid Foreign key {fk_info['Attribute']} for {table_name}\n\
+                        all attributes must be present in {ref_table_name}"
+                
+                assert checkUniqueness(
+                    field=fk_info['Attribute'],
+                    table=self.sheets_dict[ref_table_name]
+                ),\
+                    f"invalid Foreign key {fk_info['Attribute']} for {table_name}\n\
+                        all attributes must be present in {ref_table_name}"
 
-                assert row['Attribute'] in self.sheets_dict[row['ReferenceTable']],\
-                    f"invalid foreign key for {table_name}\
-                    \n{row['Attribute']} does not exist in {row['ReferenceTable']}"
+            # for _, row in fk_info.iterrows():
+
+            #     assert row['Attribute'] in self.sheets_dict[row['ReferenceTable']],\
+            #         f"invalid foreign key for {table_name}\
+            #         \n{row['Attribute']} does not exist in {row['ReferenceTable']}"
         return
- 
+
     def check_PK_defined(self) -> None:
         """Raise AssertionError if a table has no Primary Key defined"""
 
