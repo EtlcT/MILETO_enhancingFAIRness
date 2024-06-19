@@ -14,7 +14,7 @@ import os
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.extraction.utils import checkUniqueness
+from src.extraction.utils import check_uniqueness
 
 class GetSpreadsheetData:
     """
@@ -105,7 +105,7 @@ class GetSpreadsheetData:
         return composite_pk_df
                 
     #?
-    def check_PK_uniqueness(self) -> None:
+    def check_pk_uniqueness(self) -> None:
         """
         Raise assertion error if fields defined as Primary Key does not
         respect uniqueness criteria
@@ -115,7 +115,7 @@ class GetSpreadsheetData:
         for table_name, pk_info in pk_groupedby_table:
             pk_info = pk_info['Attribute'].tolist()
 
-            assert checkUniqueness(field=pk_info, table=self.sheets_dict[table_name]),\
+            assert check_uniqueness(field=pk_info, table=self.sheets_dict[table_name]),\
                     f"invalid primary key constraint {pk_info} for table {table_name}\n\
                     Primary must be unique"
             
@@ -138,7 +138,7 @@ class GetSpreadsheetData:
                     f"invalid Foreign key {fk_info['Attribute']} for {table_name}\n\
                         all attributes must be present in {ref_table_name}"
                 
-                assert checkUniqueness(
+                assert check_uniqueness(
                     field=fk_info['Attribute'],
                     table=self.sheets_dict[ref_table_name]
                 ),\
@@ -146,11 +146,12 @@ class GetSpreadsheetData:
                         all attributes must be present in {ref_table_name}"
 
         return
-
-    def check_PK_defined(self) -> None:
+    
+    #?
+    def check_pk_defined(self) -> None:
         """Raise AssertionError if a table has no Primary Key defined"""
 
         for table, table_info in self.table_structure.groupby(by='Table'):
-            assert 'Y' in table_info['isPK'], f"Table {table} has no Primary Key defined"
+            assert 'Y' in table_info['isPK'].values, f"Table {table} has no Primary Key defined"
         
         return

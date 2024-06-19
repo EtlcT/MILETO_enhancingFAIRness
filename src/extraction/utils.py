@@ -1,4 +1,4 @@
-def checkUniqueness(field, table) -> bool:
+def check_uniqueness(field, table) -> bool:
     """
         Check that a field or group of fields verify uniqueness constraint
 

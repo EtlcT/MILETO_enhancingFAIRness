@@ -77,6 +77,50 @@ def _read_spreadsheet_mock():
         'meta.REFERENCES': table_REF
     }
 
+def undefined_pk_rs_mock():
+    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
+    values_A = [
+        ['Ref_A1', 'value_1', 'some_value_1'],
+        ['Ref_A2', 'value_2', 'some_value_2'],
+                ]
+    table_A = pd.DataFrame(data=values_A, columns=fields_A)
+
+    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
+    values_B = [
+        ['Ref_B1', 11, 'value_aa'],
+        ['Ref_B2', 23, 'value_ab'],
+        ['Ref_B1', 456, 'value_aa'],
+        ['Ref_B2', 7, 'value_ac'],
+    ]
+    table_B = pd.DataFrame(data=values_B, columns=fields_B)
+
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    values_KEYS = [
+        ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
+        ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
+        ['Table_A', 'Attribute_A3', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B1', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B2', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B3', np.nan, np.nan, np.nan],
+    ]
+    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
+
+    table_REF = pd.DataFrame(
+        columns=['key', 'value'],
+        data=[
+            ['Date', 2024],
+            ['Title', 'Template2024'],
+            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+        ]
+    )
+
+    return {
+        'Table_B': table_B,
+        'Table_A': table_A,
+        'KEYS': table_KEYS,
+        'meta.REFERENCES': table_REF
+    }
+
 def df1_no_duplicate():
     
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
@@ -204,6 +248,7 @@ def cpk_duplicate_rs_mock():
         'meta.REFERENCES': table_REF
     }
 
+################################################
 
 class TestExtraction(unittest.TestCase):
     
@@ -270,11 +315,11 @@ class TestExtraction(unittest.TestCase):
 
     def test_check_uniqueness(self, table_df, fields, expected_result):
         """
-            Check that function utils.checkUniqueness properly return False
+            Check that function utils.check_uniqueness properly return False
             when there are duplicate True if not
         """
 
-        result = utils.checkUniqueness(table=table_df, field=fields)
+        result = utils.check_uniqueness(table=table_df, field=fields)
         
         self.assertEqual(result, expected_result)
         
@@ -301,33 +346,22 @@ class TestExtraction(unittest.TestCase):
         getData = retrieve_data.GetSpreadsheetData('fakepath')
 
         with self.assertRaises(AssertionError) as customError:
-            getData.check_PK_uniqueness()
+            getData.check_pk_uniqueness()
 
         
         self.assertEqual(str(customError.exception), errorRaised)
 
+    def test_check_pk_defined(self):
+        """
+        Check that an assertion error is raised if a table has no
+        primary key defined
+        """
 
-        
-    # def test_get_keys_df(self):
-    #     """Check that we retrieve all attributes that are either defined
-    #     as PK or FK and not the others
-    #     """
+        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=undefined_pk_rs_mock())
+        getData = retrieve_data.GetSpreadsheetData('fakepath')
+        expected_result = 'Table Table_B has no Primary Key defined'
 
-    #     getData = retrieve_data.GetSpreadsheetData('fakepath')
-    #     result = getData._get_keys_df()
+        with self.assertRaises(AssertionError) as customError:
+            getData.check_pk_defined()
 
-    #     expected_result = pd.DataFrame(
-    #         columns= ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab'],
-    #         data= [
-    #             ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
-    #             ['Table_B', 'Attribute_A1', 'Y', 'Y', 'Table_A'],
-    #             ['Table_B', 'Attribute_B1', 'Y', np.nan, np.nan],
-    #             ['Table_C', 'Attribute_A1', np.nan, 'Y', 'Table_A'],
-    #             ['Table_C', 'Attribute_B1', np.nan, 'Y', 'Table_B'],
-    #             ['Table_C', 'Attribute_C1', 'Y', np.nan, np.nan],
-    #             ['Table_C', 'Attribute_D1', np.nan, 'Y', 'Table_D'],
-    #             ['Table_D', 'Attribute_D1', 'Y', np.nan, np.nan]
-    #         ]
-    #     )
-
-    #     self.assertEqual(expected_result.equals(result), True) # use Dataframe.equals from pandas library to check
+        self.assertEqual(str(customError.exception), expected_result)
