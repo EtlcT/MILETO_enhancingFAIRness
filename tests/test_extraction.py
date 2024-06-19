@@ -286,26 +286,25 @@ class TestExtraction(unittest.TestCase):
     expected_error_2 = "invalid primary key constraint ['Attribute_B1', 'Attribute_B2'] for table Table_B\n\
                     Primary must be unique"
     
-    # @parameterized.expand([
-    #     (MagicMock(return_value=pk_duplicate_rs_mock()), expected_error_1 ),
-    #     (MagicMock(return_value=cpk_duplicate_rs_mock()), expected_error_2),
-    # ])
+    @parameterized.expand([
+        (MagicMock(return_value=pk_duplicate_rs_mock()), expected_error_1 ),
+        (MagicMock(return_value=cpk_duplicate_rs_mock()), expected_error_2),
+    ])
 
-    # def test_check_PK_uniqueness(self, mock_object, errorRaised):
-    #     """
-    #         Check that an assertion is raised if primary key or composite
-    #         primary key contain duplicate
-    #     """
+    def test_check_PK_uniqueness(self, mock_object, errorRaised):
+        """
+            Check that an assertion is raised if primary key or composite
+            primary key contain duplicate
+        """
 
-    #     retrieve_data.GetSpreadsheetData._read_spreadsheet = mock_object
-    #     getData = retrieve_data.GetSpreadsheetData('fakepath')
+        retrieve_data.GetSpreadsheetData._read_spreadsheet = mock_object
+        getData = retrieve_data.GetSpreadsheetData('fakepath')
 
-    #     with self.assertRaises(ValueError) as customError:
-    #         getData.check_PK_uniqueness()
+        with self.assertRaises(AssertionError) as customError:
+            getData.check_PK_uniqueness()
 
         
-    #     print("noooooooooooo")
-    #     self.assertEqual(customError.exception, errorRaised)
+        self.assertEqual(str(customError.exception), errorRaised)
 
 
         
