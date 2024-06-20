@@ -248,6 +248,97 @@ def cpk_duplicate_rs_mock():
         'meta.REFERENCES': table_REF
     }
 
+def fk_not_unique_rs_mock():
+
+    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
+    values_A = [
+        ['Ref_A1', 'value_1', 'some_value_1'],
+        ['Ref_A2', 'value_2', 'some_value_1'],
+        ['Ref_A2', 'value_2', 'some_value_2'],
+                ]
+    table_A = pd.DataFrame(data=values_A, columns=fields_A)
+
+    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_A3']
+    values_B = [
+        ['Ref_B1', 11, 'some_value_1'],
+        ['Ref_B2', 23, 'some_value_1'],
+        ['Ref_B1', 11, 'some_value_1'],
+        ['Ref_B2', 7, 'some_value_1'],
+    ]
+    table_B = pd.DataFrame(data=values_B, columns=fields_B)
+
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    values_KEYS = [
+        ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
+        ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
+        ['Table_A', 'Attribute_A3', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B1', 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_B2', 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_A3', np.nan, 'Y', 'Table_A'],
+    ]
+    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
+
+    table_REF = pd.DataFrame(
+        columns=['key', 'value'],
+        data=[
+            ['Date', 2024],
+            ['Title', 'Template2024'],
+            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+        ]
+    )
+
+    return {
+        'Table_A': table_A,
+        'Table_B': table_B,
+        'KEYS': table_KEYS,
+        'meta.REFERENCES': table_REF
+    }
+
+def fk_not_exist_rs_mock():
+
+    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
+    values_A = [
+        ['Ref_A1', 'value_1', 'some_value_1'],
+        ['Ref_A2', 'value_2', 'some_value_2'],
+        ['Ref_A2', 'value_2', 'some_value_3'],
+                ]
+    table_A = pd.DataFrame(data=values_A, columns=fields_A)
+
+    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
+    values_B = [
+        ['Ref_B1', 11, 'value_aa'],
+        ['Ref_B2', 23, 'value_ab'],
+        ['Ref_B1', 11, 'value_ac'],
+        ['Ref_B2', 7, 'value_ac'],
+    ]
+    table_B = pd.DataFrame(data=values_B, columns=fields_B)
+
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    values_KEYS = [
+        ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
+        ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
+        ['Table_A', 'Attribute_A3', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B1', 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_B2', 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_B3', np.nan, 'Y', 'Table_A'],
+    ]
+    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
+
+    table_REF = pd.DataFrame(
+        columns=['key', 'value'],
+        data=[
+            ['Date', 2024],
+            ['Title', 'Template2024'],
+            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+        ]
+    )
+
+    return {
+        'Table_A': table_A,
+        'Table_B': table_B,
+        'KEYS': table_KEYS,
+        'meta.REFERENCES': table_REF
+    }
 ################################################
 
 class TestExtraction(unittest.TestCase):
@@ -262,7 +353,7 @@ class TestExtraction(unittest.TestCase):
     ])
 
     def test_regex_exclude_meta(self, text, regexMatch):
-        """Check that sheet that contains either 'meta', 'keys' or 'extra' 
+        """Check that sheet that contains either 'meta.', 'keys' or 'extra' 
         matches the regex and so return True.
         """
 
@@ -319,21 +410,25 @@ class TestExtraction(unittest.TestCase):
             when there are duplicate True if not
         """
 
-        result = utils.check_uniqueness(table=table_df, field=fields)
+        result = utils.check_uniqueness(table=table_df, fields=fields)
         
         self.assertEqual(result, expected_result)
         
         
 
-    expected_error_1 = "invalid primary key constraint ['Attribute_A1'] for table Table_A\n\
-                    Primary must be unique"
+    error_pk_not_unique = (
+        "invalid primary key constraint ['Attribute_A1'] for table Table_A\n"
+        "Primary must be unique"
+    )
     
-    expected_error_2 = "invalid primary key constraint ['Attribute_B1', 'Attribute_B2'] for table Table_B\n\
-                    Primary must be unique"
+    error_cpk_not_unique = (
+        "invalid primary key constraint ['Attribute_B1', 'Attribute_B2'] for table Table_B\n"
+        "Primary must be unique"
+    )
     
     @parameterized.expand([
-        (MagicMock(return_value=pk_duplicate_rs_mock()), expected_error_1 ),
-        (MagicMock(return_value=cpk_duplicate_rs_mock()), expected_error_2),
+        (MagicMock(return_value=pk_duplicate_rs_mock()), error_pk_not_unique ),
+        (MagicMock(return_value=cpk_duplicate_rs_mock()), error_cpk_not_unique),
     ])
 
     def test_check_PK_uniqueness(self, mock_object, errorRaised):
@@ -345,12 +440,47 @@ class TestExtraction(unittest.TestCase):
         retrieve_data.GetSpreadsheetData._read_spreadsheet = mock_object
         getData = retrieve_data.GetSpreadsheetData('fakepath')
 
-        with self.assertRaises(AssertionError) as customError:
+        with self.assertRaises(AssertionError) as custom_error:
             getData.check_pk_uniqueness()
 
         
-        self.assertEqual(str(customError.exception), errorRaised)
+        self.assertEqual(str(custom_error.exception), errorRaised)
 
+    
+    error_fk_not_unique = (
+        "invalid Foreign key ['Attribute_A3'] for Table_B\n"
+        "the reference attribute in Table_A should be unique"
+    )
+    error_fk_not_exist = (
+        "invalid Foreign key ['Attribute_B3'] for Table_B\n"
+        "all attributes must be present in Table_A"
+    )
+
+    @parameterized.expand([
+        [MagicMock(return_value=fk_not_unique_rs_mock()), error_fk_not_unique],
+        [MagicMock(return_value=fk_not_exist_rs_mock()), error_fk_not_exist]
+    ])
+
+    def test_check_fk_existence_and_uniqueness(self, mockObject, expected_result):
+        """
+        Check that an assertion error is raised if :
+         - FK reference does not exist in the reference table
+         - FK reference exists but does not comply with unicity constraint
+        """
+
+        retrieve_data.GetSpreadsheetData._read_spreadsheet = mockObject
+        getData = retrieve_data.GetSpreadsheetData('fakepath')
+
+        with self.assertRaises(AssertionError) as custom_error:
+            getData.check_FK_existence_and_uniqueness()
+        
+        print(f'Expected : {expected_result}')
+        print('      ')
+        print(f'result : {str(custom_error.exception)}')
+
+        self.assertEqual(str(custom_error.exception), expected_result)
+
+    
     def test_check_pk_defined(self):
         """
         Check that an assertion error is raised if a table has no
@@ -361,7 +491,7 @@ class TestExtraction(unittest.TestCase):
         getData = retrieve_data.GetSpreadsheetData('fakepath')
         expected_result = 'Table Table_B has no Primary Key defined'
 
-        with self.assertRaises(AssertionError) as customError:
+        with self.assertRaises(AssertionError) as custom_error:
             getData.check_pk_defined()
 
-        self.assertEqual(str(customError.exception), expected_result)
+        self.assertEqual(str(custom_error.exception), expected_result)

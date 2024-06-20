@@ -36,6 +36,7 @@ class GetSpreadsheetData:
         return pd.read_excel(filepath, sheet_name=None)
     
     #?
+    #! add file for regex exclusion
     def _regex_exclude_meta(self, text) -> bool:
         """
         return True if text match one of the regex to exclude, false either
@@ -115,35 +116,44 @@ class GetSpreadsheetData:
         for table_name, pk_info in pk_groupedby_table:
             pk_info = pk_info['Attribute'].tolist()
 
-            assert check_uniqueness(field=pk_info, table=self.sheets_dict[table_name]),\
-                    f"invalid primary key constraint {pk_info} for table {table_name}\n\
-                    Primary must be unique"
+            assert check_uniqueness(
+                fields=pk_info,
+                table=self.sheets_dict[table_name]
+            ), (
+                f"invalid primary key constraint {pk_info} for table {table_name}\n"
+                "Primary must be unique"
+            )
             
         return
     
     def check_FK_existence_and_uniqueness(self) -> None:
         """
-        Raise assertion error if FK is not present in Reference Table
+        Raise assertion error if FK is not present in Reference Table or
+        if the reference attribute does not respect unicity 
         """
 
         isFK_condition = self.table_structure['isFK']=='Y'
-        fk_constraint = self.table_structure[isFK_condition]['Table','Attribute','ReferenceTable']
-        fk_by_table_and_ref = fk_constraint.groupby(by=['Table','ReferenceTable'])
+
+        fk_constraint = self.table_structure[isFK_condition][['Table','Attribute','ReferenceTab']]
+        fk_by_table_and_ref = fk_constraint.groupby(by=['Table','ReferenceTab'])
 
         for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
                 exist_in_ref = (col in self.sheets_dict[ref_table_name].columns
                                 for col in fk_info['Attribute'])
                 
-                assert all(exist_in_ref),\
-                    f"invalid Foreign key {fk_info['Attribute']} for {table_name}\n\
-                        all attributes must be present in {ref_table_name}"
+                # check that the attribute exist in reference table
+                assert all(exist_in_ref),(
+                    f"invalid Foreign key {fk_info['Attribute'].tolist()} for {table_name}\n"
+                    f"all attributes must be present in {ref_table_name}"
+                )
                 
                 assert check_uniqueness(
-                    field=fk_info['Attribute'],
+                    fields=fk_info['Attribute'],
                     table=self.sheets_dict[ref_table_name]
-                ),\
-                    f"invalid Foreign key {fk_info['Attribute']} for {table_name}\n\
-                        all attributes must be present in {ref_table_name}"
+                ), (
+                    f"invalid Foreign key {fk_info['Attribute'].tolist()} for {table_name}\n"
+                    f"the reference attribute in {ref_table_name} should be unique"
+                )
 
         return
     
