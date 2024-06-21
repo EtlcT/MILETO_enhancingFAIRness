@@ -40,7 +40,7 @@ def _read_spreadsheet_mock():
     ]
     table_D = pd.DataFrame(data=values_D, columns=fields_D)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -77,7 +77,7 @@ def _read_spreadsheet_mock():
         'meta.REFERENCES': table_REF
     }
 
-def undefined_pk_rs_mock():
+def rs_mock_undefined_pk():
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
         ['Ref_A1', 'value_1', 'some_value_1'],
@@ -94,7 +94,7 @@ def undefined_pk_rs_mock():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -158,7 +158,7 @@ def df2_with_duplicate():
 
     return table_B
 
-def pk_duplicate_rs_mock():
+def rs_mock_pk_duplicate():
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
         ['Ref_A1', 'value_1', 'some_value_1'],
@@ -176,7 +176,7 @@ def pk_duplicate_rs_mock():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -203,7 +203,7 @@ def pk_duplicate_rs_mock():
         'meta.REFERENCES': table_REF
     }
 
-def cpk_duplicate_rs_mock():
+def rs_mock_cpk_duplicate():
 
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -221,7 +221,7 @@ def cpk_duplicate_rs_mock():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -248,7 +248,7 @@ def cpk_duplicate_rs_mock():
         'meta.REFERENCES': table_REF
     }
 
-def fk_not_unique_rs_mock():
+def rs_mock_fk_not_unique():
 
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -267,7 +267,7 @@ def fk_not_unique_rs_mock():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -294,7 +294,7 @@ def fk_not_unique_rs_mock():
         'meta.REFERENCES': table_REF
     }
 
-def fk_not_exist_rs_mock():
+def rs_mock_fk_not_exist():
 
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -313,7 +313,7 @@ def fk_not_exist_rs_mock():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTab']
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -332,6 +332,52 @@ def fk_not_exist_rs_mock():
             ['DBfileName', '2022_Example#/Template_v2_1; ' ]
         ]
     )
+    
+    return {
+        'Table_A': table_A,
+        'Table_B': table_B,
+        'KEYS': table_KEYS,
+        'meta.REFERENCES': table_REF
+    }
+
+def rs_mock_fk_without_ref():
+
+    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
+    values_A = [
+        ['Ref_A1', 'value_1', 'some_value_1'],
+        ['Ref_A2', 'value_2', 'some_value_2'],
+        ['Ref_A2', 'value_2', 'some_value_3'],
+                ]
+    table_A = pd.DataFrame(data=values_A, columns=fields_A)
+
+    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
+    values_B = [
+        ['Ref_B1', 11, 'value_aa'],
+        ['Ref_B2', 23, 'value_ab'],
+        ['Ref_B1', 11, 'value_ac'],
+        ['Ref_B2', 7, 'value_ac'],
+    ]
+    table_B = pd.DataFrame(data=values_B, columns=fields_B)
+
+    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    values_KEYS = [
+        ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
+        ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
+        ['Table_A', 'Attribute_A3', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B1', 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_B2', 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_B3', np.nan, 'Y', np.nan],
+    ]
+    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
+
+    table_REF = pd.DataFrame(
+            columns=['key', 'value'],
+            data=[
+                ['Date', 2024],
+                ['Title', 'Template2024'],
+                ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+            ]
+        )
 
     return {
         'Table_A': table_A,
@@ -427,8 +473,8 @@ class TestExtraction(unittest.TestCase):
     )
     
     @parameterized.expand([
-        (MagicMock(return_value=pk_duplicate_rs_mock()), error_pk_not_unique ),
-        (MagicMock(return_value=cpk_duplicate_rs_mock()), error_cpk_not_unique),
+        (MagicMock(return_value=rs_mock_pk_duplicate()), error_pk_not_unique ),
+        (MagicMock(return_value=rs_mock_cpk_duplicate()), error_cpk_not_unique),
     ])
 
     def test_check_PK_uniqueness(self, mock_object, errorRaised):
@@ -457,8 +503,8 @@ class TestExtraction(unittest.TestCase):
     )
 
     @parameterized.expand([
-        [MagicMock(return_value=fk_not_unique_rs_mock()), error_fk_not_unique],
-        [MagicMock(return_value=fk_not_exist_rs_mock()), error_fk_not_exist]
+        [MagicMock(return_value=rs_mock_fk_not_unique()), error_fk_not_unique],
+        [MagicMock(return_value=rs_mock_fk_not_exist()), error_fk_not_exist]
     ])
 
     def test_check_fk_existence_and_uniqueness(self, mockObject, expected_result):
@@ -473,13 +519,8 @@ class TestExtraction(unittest.TestCase):
 
         with self.assertRaises(AssertionError) as custom_error:
             getData.check_FK_existence_and_uniqueness()
-        
-        print(f'Expected : {expected_result}')
-        print('      ')
-        print(f'result : {str(custom_error.exception)}')
 
         self.assertEqual(str(custom_error.exception), expected_result)
-
     
     def test_check_pk_defined(self):
         """
@@ -487,7 +528,7 @@ class TestExtraction(unittest.TestCase):
         primary key defined
         """
 
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=undefined_pk_rs_mock())
+        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=rs_mock_undefined_pk())
         getData = retrieve_data.GetSpreadsheetData('fakepath')
         expected_result = 'Table Table_B has no Primary Key defined'
 
@@ -495,3 +536,17 @@ class TestExtraction(unittest.TestCase):
             getData.check_pk_defined()
 
         self.assertEqual(str(custom_error.exception), expected_result)
+
+    def test_check_fk_get_ref(self):
+        """
+        Check that an assertion is raised if a field is defined as
+        a foreing key without having a reference table defined
+        """
+
+        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=rs_mock_fk_without_ref())
+        getData = retrieve_data.GetSpreadsheetData('fakepath')
+
+        with self.assertRaises(AssertionError) as custom_error:
+            getData.check_fk_get_ref()
+        
+        self.assertIn("Every FK should have a reference table defined", str(custom_error.exception))

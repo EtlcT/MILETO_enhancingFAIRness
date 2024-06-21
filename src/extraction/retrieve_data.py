@@ -134,9 +134,10 @@ class GetSpreadsheetData:
         """
 
         isFK_condition = self.tables_structure['isFK']=='Y'
-
-        fk_constraint = self.tables_structure[isFK_condition][['Table','Attribute','ReferenceTable']]
-        fk_by_table_and_ref = fk_constraint.groupby(by=['Table','ReferenceTable'])
+        fk_by_table_and_ref = (
+            self.tables_structure[isFK_condition][['Table','Attribute','ReferenceTable']]
+            .groupby(by=['Table','ReferenceTable'])
+        )
 
         for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
                 exist_in_ref = (col in self.sheets_dict[ref_table_name].columns
@@ -170,13 +171,14 @@ class GetSpreadsheetData:
     def check_fk_get_ref(self) -> None:
         """
         Raise AssertionError if a field is defined as FK 
-        but has empty ReferenceTab field
+        but has empty ReferenceTable field
         """
 
         isFK_condition = self.tables_structure['isFK']=='Y'
         fk_constraint = self.tables_structure[isFK_condition]
 
-        assert fk_constraint['ReferenceTable'].isna().any(), (
+        assert not fk_constraint['ReferenceTable'].isna().any(), (
             "Every FK should have a reference table defined"
             f"{fk_constraint[fk_constraint['ReferenceTable'].isna()==True]}"
         )
+    
