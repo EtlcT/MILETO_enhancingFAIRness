@@ -27,7 +27,7 @@ class sqliteCreate():
 
     def create_db(self) -> None:
         """
-        Iterate through table_structure dataframe to create table
+        Iterate through tables_structure dataframe to create table
         with both PK and FK constraints
 
         This function create a sqlite file
@@ -36,18 +36,26 @@ class sqliteCreate():
         filename = f"{self.data.db_name}.sqlite"
         conn = sqlite3.connect(database=filename)
         
-        group_by_table = self.data.table_structure.groupby(by='Table')
+        group_by_table = self.data.tables_structure.groupby(by='Table')
         for table_name, table_info in group_by_table:
 
             column_list = table_info['Attribute'].tolist()
             pk_attr = table_info[table_info['isPK']=='Y']['Attribute']
-            fk_info = table_info[table_info['isFK']=='Y'][['Attribute', 'ReferenceTable']]
 
             query = self._add_PK_constraint(table_name, column_list, pk_attr)
 
-            # if there are some FK constraint            
-            if (fk_info.empty != True):
-                fk_statement = self._add_FK_constraint(fk_info)
+            isFK_condition = ~table_info['isFK'].isna()
+            group_by_table_ref = (
+                table_info[isFK_condition]
+                .groupby('ReferenceTable')
+            )
+
+            for ref_table_name, ref_info in group_by_table_ref[['Attribute', 'ReferenceTable']]:
+
+                fk_statement = self._add_FK_constraint(
+                    ref_table_name=ref_table_name,
+                    fk_attribute=ref_info['Attribute'].tolist()
+                )
                 query += fk_statement
             
             query += ")"
@@ -90,64 +98,25 @@ class sqliteCreate():
 
         return query
 
-    def _add_FK_constraint(self, fk_info: pd.DataFrame) -> str:
+
+    def _add_FK_constraint(self, ref_table_name: str, fk_attribute: list) -> str:
         """
         Return a part of sql statement relative to Foreign keys constraint
         FOREIGN KEYS (field_name) REFERENCES ref_table_name(field_name)
         
-        fk_info: pandas.Dataframe
-            columns:
-                Name: Attribute, type: str, detail: FK attribute
-                Name: ReferenceTable, type: str, detail: the parent table
+        inputs:
+            ref_table_name: name of the reference table
+            fk_attribute: list of fields defined as foreign keys
 
         !!WARNING!! field name must be the same in child and parent table
         """
-
         fk_statement = str()
-        for index, row in fk_info.iterrows():
-            fk_statement += f", FOREIGN KEY ({row['Attribute']}) REFERENCES {row['ReferenceTable']}"
+        fk_statement += (
+            f", FOREIGN KEY ({(', ').join(fk_attribute)}) "
+            f"REFERENCES {ref_table_name}({(', ').join(fk_attribute)})"
+        )
+        
         return fk_statement
-            
-
-
-    #? function not working for sqlite db
-    #? ALTER TABLE not supported
-    # def create_db(self) -> None:
-    #     """
-    #     Iterate through keys in self.dict_tables (ie: table name)
-    #     if the table is part of data table, it is created in the database
-    #     """
-    #     conn = sqlite3.connect(database=self.dbname)
-
-    #     for table in self.dict_tables:
-    #         if table in self.datatable_list:
-    #             self.dict_tables[table].to_sql(
-    #                 name=table,
-    #                 con=conn,
-    #                 if_exists='replace',
-    #                 index=False
-    #             )
-    #     conn.close()
-
-    # def add_constraint(self) -> None:
-    #     """
-    #     Add constraints relative to PK, FK and NULLABLE fields based 
-    #     on keys table (ie self.keys)
-    #     """
-    #     conn = sqlite3.connect(database=self.dbname)
-    #     for _, row in self.keys.iterrows():
-            
-    #         table = row['Table']
-    #         field = row['Atttribute']
-    #         reference = row['References']
-
-    #         if row['isPK']=='Y':
-    #             conn.execute(
-    #                 f"ALTER TABLE {table} ADD PRIMARY KEY ({field})"
-    #             )
-    #         elif row['isFK']=='Y':
-    #             conn.execute(f'ALTER TABLE {table} ADD FOREIGN KEY ({field}) REFERENCES {reference}({field})')
-    #     conn.close()
 
 
 if __name__ == "__main__":

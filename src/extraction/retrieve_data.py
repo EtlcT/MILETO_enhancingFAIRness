@@ -25,7 +25,7 @@ class GetSpreadsheetData:
         self.sheets_dict = self._read_spreadsheet(filepath)
         self.db_name = self._get_dbname()
         self.datatables_list = self._get_datatables_list()
-        self.table_structure = self._get_table_structure()
+        self.tables_structure = self._get_tables_structure()
         self.compositePK_df = self._get_composite_pk()
     
     def _read_spreadsheet(self, filepath) -> dict:
@@ -64,7 +64,7 @@ class GetSpreadsheetData:
     #! may be deprecated in the future if spreadsheet template is modified
     #? potential future behavior: directly modify sheet_dict['KEYS']
     #? and access it instead of creating dedicated Df that is a duplication
-    def _get_table_structure(self) -> pd.DataFrame:
+    def _get_tables_structure(self) -> pd.DataFrame:
         """
         return a dataframe that contain rows from KEYS table
         where 'Table' belong to data table list (ie self.datatables_list)
@@ -92,7 +92,7 @@ class GetSpreadsheetData:
         Return a Dataframe containing table name and composite key fields
         """
         composite_pk_df = pd.DataFrame(columns=['Table', 'pk_fields'])
-        group_by_table = self.table_structure.groupby(by='Table')
+        group_by_table = self.tables_structure.groupby(by='Table')
 
         for table_name, table_info in group_by_table:
             pk_attr = table_info[table_info['isPK']=='Y']['Attribute'].tolist()
@@ -111,7 +111,7 @@ class GetSpreadsheetData:
         Raise assertion error if fields defined as Primary Key does not
         respect uniqueness criteria
         """
-        pk_constraint = self.table_structure[self.table_structure['isPK'] == 'Y'][['Table','Attribute']]
+        pk_constraint = self.tables_structure[self.tables_structure['isPK'] == 'Y'][['Table','Attribute']]
         pk_groupedby_table = pk_constraint.groupby(by='Table')
         for table_name, pk_info in pk_groupedby_table:
             pk_info = pk_info['Attribute'].tolist()
@@ -126,16 +126,17 @@ class GetSpreadsheetData:
             
         return
     
+    #?
     def check_FK_existence_and_uniqueness(self) -> None:
         """
         Raise assertion error if FK is not present in Reference Table or
         if the reference attribute does not respect unicity 
         """
 
-        isFK_condition = self.table_structure['isFK']=='Y'
+        isFK_condition = self.tables_structure['isFK']=='Y'
 
-        fk_constraint = self.table_structure[isFK_condition][['Table','Attribute','ReferenceTab']]
-        fk_by_table_and_ref = fk_constraint.groupby(by=['Table','ReferenceTab'])
+        fk_constraint = self.tables_structure[isFK_condition][['Table','Attribute','ReferenceTable']]
+        fk_by_table_and_ref = fk_constraint.groupby(by=['Table','ReferenceTable'])
 
         for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
                 exist_in_ref = (col in self.sheets_dict[ref_table_name].columns
@@ -161,7 +162,21 @@ class GetSpreadsheetData:
     def check_pk_defined(self) -> None:
         """Raise AssertionError if a table has no Primary Key defined"""
 
-        for table, table_info in self.table_structure.groupby(by='Table'):
+        for table, table_info in self.tables_structure.groupby(by='Table'):
             assert 'Y' in table_info['isPK'].values, f"Table {table} has no Primary Key defined"
         
         return
+    
+    def check_fk_get_ref(self) -> None:
+        """
+        Raise AssertionError if a field is defined as FK 
+        but has empty ReferenceTab field
+        """
+
+        isFK_condition = self.tables_structure['isFK']=='Y'
+        fk_constraint = self.tables_structure[isFK_condition]
+
+        assert fk_constraint['ReferenceTable'].isna().any(), (
+            "Every FK should have a reference table defined"
+            f"{fk_constraint[fk_constraint['ReferenceTable'].isna()==True]}"
+        )
