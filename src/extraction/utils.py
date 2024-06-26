@@ -6,6 +6,7 @@ def check_uniqueness(fields, table) -> bool:
             fields must be a string or a list of string
             table is a pandas.Dataframe object
     """
+
     if isinstance(fields, str):
         return table[fields].is_unique
     elif isinstance(fields, list):
@@ -14,9 +15,15 @@ def check_uniqueness(fields, table) -> bool:
                 table
                 .groupby(by=fields)
                 .size()
-                .reset_index(name='count')
-                            
+                .reset_index(name='count')          
             )
             return (count_combination['count']==1).all()
         else:
             return table[fields[0]].is_unique
+
+def checks_pipeline(funcs: list):
+    """
+    Execute a list of function
+    """
+    for func in funcs:
+        func()

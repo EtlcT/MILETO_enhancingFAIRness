@@ -28,6 +28,7 @@ class GetSpreadsheetData:
         self.tables_structure = self._get_tables_structure()
         self.compositePK_df = self._get_composite_pk()
     
+
     def _read_spreadsheet(self, filepath) -> dict:
         """
         return a dictionnary containing as many dataframes as sheets in the original file
@@ -35,7 +36,7 @@ class GetSpreadsheetData:
         
         return pd.read_excel(filepath, sheet_name=None)
     
-    #?
+
     #! add file for regex exclusion
     def _regex_exclude_meta(self, text) -> bool:
         """
@@ -48,7 +49,7 @@ class GetSpreadsheetData:
         no_extra = re.search("(?i)extra_sheet\.", text)
         return any([no_keys, no_meta, no_extra])
 
-    #?
+
     def _get_datatables_list(self) -> list:
         """
         Return a list containing the name of table that contains effective data
@@ -60,6 +61,7 @@ class GetSpreadsheetData:
             if(self._regex_exclude_meta(sheet_name) == False):
                 datatable_list.append(sheet_name)
         return datatable_list
+
 
     #! may be deprecated in the future if spreadsheet template is modified
     #? potential future behavior: directly modify sheet_dict['KEYS']
@@ -73,7 +75,8 @@ class GetSpreadsheetData:
         return self.sheets_dict['KEYS'][self.sheets_dict['KEYS']['Table']
                                         .isin(self.datatables_list)] \
                                         .iloc[:,:5]
-    #?
+
+
     def _get_dbname(self) -> str:
         """
         return the database name as specified in the spreadsheet meta.References sheet
@@ -86,7 +89,7 @@ class GetSpreadsheetData:
         db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
         return db_name
 
-    #?
+
     def _get_composite_pk(self) -> pd.DataFrame:
         """
         Return a Dataframe containing table name and composite key fields
@@ -105,7 +108,7 @@ class GetSpreadsheetData:
                 
         return composite_pk_df
                 
-    #?
+
     def check_pk_uniqueness(self) -> None:
         """
         Raise assertion error if fields defined as Primary Key does not
@@ -126,7 +129,7 @@ class GetSpreadsheetData:
             
         return
     
-    #?
+
     def check_FK_existence_and_uniqueness(self) -> None:
         """
         Raise assertion error if FK is not present in Reference Table or
@@ -148,9 +151,9 @@ class GetSpreadsheetData:
                     f"invalid Foreign key {fk_info['Attribute'].tolist()} for {table_name}\n"
                     f"all attributes must be present in {ref_table_name}"
                 )
-                
+
                 assert check_uniqueness(
-                    fields=fk_info['Attribute'],
+                    fields=fk_info['Attribute'].tolist(),
                     table=self.sheets_dict[ref_table_name]
                 ), (
                     f"invalid Foreign key {fk_info['Attribute'].tolist()} for {table_name}\n"
@@ -159,7 +162,7 @@ class GetSpreadsheetData:
 
         return
     
-    #?
+
     def check_pk_defined(self) -> None:
         """Raise AssertionError if a table has no Primary Key defined"""
 

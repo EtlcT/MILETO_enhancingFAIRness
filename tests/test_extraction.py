@@ -158,6 +158,19 @@ def df2_with_duplicate():
 
     return table_B
 
+def df3_no_duplicate():
+
+    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
+    values_B = [
+        ['Ref_B1', 11, 'value_aa'],
+        ['Ref_B2', 23, 'value_ab'],
+        ['Ref_B1', 456, 'value_ac'],
+        ['Ref_B2', 7, 'value_ac'],
+    ]
+    table_B = pd.DataFrame(data=values_B, columns=fields_B)
+
+    return table_B
+
 def rs_mock_pk_duplicate():
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -300,7 +313,7 @@ def rs_mock_fk_not_exist():
     values_A = [
         ['Ref_A1', 'value_1', 'some_value_1'],
         ['Ref_A2', 'value_2', 'some_value_2'],
-        ['Ref_A2', 'value_2', 'some_value_3'],
+        ['Ref_A3', 'value_2', 'some_value_3'],
                 ]
     table_A = pd.DataFrame(data=values_A, columns=fields_A)
 
@@ -308,7 +321,7 @@ def rs_mock_fk_not_exist():
     values_B = [
         ['Ref_B1', 11, 'value_aa'],
         ['Ref_B2', 23, 'value_ab'],
-        ['Ref_B1', 11, 'value_ac'],
+        ['Ref_B1', 456, 'value_ac'],
         ['Ref_B2', 7, 'value_ac'],
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
@@ -447,7 +460,8 @@ class TestExtraction(unittest.TestCase):
         (df1_no_duplicate(), 'Attribute_A1', True),
         (df1_with_duplicate(), 'Attribute_A1', False),
         (df1_with_duplicate(), ['Attribute_A1'], False),
-        (df2_with_duplicate(), ['Attribute_B1', 'Attribute_B2'], False)
+        (df2_with_duplicate(), ['Attribute_B1', 'Attribute_B2'], False),
+        (df3_no_duplicate(), ['Attribute_B1', 'Attribute_B2'], True)
     ])
 
     def test_check_uniqueness(self, table_df, fields, expected_result):
@@ -503,8 +517,9 @@ class TestExtraction(unittest.TestCase):
     )
 
     @parameterized.expand([
-        [MagicMock(return_value=rs_mock_fk_not_unique()), error_fk_not_unique],
-        [MagicMock(return_value=rs_mock_fk_not_exist()), error_fk_not_exist]
+        (MagicMock(return_value=rs_mock_fk_not_unique()), error_fk_not_unique),
+        (MagicMock(return_value=rs_mock_fk_not_exist()), error_fk_not_exist),
+        (MagicMock(return_value=_read_spreadsheet_mock()), None)
     ])
 
     def test_check_fk_existence_and_uniqueness(self, mockObject, expected_result):
@@ -513,14 +528,18 @@ class TestExtraction(unittest.TestCase):
          - FK reference does not exist in the reference table
          - FK reference exists but does not comply with unicity constraint
         """
-
         retrieve_data.GetSpreadsheetData._read_spreadsheet = mockObject
         getData = retrieve_data.GetSpreadsheetData('fakepath')
 
-        with self.assertRaises(AssertionError) as custom_error:
-            getData.check_FK_existence_and_uniqueness()
+        if expected_result is not None:
 
-        self.assertEqual(str(custom_error.exception), expected_result)
+            with self.assertRaises(AssertionError) as custom_error:
+                getData.check_FK_existence_and_uniqueness()
+            self.assertEqual(str(custom_error.exception), expected_result)
+
+        else:
+            self.assertEqual(getData.check_FK_existence_and_uniqueness(),expected_result)
+
     
     def test_check_pk_defined(self):
         """
@@ -536,6 +555,7 @@ class TestExtraction(unittest.TestCase):
             getData.check_pk_defined()
 
         self.assertEqual(str(custom_error.exception), expected_result)
+
 
     def test_check_fk_get_ref(self):
         """

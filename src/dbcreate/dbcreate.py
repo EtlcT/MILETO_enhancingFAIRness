@@ -15,6 +15,7 @@ import argparse
 import sqlite3
 import pandas as pd
 from src.extraction.retrieve_data import GetSpreadsheetData
+from src.extraction.utils import checks_pipeline
 
 class sqliteCreate():
     """
@@ -123,9 +124,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filepath", help="path to the spreadsheet you want to convert")
     args = parser.parse_args()
-    # if args.filepath is None:
-    #     raise TypeError("filepath to your spreadsheet is required")
+    
     getData = GetSpreadsheetData(filepath=args.filepath)
+
+    check_funcs_list = list(
+        GetSpreadsheetData.check_pk_defined,
+        GetSpreadsheetData.check_pk_uniqueness,
+        GetSpreadsheetData.check_fk_get_ref,
+        GetSpreadsheetData.check_FK_existence_and_uniqueness
+    )
+    checks_pipeline(check_funcs_list)
+
     dbCreate = sqliteCreate(getData)
     dbCreate.create_db()
     dbCreate.insert_data()
