@@ -127,12 +127,12 @@ if __name__ == "__main__":
     
     getData = GetSpreadsheetData(filepath=args.filepath)
 
-    check_funcs_list = list(
-        GetSpreadsheetData.check_pk_defined,
-        GetSpreadsheetData.check_pk_uniqueness,
-        GetSpreadsheetData.check_fk_get_ref,
-        GetSpreadsheetData.check_FK_existence_and_uniqueness
-    )
+    check_funcs_list = [
+        getData.check_pk_defined,
+        getData.check_pk_uniqueness,
+        getData.check_fk_get_ref,
+        getData.check_FK_existence_and_uniqueness
+    ]
     checks_pipeline(check_funcs_list)
 
     dbCreate = sqliteCreate(getData)
