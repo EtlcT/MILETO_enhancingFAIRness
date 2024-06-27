@@ -5,7 +5,17 @@ from unittest.mock import MagicMock
 import pandas as pd
 import numpy as np
 
-from src.extraction import retrieve_data, utils
+from src.extraction import retrieve_data
+from src import utils
+
+TEMP_CONF = utils.json2dict("conf/template_conf.json")
+METAREF = TEMP_CONF["meta_references"]["tab_name"]
+METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
+INFO = TEMP_CONF["infos"]["tab_name"]
+INFO_ATT = TEMP_CONF["infos"]["tab_attr"]
+DDICT_T = TEMP_CONF["DDict_tables"]["tab_name"]
+DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
+
 
 def _read_spreadsheet_mock():
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
@@ -40,7 +50,7 @@ def _read_spreadsheet_mock():
     ]
     table_D = pd.DataFrame(data=values_D, columns=fields_D)
 
-    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -60,7 +70,7 @@ def _read_spreadsheet_mock():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['property', 'value'],
+        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3], # ['property', 'value']
         data=[
             ['Date', 2024],
             ['Title', '2022_Example#/Template_v2_1; ' ]
@@ -72,8 +82,8 @@ def _read_spreadsheet_mock():
         'Table_B': table_B,
         'Table_C': table_C,
         'Table_D': table_D,
-        'tables_info': table_KEYS,
-        'meta_references': table_REF
+        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
 def rs_mock_undefined_pk():
@@ -93,7 +103,7 @@ def rs_mock_undefined_pk():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -105,7 +115,7 @@ def rs_mock_undefined_pk():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['property', 'value'],
+        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
         data=[
             ['Date', 2024],
             ['Title', '2022_Example#/Template_v2_1; ' ]
@@ -115,8 +125,8 @@ def rs_mock_undefined_pk():
     return {
         'Table_B': table_B,
         'Table_A': table_A,
-        'tables_info': table_KEYS,
-        'meta_references': table_REF
+        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
 def df1_no_duplicate():
@@ -187,7 +197,7 @@ def rs_mock_pk_duplicate():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -199,7 +209,7 @@ def rs_mock_pk_duplicate():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['property', 'value'],
+        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
         data=[
             ['Date', 2024],
             ['Title', '2022_Example#/Template_v2_1; ' ]
@@ -209,8 +219,8 @@ def rs_mock_pk_duplicate():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'tables_info': table_KEYS,
-        'meta_references': table_REF
+        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
 def rs_mock_cpk_duplicate():
@@ -231,7 +241,7 @@ def rs_mock_cpk_duplicate():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -243,7 +253,7 @@ def rs_mock_cpk_duplicate():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['property', 'value'],
+        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
         data=[
             ['Date', 2024],
             ['Title', '2022_Example#/Template_v2_1; ' ]
@@ -253,8 +263,8 @@ def rs_mock_cpk_duplicate():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'tables_info': table_KEYS,
-        'meta_references': table_REF
+        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
 def rs_mock_fk_not_unique():
@@ -276,7 +286,7 @@ def rs_mock_fk_not_unique():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -288,7 +298,7 @@ def rs_mock_fk_not_unique():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['property', 'value'],
+        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
         data=[
             ['Date', 2024],
             ['Title', '2022_Example#/Template_v2_1; ']
@@ -298,8 +308,8 @@ def rs_mock_fk_not_unique():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'tables_info': table_KEYS,
-        'meta_references': table_REF
+        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
 def rs_mock_fk_not_exist():
@@ -321,7 +331,7 @@ def rs_mock_fk_not_exist():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -333,7 +343,7 @@ def rs_mock_fk_not_exist():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['property', 'value'],
+        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
         data=[
             ['Date', 2024],
             ['Title', '2022_Example#/Template_v2_1; ' ]
@@ -343,8 +353,8 @@ def rs_mock_fk_not_exist():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'tables_info': table_KEYS,
-        'meta_references': table_REF
+        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
 def rs_mock_fk_without_ref():
@@ -366,7 +376,7 @@ def rs_mock_fk_without_ref():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -378,7 +388,7 @@ def rs_mock_fk_without_ref():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-            columns=['property', 'value'],
+            columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
             data=[
                 ['Date', 2024],
                 ['Title', '2022_Example#/Template_v2_1; ' ]
@@ -388,8 +398,8 @@ def rs_mock_fk_without_ref():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'tables_info': table_KEYS,
-        'meta_references': table_REF
+        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 ################################################
 
@@ -400,12 +410,12 @@ class TestExtraction(unittest.TestCase):
         ('meta_Something', True),
         ('MeTa_CaseUnsensitive', True),
         ('metacognitive', False),
-        ('tables_info', True),
+        (TEMP_CONF["infos"]["tab_name"], True),
         ('keys_table', False),
     ])
 
     def test_regex_exclude_meta(self, text, regexMatch):
-        """Check that sheet that contains either 'meta.', 'tables_info' or 'extra' 
+        """Check that sheet that contains either 'meta.', TEMP_CONF["infos"]["tab_name"] or 'extra' 
         matches the regex and so return True.
         """
 

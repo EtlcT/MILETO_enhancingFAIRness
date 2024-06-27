@@ -14,7 +14,7 @@ import os
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.extraction.utils import check_uniqueness, json2dict
+from src.utils import check_uniqueness, json2dict
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]

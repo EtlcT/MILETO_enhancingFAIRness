@@ -17,7 +17,7 @@ import sqlite3
 import pandas as pd
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
-from src.extraction.utils import checks_pipeline, json2dict
+from src.utils import checks_pipeline, json2dict
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]

@@ -3,7 +3,7 @@ import os
 
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.dbcreate import sqliteCreate
-from src.extraction.utils import checks_pipeline
+from src.utils import checks_pipeline
 
 def main():
     print('Welcome into Spreadsheet2sqlite\nEnter exit or Ctrl+C to quit.\n')
