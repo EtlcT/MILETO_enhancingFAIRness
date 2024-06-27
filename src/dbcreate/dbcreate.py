@@ -86,15 +86,38 @@ class sqliteCreate():
         db_file = self.output_path
         conn = sqlite3.connect(db_file)
         for table in self.data.datatables_list:
-            self.data.sheets_dict[table].to_sql(name=table,
-                                           con=conn,
-                                           if_exists='append',
-                                           index=False
-                                           )
+            self.data.sheets_dict[table].to_sql(
+                name=table,
+                con=conn,
+                if_exists='append',
+                index=False             
+            )
         return
 
+    def meta_tables_create(self) -> None:
+        """ Create non data table
+        """
+        db_file = self.output_path
+        conn = sqlite3.connect(db_file)
+
+        for table in TEMP_CONF.keys():
+            if table != "DDict_schema":
+                tab_name = TEMP_CONF[table]["tab_name"]
+                self.data.sheets_dict[tab_name].to_sql(
+                    name=tab_name,
+                    con=conn,
+                    if_exists='replace',
+                    index=False
+                )
+
+        pass
+
     def ddict_schema_create(self):
-        
+        """
+        Create DDict_schema table and 
+        insert the Entity-Relationship Diagram and sql statement
+        """
+
         blob_image = self._create_ERD()
         
         sql_statement = self._get_sql()
@@ -121,23 +144,26 @@ class sqliteCreate():
 
         return None
 
-    def _create_ERD(self):
+    def _create_ERD(self) -> bytes:
+        """Create ERD schema, save it to png and return it as a Blob
+        """
 
         try:
+            # if eralchimy2 is installed
             pkg_resources.get_distribution('eralchemy2')
-            print("eralchemy")
             draw = ERD_maker(db_path=self.output_path)
             blob_image = draw.eralchemy_draw_ERD()
 
         except pkg_resources.DistributionNotFound:
-            print('networkx')
+            # if not the ERD is made with networkx
             draw = ERD_maker(db_path=self.output_path, tables_infos=getData.tables_infos)
             blob_image = draw.networkx_draw_ERD()
         
         return blob_image
 
-    def _get_sql(self):
-
+    def _get_sql(self) -> str:
+        """ Return sql statement that lead to this database creation
+        """
         conn = sqlite3.connect(database=self.output_path)
         cursor = conn.cursor()
         cursor.execute('SELECT sql from sqlite_master')
@@ -214,3 +240,4 @@ if __name__ == "__main__":
     dbCreate.create_db()
     dbCreate.insert_data()
     dbCreate.ddict_schema_create()
+    dbCreate.meta_tables_create()

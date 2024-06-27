@@ -63,7 +63,7 @@ class GetSpreadsheetData:
         """
         Return a list containing the name of table that contains effective data
 
-        exclude extra.*, meta.* and DDict.*
+        exclude extra.*, meta.* and DDict.*, tables_infos
         """
         datatable_list = list()
         for sheet_name in self.sheets_dict:
@@ -77,7 +77,7 @@ class GetSpreadsheetData:
     #? and access it instead of creating dedicated Df that is a duplication
     def _get_tables_infos(self) -> pd.DataFrame:
         """
-        return a dataframe that contain rows from KEYS table
+        return a dataframe that contain rows from tables_infos table
         where 'Table' belong to data table list (ie self.datatables_list)
         """
 
