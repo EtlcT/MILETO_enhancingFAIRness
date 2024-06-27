@@ -1,0 +1,49 @@
+{
+    "meta_references": {
+        "tab_name": "meta_references",
+        "tab_attr": {
+            "id": "id",
+            "property": "property",
+            "value": "value",
+            "obligation": "obligation",
+            "helper": "helper"
+        }
+    },
+
+    "infos": {
+        "tab_name": "tables_info",
+        "tab_attr": {
+            "table": "table",
+            "attribute": "attribute",
+            "isPK": "isPK",
+            "isFK": "isFK",
+            "refTable": "referenceTable"
+        }
+    },
+
+    "DDict_tables": {
+        "tab_name": "DDict_tables",
+        "tab_attr": {
+            "table": "table",
+            "caption": "caption"
+        }
+    },
+
+    "DDict_attributes": {
+        "tab_name": "DDict_attributes",
+        "tab_attr": {
+            "attribute": "attribute",
+            "AttrType": "AttType",
+            "Unit": "Unit",
+            "Caption": "Caption"
+        }
+    },
+
+    "DDict_schema": {
+        "tab_name": "DDict_schema",
+        "tab_attr": {
+            "ERD": "ERD",
+            "sql": "sql_statement"
+        }
+    }
+}
