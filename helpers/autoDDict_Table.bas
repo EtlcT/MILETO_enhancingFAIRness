@@ -6,66 +6,60 @@ Sub UpdateOrCreateDictFieldsSheet()
     Dim wsName As String
     Dim table As ListObject
     Dim column As ListColumn
-    Dim found As Boolean
     Dim nextRow As Long
+    Dim ExcludeSheets As Variant
+    Dim sheetName As Variant
+    Dim exclude As Boolean
     
     ' Set the name for the dictionary fields sheet
-    wsName = "DDict_Table"
+    wsName = "tables_infos"
     
     ' Reference the active workbook
     Set wb = ActiveWorkbook
     
-    ' Check if the dict_fields sheet already exists
+    CreateDictFieldsSheet
+    
+    ' Retrieve the created sheet
     On Error Resume Next
     Set dictWs = wb.Sheets(wsName)
     On Error GoTo 0
     
-    ' If the dict_fields sheet does not exist, create it
+    ' Exit if still not found
     If dictWs Is Nothing Then
-        ' Call the CreateDictFieldsSheet function to create the sheet
-        CreateDictFieldsSheet
-        ' Retrieve the created sheet
-        On Error Resume Next
-        Set dictWs = wb.Sheets(wsName)
-        On Error GoTo 0
-        ' Exit if still not found
-        If dictWs Is Nothing Then
-            MsgBox "Error creating or retrieving dict_fields sheet.", vbExclamation
-            Exit Sub
-        End If
+        MsgBox "Error creating or retrieving dict_fields sheet.", vbExclamation
+        Exit Sub
     End If
+    
+    ' Define sheets to exclude
+    ExcludeSheets = Array("DDict_tables", "DDict_attributes", "meta_references")
     
     ' Find the next available row in dict_fields sheet
     nextRow = dictWs.Cells(dictWs.Rows.Count, 1).End(xlUp).Row + 1
   
     ' Loop through each worksheet in the workbook
     For Each ws In wb.Worksheets
-        ' Skip the dict_fields sheet
-        If ws.Name <> wsName Then
+        exclude = False
+        
+        ' Check if the sheet name is in the exclusion list
+        For Each sheetName In ExcludeSheets
+            If ws.Name = sheetName Then
+                exclude = True
+                Exit For
+            End If
+        Next sheetName
+        
+        ' Skip the sheet if it's in the exclusion list or if it's the dict_fields sheet
+        If Not exclude And ws.Name <> wsName Then
             ' Check if the worksheet has tables (ListObjects)
             If ws.ListObjects.Count > 0 Then
                 ' Loop through each table in the worksheet
                 For Each table In ws.ListObjects
                     ' Loop through each column in the table
                     For Each column In table.ListColumns
-                        ' Check if the attribute already exists in dict_fields
-                        found = False
-                        For i = 2 To nextRow - 1
-                            If dictWs.Cells(i, 1).Value = ws.Name And dictWs.Cells(i, 2).Value = column.Name Then
-                                found = True
-                                Exit For
-                            End If
-                        Next i
-                        
-                        ' If not found, add it
-                        If Not found Then
-                            dictWs.Cells(nextRow, 1).Value = ws.Name
-                            dictWs.Cells(nextRow, 2).Value = column.Name
-                            dictWs.Cells(nextRow, 3).Value = "" ' Placeholder for isPK
-                            dictWs.Cells(nextRow, 4).Value = "" ' Placeholder for isFK
-                            dictWs.Cells(nextRow, 5).Value = "" ' Placeholder for ReferenceTable
-                            nextRow = nextRow + 1
-                        End If
+                        ' Add the worksheet name and column name to the dict_fields sheet
+                        dictWs.Cells(nextRow, 1).Value = ws.Name
+                        dictWs.Cells(nextRow, 2).Value = column.Name
+                        nextRow = nextRow + 1
                     Next column
                 Next table
             End If
@@ -85,7 +79,7 @@ Sub CreateDictFieldsSheet()
     Dim dictWs As Worksheet
     
     ' Set the name for the dictionary fields sheet
-    wsName = "DDict_Table"
+    wsName = "tables_infos"
     
     ' Reference the active workbook
     Dim wb As Workbook
@@ -151,8 +145,8 @@ Sub ConvertToTables()
         ' Assign headers based on the first row of the range
         tbl.HeaderRowRange.Value = ws.Range("A1").Resize(1, rng.columns.Count).Value
         
-        ' Format the table as a proper Excel table
-        tbl.TableStyle = "TableStyleMedium2"
+        ' Optional: Format the table as a proper Excel table
+        tbl.TableStyle = "TableStyleMedium2" ' You can change this to any built-in table style
         
         ' Resize the range to exclude the header row (if needed)
         Set rng = rng.Offset(1).Resize(rng.Rows.Count - 1, rng.columns.Count)
