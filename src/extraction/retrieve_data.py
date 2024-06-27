@@ -14,7 +14,15 @@ import os
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.extraction.utils import check_uniqueness
+from src.extraction.utils import check_uniqueness, json2dict
+
+TEMP_CONF = json2dict("conf/template_conf.json")
+METAREF = TEMP_CONF["meta_references"]["tab_name"]
+METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
+INFO = TEMP_CONF["infos"]["tab_name"]
+INFO_ATT = TEMP_CONF["infos"]["tab_attr"]
+DDICT_T = TEMP_CONF["DDict_tables"]["tab_name"]
+DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
 
 class GetSpreadsheetData:
     """
@@ -25,7 +33,7 @@ class GetSpreadsheetData:
         self.sheets_dict = self._read_spreadsheet(filepath)
         self.db_name = self._get_dbname()
         self.datatables_list = self._get_datatables_list()
-        self.tables_structure = self._get_tables_structure()
+        self.tables_infos = self._get_tables_infos()
         self.compositePK_df = self._get_composite_pk()
     
 
@@ -44,17 +52,18 @@ class GetSpreadsheetData:
 
         case insensitive regex to keep only data tables
         """
-        no_keys = re.search("(?i)^keys$", text)
-        no_meta = re.search("(?i)meta\.", text)
+        no_info = re.search("(?i)tables_info", text)
+        no_meta = re.search("(?i)meta\_", text)
+        no_DDict = re.search("(?i)DDict\_", text)
         no_extra = re.search("(?i)extra_sheet\.", text)
-        return any([no_keys, no_meta, no_extra])
+        return any([no_DDict, no_meta, no_extra, no_info])
 
 
     def _get_datatables_list(self) -> list:
         """
         Return a list containing the name of table that contains effective data
 
-        exclude KEYS, meta.* and DDict.*
+        exclude extra.*, meta.* and DDict.*
         """
         datatable_list = list()
         for sheet_name in self.sheets_dict:
@@ -64,25 +73,25 @@ class GetSpreadsheetData:
 
 
     #! may be deprecated in the future if spreadsheet template is modified
-    #? potential future behavior: directly modify sheet_dict['KEYS']
+    #? potential future behavior: directly modify sheet_dict[INFO]
     #? and access it instead of creating dedicated Df that is a duplication
-    def _get_tables_structure(self) -> pd.DataFrame:
+    def _get_tables_infos(self) -> pd.DataFrame:
         """
         return a dataframe that contain rows from KEYS table
         where 'Table' belong to data table list (ie self.datatables_list)
         """
-        
-        return self.sheets_dict['KEYS'][self.sheets_dict['KEYS']['Table']
+
+        return self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
                                         .isin(self.datatables_list)] \
                                         .iloc[:,:5]
 
 
     def _get_dbname(self) -> str:
         """
-        return the database name as specified in the spreadsheet meta.References sheet
+        return the database name as specified in the spreadsheet meta_references sheet
         """
-        db_name = self.sheets_dict['meta.REFERENCES']\
-            [self.sheets_dict['meta.REFERENCES']['key'] == 'DBfileName']\
+        db_name = self.sheets_dict[METAREF]\
+            [self.sheets_dict[METAREF][METAREF_ATT["property"]] == 'Title']\
             ['value'].values[0]
 
         # remove unwanted character from file name
@@ -95,10 +104,10 @@ class GetSpreadsheetData:
         Return a Dataframe containing table name and composite key fields
         """
         composite_pk_df = pd.DataFrame(columns=['Table', 'pk_fields'])
-        group_by_table = self.tables_structure.groupby(by='Table')
+        group_by_table = self.tables_infos.groupby(by=INFO_ATT["table"])
 
         for table_name, table_info in group_by_table:
-            pk_attr = table_info[table_info['isPK']=='Y']['Attribute'].tolist()
+            pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']].tolist()
             if len(pk_attr)>1:
                 new_row = pd.DataFrame([{'Table': table_name,'pk_fields': pk_attr}])
                 composite_pk_df = pd.concat(
@@ -114,10 +123,10 @@ class GetSpreadsheetData:
         Raise assertion error if fields defined as Primary Key does not
         respect uniqueness criteria
         """
-        pk_constraint = self.tables_structure[self.tables_structure['isPK'] == 'Y'][['Table','Attribute']]
-        pk_groupedby_table = pk_constraint.groupby(by='Table')
+        pk_constraint = self.tables_infos[self.tables_infos[INFO_ATT['isPK']] == 'Y'][[INFO_ATT['table'],INFO_ATT['attribute']]]
+        pk_groupedby_table = pk_constraint.groupby(by=INFO_ATT['table'])
         for table_name, pk_info in pk_groupedby_table:
-            pk_info = pk_info['Attribute'].tolist()
+            pk_info = pk_info[INFO_ATT['attribute']].tolist()
 
             assert check_uniqueness(
                 fields=pk_info,
@@ -136,27 +145,31 @@ class GetSpreadsheetData:
         if the reference attribute does not respect unicity 
         """
 
-        isFK_condition = self.tables_structure['isFK']=='Y'
+        isFK_condition = self.tables_infos[INFO_ATT['isFK']]=='Y'
         fk_by_table_and_ref = (
-            self.tables_structure[isFK_condition][['Table','Attribute','ReferenceTable']]
-            .groupby(by=['Table','ReferenceTable'])
+            self.tables_infos[isFK_condition][[
+                INFO_ATT["table"],
+                INFO_ATT['attribute'],
+                INFO_ATT['refTable']
+            ]]
+            .groupby(by=[INFO_ATT["table"],INFO_ATT['refTable']])
         )
 
         for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
                 exist_in_ref = (col in self.sheets_dict[ref_table_name].columns
-                                for col in fk_info['Attribute'])
+                                for col in fk_info[INFO_ATT['attribute']])
                 
                 # check that the attribute exist in reference table
                 assert all(exist_in_ref),(
-                    f"invalid Foreign key {fk_info['Attribute'].tolist()} for {table_name}\n"
+                    f"invalid Foreign key {fk_info[INFO_ATT['attribute']].tolist()} for {table_name}\n"
                     f"all attributes must be present in {ref_table_name}"
                 )
 
                 assert check_uniqueness(
-                    fields=fk_info['Attribute'].tolist(),
+                    fields=fk_info['attribute'].tolist(),
                     table=self.sheets_dict[ref_table_name]
                 ), (
-                    f"invalid Foreign key {fk_info['Attribute'].tolist()} for {table_name}\n"
+                    f"invalid Foreign key {fk_info['attribute'].tolist()} for {table_name}\n"
                     f"the reference attribute in {ref_table_name} should be unique"
                 )
 
@@ -166,8 +179,8 @@ class GetSpreadsheetData:
     def check_pk_defined(self) -> None:
         """Raise AssertionError if a table has no Primary Key defined"""
 
-        for table, table_info in self.tables_structure.groupby(by='Table'):
-            assert 'Y' in table_info['isPK'].values, f"Table {table} has no Primary Key defined"
+        for table, table_info in self.tables_infos.groupby(by=INFO_ATT["table"]):
+            assert 'Y' in table_info[INFO_ATT['isPK']].values, f"Table {table} has no Primary Key defined"
         
         return
     
@@ -177,11 +190,11 @@ class GetSpreadsheetData:
         but has empty ReferenceTable field
         """
 
-        isFK_condition = self.tables_structure['isFK']=='Y'
-        fk_constraint = self.tables_structure[isFK_condition]
+        isFK_condition = self.tables_infos[INFO_ATT['isFK']]=='Y'
+        fk_constraint = self.tables_infos[isFK_condition]
 
-        assert not fk_constraint['ReferenceTable'].isna().any(), (
+        assert not fk_constraint[INFO_ATT['refTable']].isna().any(), (
             "Every FK should have a reference table defined"
-            f"{fk_constraint[fk_constraint['ReferenceTable'].isna()==True]}"
+            f"{fk_constraint[fk_constraint[INFO_ATT['refTable']].isna()==True]}"
         )
     

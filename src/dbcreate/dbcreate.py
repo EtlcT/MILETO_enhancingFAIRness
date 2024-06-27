@@ -16,8 +16,17 @@ import argparse
 import sqlite3
 import pandas as pd
 from src.extraction.retrieve_data import GetSpreadsheetData
-from dbcreate.erd_create import ERD_maker
-from src.extraction.utils import checks_pipeline
+from src.dbcreate.erd_create import ERD_maker
+from src.extraction.utils import checks_pipeline, json2dict
+
+TEMP_CONF = json2dict("conf/template_conf.json")
+METAREF = TEMP_CONF["meta_references"]["tab_name"]
+METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
+INFO = TEMP_CONF["infos"]["tab_name"]
+INFO_ATT = TEMP_CONF["infos"]["tab_attr"]
+DDICT_T = TEMP_CONF["DDict_tables"]["tab_name"]
+DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
+
 
 class sqliteCreate():
     """
@@ -32,7 +41,7 @@ class sqliteCreate():
     #! check output dir exist or create it
     def create_db(self) -> None:
         """
-        Iterate through tables_structure dataframe to create table
+        Iterate through tables_infos dataframe to create table
         with both PK and FK constraints
 
         This function create a sqlite file
@@ -41,25 +50,25 @@ class sqliteCreate():
         db_file = self.output_path
         conn = sqlite3.connect(database=db_file)
         
-        group_by_table = self.data.tables_structure.groupby(by='Table')
+        group_by_table = self.data.tables_infos.groupby(by=INFO_ATT['table'])
         for table_name, table_info in group_by_table:
 
-            column_list = table_info['Attribute'].tolist()
-            pk_attr = table_info[table_info['isPK']=='Y']['Attribute']
+            column_list = table_info[INFO_ATT['attribute']].tolist()
+            pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']]
 
             query = self._add_PK_constraint(table_name, column_list, pk_attr)
 
-            isFK_condition = ~table_info['isFK'].isna()
+            isFK_condition = ~table_info[INFO_ATT['isFK']].isna()
             group_by_table_ref = (
                 table_info[isFK_condition]
-                .groupby('ReferenceTable')
+                .groupby(INFO_ATT['refTable'])
             )
 
-            for ref_table_name, ref_info in group_by_table_ref[['Attribute', 'ReferenceTable']]:
+            for ref_table_name, ref_info in group_by_table_ref[[INFO_ATT['attribute'],INFO_ATT['refTable']]]:
 
                 fk_statement = self._add_FK_constraint(
                     ref_table_name=ref_table_name,
-                    fk_attribute=ref_info['Attribute'].tolist()
+                    fk_attribute=ref_info[INFO_ATT['attribute']].tolist()
                 )
                 query += fk_statement
             
@@ -122,7 +131,7 @@ class sqliteCreate():
 
         except pkg_resources.DistributionNotFound:
             print('networkx')
-            draw = ERD_maker(db_path=self.output_path, tables_structure=getData.tables_structure)
+            draw = ERD_maker(db_path=self.output_path, tables_infos=getData.tables_infos)
             blob_image = draw.networkx_draw_ERD()
         
         return blob_image

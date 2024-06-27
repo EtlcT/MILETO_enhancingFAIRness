@@ -40,7 +40,7 @@ def _read_spreadsheet_mock():
     ]
     table_D = pd.DataFrame(data=values_D, columns=fields_D)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -60,11 +60,10 @@ def _read_spreadsheet_mock():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['key', 'value'],
+        columns=['property', 'value'],
         data=[
             ['Date', 2024],
-            ['Title', 'Template2024'],
-            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+            ['Title', '2022_Example#/Template_v2_1; ' ]
         ]
     )
 
@@ -73,8 +72,8 @@ def _read_spreadsheet_mock():
         'Table_B': table_B,
         'Table_C': table_C,
         'Table_D': table_D,
-        'KEYS': table_KEYS,
-        'meta.REFERENCES': table_REF
+        'tables_info': table_KEYS,
+        'meta_references': table_REF
     }
 
 def rs_mock_undefined_pk():
@@ -94,7 +93,7 @@ def rs_mock_undefined_pk():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -106,19 +105,18 @@ def rs_mock_undefined_pk():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['key', 'value'],
+        columns=['property', 'value'],
         data=[
             ['Date', 2024],
-            ['Title', 'Template2024'],
-            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+            ['Title', '2022_Example#/Template_v2_1; ' ]
         ]
     )
 
     return {
         'Table_B': table_B,
         'Table_A': table_A,
-        'KEYS': table_KEYS,
-        'meta.REFERENCES': table_REF
+        'tables_info': table_KEYS,
+        'meta_references': table_REF
     }
 
 def df1_no_duplicate():
@@ -189,7 +187,7 @@ def rs_mock_pk_duplicate():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -201,19 +199,18 @@ def rs_mock_pk_duplicate():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['key', 'value'],
+        columns=['property', 'value'],
         data=[
             ['Date', 2024],
-            ['Title', 'Template2024'],
-            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+            ['Title', '2022_Example#/Template_v2_1; ' ]
         ]
     )
 
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'KEYS': table_KEYS,
-        'meta.REFERENCES': table_REF
+        'tables_info': table_KEYS,
+        'meta_references': table_REF
     }
 
 def rs_mock_cpk_duplicate():
@@ -234,7 +231,7 @@ def rs_mock_cpk_duplicate():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -246,19 +243,18 @@ def rs_mock_cpk_duplicate():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['key', 'value'],
+        columns=['property', 'value'],
         data=[
             ['Date', 2024],
-            ['Title', 'Template2024'],
-            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+            ['Title', '2022_Example#/Template_v2_1; ' ]
         ]
     )
 
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'KEYS': table_KEYS,
-        'meta.REFERENCES': table_REF
+        'tables_info': table_KEYS,
+        'meta_references': table_REF
     }
 
 def rs_mock_fk_not_unique():
@@ -280,7 +276,7 @@ def rs_mock_fk_not_unique():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -292,19 +288,18 @@ def rs_mock_fk_not_unique():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['key', 'value'],
+        columns=['property', 'value'],
         data=[
             ['Date', 2024],
-            ['Title', 'Template2024'],
-            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+            ['Title', '2022_Example#/Template_v2_1; ']
         ]
     )
 
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'KEYS': table_KEYS,
-        'meta.REFERENCES': table_REF
+        'tables_info': table_KEYS,
+        'meta_references': table_REF
     }
 
 def rs_mock_fk_not_exist():
@@ -326,7 +321,7 @@ def rs_mock_fk_not_exist():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -338,19 +333,18 @@ def rs_mock_fk_not_exist():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-        columns=['key', 'value'],
+        columns=['property', 'value'],
         data=[
             ['Date', 2024],
-            ['Title', 'Template2024'],
-            ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+            ['Title', '2022_Example#/Template_v2_1; ' ]
         ]
     )
     
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'KEYS': table_KEYS,
-        'meta.REFERENCES': table_REF
+        'tables_info': table_KEYS,
+        'meta_references': table_REF
     }
 
 def rs_mock_fk_without_ref():
@@ -372,7 +366,7 @@ def rs_mock_fk_without_ref():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = ['Table', 'Attribute', 'isPK', 'isFK', 'ReferenceTable']
+    fields_KEYS = ['table', 'attribute', 'isPK', 'isFK', 'referenceTable']
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -384,19 +378,18 @@ def rs_mock_fk_without_ref():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-            columns=['key', 'value'],
+            columns=['property', 'value'],
             data=[
                 ['Date', 2024],
-                ['Title', 'Template2024'],
-                ['DBfileName', '2022_Example#/Template_v2_1; ' ]
+                ['Title', '2022_Example#/Template_v2_1; ' ]
             ]
         )
 
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        'KEYS': table_KEYS,
-        'meta.REFERENCES': table_REF
+        'tables_info': table_KEYS,
+        'meta_references': table_REF
     }
 ################################################
 
@@ -404,15 +397,15 @@ class TestExtraction(unittest.TestCase):
     
 
     @parameterized.expand([
-        ('meta.Something', True),
-        ('MeTa.CaseUnsensitive', True),
+        ('meta_Something', True),
+        ('MeTa_CaseUnsensitive', True),
         ('metacognitive', False),
-        ('KeYS', True),
-        ('not_keys_table', False),
+        ('tables_info', True),
+        ('keys_table', False),
     ])
 
     def test_regex_exclude_meta(self, text, regexMatch):
-        """Check that sheet that contains either 'meta.', 'keys' or 'extra' 
+        """Check that sheet that contains either 'meta.', 'tables_info' or 'extra' 
         matches the regex and so return True.
         """
 

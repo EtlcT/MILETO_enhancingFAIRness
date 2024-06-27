@@ -1,3 +1,5 @@
+import json
+
 def check_uniqueness(fields, table) -> bool:
     """
         Check that a fields or group of fieldss verify uniqueness constraint
@@ -27,3 +29,12 @@ def checks_pipeline(funcs: list):
     """
     for func in funcs:
         func()
+
+def json2dict(json_filepath) -> dict :
+    """Read a json file and return it as a python dict
+    """
+
+    with open(json_filepath) as json_file:
+        json_data = json_file.read()
+    
+    return json.loads(json_data)
