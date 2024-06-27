@@ -6,6 +6,7 @@ from data tables dataframes and Keys description.
 
 import sys
 import os
+import pkg_resources
 
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -15,6 +16,7 @@ import argparse
 import sqlite3
 import pandas as pd
 from src.extraction.retrieve_data import GetSpreadsheetData
+from dbcreate.erd_create import ERD_maker
 from src.extraction.utils import checks_pipeline
 
 class sqliteCreate():
@@ -22,10 +24,12 @@ class sqliteCreate():
     Class that create a sqlite file based on data from extraction module
     """
 
-    def __init__(self, getData: object) -> None:
+    def __init__(self, getData: object, output_dir) -> None:
         assert isinstance(getData, GetSpreadsheetData)
         self.data = getData
-
+        self.output_path = f"{os.path.join(output_dir, self.data.db_name)}.sqlite"
+    
+    #! check output dir exist or create it
     def create_db(self) -> None:
         """
         Iterate through tables_structure dataframe to create table
@@ -34,8 +38,8 @@ class sqliteCreate():
         This function create a sqlite file
         """
 
-        filename = f"{self.data.db_name}.sqlite"
-        conn = sqlite3.connect(database=filename)
+        db_file = self.output_path
+        conn = sqlite3.connect(database=db_file)
         
         group_by_table = self.data.tables_structure.groupby(by='Table')
         for table_name, table_info in group_by_table:
@@ -70,8 +74,8 @@ class sqliteCreate():
         Insert data into database
         """
 
-        filename = f"{self.data.db_name}.sqlite"
-        conn = sqlite3.connect(filename)
+        db_file = self.output_path
+        conn = sqlite3.connect(db_file)
         for table in self.data.datatables_list:
             self.data.sheets_dict[table].to_sql(name=table,
                                            con=conn,
@@ -79,6 +83,67 @@ class sqliteCreate():
                                            index=False
                                            )
         return
+
+    def ddict_schema_create(self):
+        
+        blob_image = self._create_ERD()
+        
+        sql_statement = self._get_sql()
+
+        conn = sqlite3.connect(database=self.output_path)
+
+        cursor = conn.cursor()
+
+        create_query = (
+            "CREATE TABLE IF NOT EXISTS DDict_schema"
+            "(ERD, sql_statement)"
+        )
+
+        cursor.execute(create_query)
+
+        insert_query = (
+            f"INSERT INTO DDict_schema (ERD, sql_statement) VALUES(?,?)"
+        )
+        cursor.execute(insert_query, (blob_image, sql_statement))
+
+        conn.commit()
+
+        conn.close()
+
+        return None
+
+    def _create_ERD(self):
+
+        try:
+            pkg_resources.get_distribution('eralchemy2')
+            print("eralchemy")
+            draw = ERD_maker(db_path=self.output_path)
+            blob_image = draw.eralchemy_draw_ERD()
+
+        except pkg_resources.DistributionNotFound:
+            print('networkx')
+            draw = ERD_maker(db_path=self.output_path, tables_structure=getData.tables_structure)
+            blob_image = draw.networkx_draw_ERD()
+        
+        return blob_image
+
+    def _get_sql(self):
+
+        conn = sqlite3.connect(database=self.output_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT sql from sqlite_master')
+
+        raw_sql = cursor.fetchall()
+
+        sql_statement = str()
+        for row in raw_sql:
+            if row[0] is not None:
+                sql_statement+= row[0] + "\n"
+        
+        conn.close()
+
+        return sql_statement
+
 
 
     def _add_PK_constraint(self, table_name: str, column_list: list, pk_attribute: list) -> str:
@@ -123,6 +188,7 @@ class sqliteCreate():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filepath", help="path to the spreadsheet you want to convert")
+    parser.add_argument("output_dir", help="absolute path to the output directory")
     args = parser.parse_args()
     
     getData = GetSpreadsheetData(filepath=args.filepath)
@@ -135,6 +201,7 @@ if __name__ == "__main__":
     ]
     checks_pipeline(check_funcs_list)
 
-    dbCreate = sqliteCreate(getData)
+    dbCreate = sqliteCreate(getData, output_dir= args.output_dir)
     dbCreate.create_db()
     dbCreate.insert_data()
+    dbCreate.ddict_schema_create()

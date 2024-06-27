@@ -15,18 +15,25 @@ Sub UpdateOrCreateDictFieldsSheet()
     ' Reference the active workbook
     Set wb = ActiveWorkbook
     
-    CreateDictFieldsSheet
-    
-    ' Retrieve the created sheet
+    ' Check if the dict_fields sheet already exists
     On Error Resume Next
     Set dictWs = wb.Sheets(wsName)
     On Error GoTo 0
     
+    ' If the dict_fields sheet does not exist, create it
+    If dictWs Is Nothing Then
+        ' Call the CreateDictFieldsSheet function to create the sheet
+        CreateDictFieldsSheet
+        ' Retrieve the created sheet
+        On Error Resume Next
+        Set dictWs = wb.Sheets(wsName)
+        On Error GoTo 0
         ' Exit if still not found
         If dictWs Is Nothing Then
             MsgBox "Error creating or retrieving dict_fields sheet.", vbExclamation
             Exit Sub
         End If
+    End If
     
     ' Find the next available row in dict_fields sheet
     nextRow = dictWs.Cells(dictWs.Rows.Count, 1).End(xlUp).Row + 1
@@ -42,10 +49,23 @@ Sub UpdateOrCreateDictFieldsSheet()
                     ' Loop through each column in the table
                     For Each column In table.ListColumns
                         ' Check if the attribute already exists in dict_fields
+                        found = False
+                        For i = 2 To nextRow - 1
+                            If dictWs.Cells(i, 1).Value = ws.Name And dictWs.Cells(i, 2).Value = column.Name Then
+                                found = True
+                                Exit For
+                            End If
+                        Next i
+                        
+                        ' If not found, add it
+                        If Not found Then
                             dictWs.Cells(nextRow, 1).Value = ws.Name
                             dictWs.Cells(nextRow, 2).Value = column.Name
+                            dictWs.Cells(nextRow, 3).Value = "" ' Placeholder for isPK
+                            dictWs.Cells(nextRow, 4).Value = "" ' Placeholder for isFK
+                            dictWs.Cells(nextRow, 5).Value = "" ' Placeholder for ReferenceTable
                             nextRow = nextRow + 1
-
+                        End If
                     Next column
                 Next table
             End If
@@ -131,8 +151,8 @@ Sub ConvertToTables()
         ' Assign headers based on the first row of the range
         tbl.HeaderRowRange.Value = ws.Range("A1").Resize(1, rng.columns.Count).Value
         
-        ' Optional: Format the table as a proper Excel table
-        tbl.TableStyle = "TableStyleMedium2" ' You can change this to any built-in table style
+        ' Format the table as a proper Excel table
+        tbl.TableStyle = "TableStyleMedium2"
         
         ' Resize the range to exclude the header row (if needed)
         Set rng = rng.Offset(1).Resize(rng.Rows.Count - 1, rng.columns.Count)
