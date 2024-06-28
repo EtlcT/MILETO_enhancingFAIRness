@@ -388,7 +388,7 @@ def rs_mock_fk_without_ref():
     table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
 
     table_REF = pd.DataFrame(
-            columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
+            columns=list(TEMP_CONF['meta_references']['tab_attr'].values())[1:3],
             data=[
                 ['Date', 2024],
                 ['Title', '2022_Example#/Template_v2_1; ' ]
@@ -398,9 +398,55 @@ def rs_mock_fk_without_ref():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        TEMP_CONF["infos"]["tab_name"]: table_KEYS,
-        TEMP_CONF["meta_references"]["tab_name"]: table_REF
+        TEMP_CONF['infos']['tab_name']: table_KEYS,
+        TEMP_CONF['meta_references']['tab_name']: table_REF
     }
+
+def attr_shared_name() -> pd.DataFrame:
+    
+    brand = pd.DataFrame(
+        columns= ['id', 'brand_name'],
+        data= [
+            [1, 'Alfa romeo'],
+            [2, 'Fiat']
+        ]
+    )
+
+    car = pd.DataFrame(
+        columns= ['id', 'model_name', 'brand_id'],
+        data= [
+            [1, '500', 2],
+            [2, 'Panda', 2],
+            [3, '147', 1]
+        ]
+    )
+
+    fields_KEYS = list(TEMP_CONF["infos"]["tab_attr"].values())
+    values_KEYS = [
+        ['brand', 'id', 'Y', np.nan, np.nan],
+        ['brand', 'brand_name', np.nan, np.nan, np.nan],
+        ['car', 'id', 'Y', np.nan, np.nan],
+        ['car', 'model_name', 'Y', np.nan, np.nan],
+        ['car', 'brand_id', np.nan, 'Y', 'brand'],
+    ]
+    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
+
+    table_REF = pd.DataFrame(
+            columns=list(TEMP_CONF['meta_references']['tab_attr'].values())[1:3],
+            data=[
+                ['Date', 2024],
+                ['Title', '2022_Example#/Template_v2_1; ' ]
+            ]
+        )
+    
+    return {
+        'brand': brand,
+        'car': car,
+        TEMP_CONF['infos']['tab_name']: table_KEYS,
+        TEMP_CONF['meta_references']['tab_name']: table_REF
+    }
+    
+
 ################################################
 
 class TestExtraction(unittest.TestCase):
@@ -573,3 +619,31 @@ class TestExtraction(unittest.TestCase):
             getData.check_fk_get_ref()
         
         self.assertIn("Every FK should have a reference table defined", str(custom_error.exception))
+
+    error_shared_name = (
+        "Except for Foreign keys, different attributes should not"
+        "have the same names"
+    )
+
+    @parameterized.expand([
+            (MagicMock(return_value=attr_shared_name()), error_shared_name),
+            (MagicMock(return_value=_read_spreadsheet_mock()), None)
+        ])
+
+    def test_check_no_shared_name(self, mockObject, expected_result):
+        """Check that an assertion error is raised if distinct attributes
+        have the same name (except for Foreign Keys)
+        """
+
+        retrieve_data.GetSpreadsheetData._read_spreadsheet = mockObject
+        getData = retrieve_data.GetSpreadsheetData('fakepath')
+
+        if expected_result is not None:
+            with self.assertRaises(AssertionError) as custom_error:
+                getData.check_no_shared_name()
+
+            self.assertEqual(str(custom_error.exception), expected_result)
+        
+        else:
+            self.assertEqual(getData.check_no_shared_name(),None)
+

@@ -81,9 +81,11 @@ class GetSpreadsheetData:
         where 'Table' belong to data table list (ie self.datatables_list)
         """
 
-        return self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
+        tables_infos = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
                                         .isin(self.datatables_list)] \
                                         .iloc[:,:5]
+
+        return tables_infos
 
 
     def _get_dbname(self) -> str:
@@ -116,7 +118,6 @@ class GetSpreadsheetData:
                 )
                 
         return composite_pk_df
-                
 
     def check_pk_uniqueness(self) -> None:
         """
@@ -184,6 +185,7 @@ class GetSpreadsheetData:
         
         return
     
+
     def check_fk_get_ref(self) -> None:
         """
         Raise AssertionError if a field is defined as FK 
@@ -198,3 +200,17 @@ class GetSpreadsheetData:
             f"{fk_constraint[fk_constraint[INFO_ATT['refTable']].isna()==True]}"
         )
     
+    def check_no_shared_name(self) -> None:
+        """
+        Raise AssertionError if fields that belong to different 
+        tables have the same name, except for foreign keys (for which
+        it could be normal to share the same name as their reference)
+        """
+
+        notFK_condition = self.tables_infos[INFO_ATT['isFK']].isna()
+        attr_no_FK = self.tables_infos[notFK_condition]
+
+        assert attr_no_FK[INFO_ATT['attribute']].is_unique, (
+            "Except for Foreign keys, different attributes should not"
+            "have the same names"
+        )
