@@ -43,6 +43,7 @@ class sqliteCreate():
         """
         Iterate through tables_infos dataframe to create table
         with both PK and FK constraints
+        CHANGES:  also specify data types
 
         This function create a sqlite file
         """
@@ -53,10 +54,33 @@ class sqliteCreate():
         group_by_table = self.data.tables_infos.groupby(by=INFO_ATT['table'])
         for table_name, table_info in group_by_table:
 
-            column_list = table_info[INFO_ATT['attribute']].tolist()
-            pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']]
+            # looks for composite pk
+            pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']].tolist()
+            attr_list = table_info[INFO_ATT['attribute']].tolist()
+            attr_type = table_info['type'].tolist()
 
-            query = self._add_PK_constraint(table_name, column_list, pk_attr)
+            if len(pk_attr) > 1:
+                # if PK is composite
+                attr_statement = ", ".join([f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)])
+
+                query = (
+                    f"CREATE TABLE {table_name}("
+                    f"{attr_statement}, "
+                    f"PRIMARY KEY ({', '.join([pk_field_name for pk_field_name in pk_attr])})"
+                )
+            
+            else:
+                # if PK not composite
+                # find index in attr_list to access its type
+                index = attr_list.index(f'{pk_attr[0]}')
+                # add PRIMARY KEY just after the pk attribute
+                attr_list = list(map(lambda x: x.replace(f"{pk_attr[0]} {attr_type[index]}", f'{pk_attr[0]} PRIMARY KEY'), attr_list))
+                attr_statement = ", ".join([f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)])
+
+                query = (
+                    f"CREATE TABLE {table_name}("
+                    f"{attr_statement}"
+                )
 
             isFK_condition = ~table_info[INFO_ATT['isFK']].isna()
             group_by_table_ref = (
@@ -109,10 +133,10 @@ class sqliteCreate():
                     if_exists='replace',
                     index=False
                 )
+        
+        return None
 
-        pass
-
-    def ddict_schema_create(self):
+    def ddict_schema_create(self) -> None:
         """
         Create DDict_schema table and 
         insert the Entity-Relationship Diagram and sql statement
@@ -143,6 +167,25 @@ class sqliteCreate():
         conn.close()
 
         return None
+
+    def _add_FK_constraint(self, ref_table_name: str, fk_attribute: list) -> str:
+        """
+        Return a part of sql statement relative to Foreign keys constraint
+        FOREIGN KEYS (field_name) REFERENCES ref_table_name(field_name)
+        
+        inputs:
+            ref_table_name: name of the reference table
+            fk_attribute: list of fields defined as foreign keys
+
+        !!WARNING!! field name must be the same in child and parent table
+        """
+        fk_statement = str()
+        fk_statement += (
+            f", FOREIGN KEY ({(', ').join(fk_attribute)}) "
+            f"REFERENCES {ref_table_name}({(', ').join(fk_attribute)})"
+        )
+        
+        return fk_statement
 
     def _create_ERD(self) -> bytes:
         """Create ERD schema, save it to png and return it as a Blob
@@ -179,47 +222,6 @@ class sqliteCreate():
 
         return sql_statement
 
-
-
-    def _add_PK_constraint(self, table_name: str, column_list: list, pk_attribute: list) -> str:
-        """
-        return a valid sql query for sqlite database CREATE TABLE <> 
-        with primary key constraint
-        """
-
-        # check if it is a composite Primary KEY
-        if len(pk_attribute)>1:
-            query = f"CREATE TABLE {table_name} ({', '.join(column_list)}"
-            pk_statement = f", PRIMARY KEY ({', '.join([PK_field_name for PK_field_name in pk_attribute])})"
-            query += pk_statement
-
-        else: # if it is not a composite PK
-            column_list = list(map(lambda x: x.replace(pk_attribute.iloc[0], f'{pk_attribute.iloc[0]} PRIMARY KEY'), column_list)) # map to add 'PRIMARY KEY' as a constrain after the name
-            query = f"CREATE TABLE {table_name} ({', '.join(column_list)}"
-
-        return query
-
-
-    def _add_FK_constraint(self, ref_table_name: str, fk_attribute: list) -> str:
-        """
-        Return a part of sql statement relative to Foreign keys constraint
-        FOREIGN KEYS (field_name) REFERENCES ref_table_name(field_name)
-        
-        inputs:
-            ref_table_name: name of the reference table
-            fk_attribute: list of fields defined as foreign keys
-
-        !!WARNING!! field name must be the same in child and parent table
-        """
-        fk_statement = str()
-        fk_statement += (
-            f", FOREIGN KEY ({(', ').join(fk_attribute)}) "
-            f"REFERENCES {ref_table_name}({(', ').join(fk_attribute)})"
-        )
-        
-        return fk_statement
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filepath", help="path to the spreadsheet you want to convert")
@@ -229,6 +231,7 @@ if __name__ == "__main__":
     getData = GetSpreadsheetData(filepath=args.filepath)
 
     check_funcs_list = [
+        getData.check_no_shared_name,
         getData.check_pk_defined,
         getData.check_pk_uniqueness,
         getData.check_fk_get_ref,

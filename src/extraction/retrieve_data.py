@@ -84,8 +84,10 @@ class GetSpreadsheetData:
         tables_infos = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
                                         .isin(self.datatables_list)] \
                                         .iloc[:,:5]
+        # add type info 
+        tables_infos_wt = self._add_attr_type(tables_infos)
 
-        return tables_infos
+        return tables_infos_wt
 
 
     def _get_dbname(self) -> str:
@@ -118,6 +120,41 @@ class GetSpreadsheetData:
                 )
                 
         return composite_pk_df
+    
+    def _add_attr_type(self, tables_infos) -> pd.DataFrame:
+        """Auto detect attr types based on dataframe content
+        store the type info in new column 'type' in tables_info
+
+        return tables_infos with type info for each attribute
+        """
+
+        tables_infos['type'] = pd.Series()
+
+        for table in self.datatables_list:
+            for attr, pd_type in self.sheets_dict[table].dtypes.items():
+                print(attr, 'as type : ', str(pd_type))
+                if re.search('int', str(pd_type)) != None:
+                    # attribute type is an integer
+                    table_value = tables_infos[INFO_ATT['table']] == table
+                    attr_value = tables_infos[INFO_ATT['attribute']] == attr
+                    # access row in tables_infos and change type value
+                    tables_infos.loc[(table_value & attr_value), 'type'] = 'INTEGER'
+                
+                elif re.search('float', str(pd_type)) != None:
+                    # attribute type is a float
+                    table_value = tables_infos[INFO_ATT['table']] == table
+                    attr_value = tables_infos[INFO_ATT['attribute'] == attr]
+                    # access row in tables_infos and change type value
+                    tables_infos.loc[(table_value & attr_value), 'type'] = "REAL"
+
+                else:
+                    table_value = tables_infos[INFO_ATT['table']] == table
+                    attr_value = tables_infos[INFO_ATT['attribute']] == attr
+                    # access row in tables_infos and change type value
+                    tables_infos.loc[(table_value & attr_value), 'type'] = "TEXT"
+        
+        return tables_infos
+
 
     def check_pk_uniqueness(self) -> None:
         """
