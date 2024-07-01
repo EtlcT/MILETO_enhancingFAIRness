@@ -132,7 +132,7 @@ class GetSpreadsheetData:
 
         for table in self.datatables_list:
             for attr, pd_type in self.sheets_dict[table].dtypes.items():
-                print(attr, 'as type : ', str(pd_type))
+
                 if re.search('int', str(pd_type)) != None:
                     # attribute type is an integer
                     table_value = tables_infos[INFO_ATT['table']] == table

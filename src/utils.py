@@ -1,4 +1,6 @@
 import json
+import sys
+import os
 
 def check_uniqueness(fields, table) -> bool:
     """
@@ -31,10 +33,20 @@ def checks_pipeline(funcs: list):
         func()
 
 def json2dict(json_filepath) -> dict :
-    """Read a json file and return it as a python dict
+    """Read a config files
     """
 
-    with open(json_filepath) as json_file:
+    with open(resource_path(json_filepath)) as json_file:
         json_data = json_file.read()
     
     return json.loads(json_data)
+
+def resource_path(relative_path):
+    """ Get absolute path to resource for PyInstaller executable """
+    try:
+        # PyInstaller creates a temporary folder and stores the path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)

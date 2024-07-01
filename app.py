@@ -1,9 +1,21 @@
+import logging
+import traceback
 import sys
 import os
 
-from src.extraction.retrieve_data import GetSpreadsheetData
-from src.dbcreate.dbcreate import sqliteCreate
-from src.utils import checks_pipeline
+# Configure logging
+logging.basicConfig(level=logging.ERROR, 
+                    format='%(asctime)s %(levelname)s %(message)s', 
+                    handlers=[logging.FileHandler("error.log"),
+                              logging.StreamHandler()])
+
+try:
+    from src.extraction.retrieve_data import GetSpreadsheetData
+    from src.dbcreate.dbcreate import sqliteCreate
+    from src.utils import checks_pipeline, resource_path
+except Exception as e:
+    logging.error("An error occurred", exc_info=True)
+    traceback.print_exc()
 
 def main():
     print('Welcome into Spreadsheet2sqlite\nEnter exit or Ctrl+C to quit.\n')
@@ -18,13 +30,14 @@ def main():
 
             else:
                 
+                file_path = os.path.normpath(user_input)
+
                 output_dir = input("Please provide the output directory to save .sqlite .png and .pdf files\n")
 
-                file_path = os.path.normpath(user_input)
-                
                 data = GetSpreadsheetData(filepath=file_path)
 
                 check_funcs_list = [
+                    data.check_no_shared_name,
                     data.check_pk_defined,
                     data.check_pk_uniqueness,
                     data.check_fk_get_ref,
@@ -38,8 +51,8 @@ def main():
                 dbCreate.ddict_schema_create()
                 
         except Exception as e:
-            with open('logs.txt','a+') as logfile:
-                logfile.write(f"{e}\n")
+            logging.error("An error occurred", exc_info=True)
+            traceback.print_exc()
 
 
 if __name__=='__main__':
