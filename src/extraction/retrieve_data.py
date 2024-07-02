@@ -143,7 +143,7 @@ class GetSpreadsheetData:
                 elif re.search('float', str(pd_type)) != None:
                     # attribute type is a float
                     table_value = tables_infos[INFO_ATT['table']] == table
-                    attr_value = tables_infos[INFO_ATT['attribute'] == attr]
+                    attr_value = tables_infos[INFO_ATT['attribute']] == attr
                     # access row in tables_infos and change type value
                     tables_infos.loc[(table_value & attr_value), 'type'] = "REAL"
 

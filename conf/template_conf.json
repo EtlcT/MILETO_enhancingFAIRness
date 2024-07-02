@@ -33,9 +33,9 @@
         "tab_name": "DDict_attributes",
         "tab_attr": {
             "attribute": "attribute",
-            "AttrType": "AttType",
-            "Unit": "Unit",
-            "Caption": "Caption"
+            "attType": "attType",
+            "unit": "unit",
+            "caption": "caption"
         }
     },
 

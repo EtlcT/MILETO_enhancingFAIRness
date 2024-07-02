@@ -144,7 +144,7 @@ class sqliteCreate():
 
         blob_image = self._create_ERD()
         
-        sql_statement = self._get_sql()
+        sql_statement = self.get_sql()
 
         conn = sqlite3.connect(database=self.output_path)
 
@@ -204,7 +204,7 @@ class sqliteCreate():
         
         return blob_image
 
-    def _get_sql(self) -> str:
+    def get_sql(self) -> str:
         """ Return sql statement that lead to this database creation
         """
         conn = sqlite3.connect(database=self.output_path)

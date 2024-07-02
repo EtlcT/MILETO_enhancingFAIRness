@@ -5,3 +5,4 @@ parameterized
 eralchemy2
 networkx
 matplotlib
+pdfkit

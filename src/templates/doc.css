@@ -1,0 +1,33 @@
+.center {
+    text-align: center;
+}
+
+.page-break {
+    page-break-before: always;
+}
+
+.description {
+    text-align: justify;
+}
+
+.full-page-image {
+    display: block;
+    max-width: 210mm;  /* A4 width */
+    max-height: 297mm; /* A4 height */
+    width: auto;
+    height: auto;
+    margin: 0 auto;
+    object-fit: contain; /* Maintain aspect ratio */
+}
+
+table, th, td{
+    border: 2px solid black;
+    border-collapse:collapse;
+    padding: 10px;
+    text-align: center;
+    width: max-content;
+}
+
+tr:nth-child(even) {
+    background-color: beige;
+}
