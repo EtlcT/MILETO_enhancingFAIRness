@@ -37,6 +37,7 @@ class sqliteCreate():
         assert isinstance(getData, GetSpreadsheetData)
         self.data = getData
         self.output_path = f"{os.path.join(output_dir, self.data.db_name)}.sqlite"
+        self.sql_dump = None
     
     #! check output dir exist or create it
     def create_db(self) -> None:
@@ -61,7 +62,9 @@ class sqliteCreate():
 
             if len(pk_attr) > 1:
                 # if PK is composite
-                attr_statement = ", ".join([f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)])
+                attr_statement = ", ".join(
+                    [f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)]
+                )
 
                 query = (
                     f"CREATE TABLE {table_name}("
@@ -74,7 +77,14 @@ class sqliteCreate():
                 # find index in attr_list to access its type
                 index = attr_list.index(f'{pk_attr[0]}')
                 # add PRIMARY KEY just after the pk attribute
-                attr_list = list(map(lambda x: x.replace(f"{pk_attr[0]} {attr_type[index]}", f'{pk_attr[0]} PRIMARY KEY'), attr_list))
+                attr_list = list(
+                    map(
+                        lambda x: x.replace(
+                            f"{pk_attr[0]} {attr_type[index]}",
+                            f'{pk_attr[0]} PRIMARY KEY'
+                        ), attr_list
+                    )
+                )
                 attr_statement = ", ".join([f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)])
 
                 query = (
@@ -199,7 +209,10 @@ class sqliteCreate():
 
         except pkg_resources.DistributionNotFound:
             # if not the ERD is made with networkx
-            draw = ERD_maker(db_path=self.output_path, tables_infos=getData.tables_infos)
+            draw = ERD_maker(
+                db_path=self.output_path,
+                tables_infos=getData.tables_infos
+            )
             blob_image = draw.networkx_draw_ERD()
         
         return blob_image
@@ -207,6 +220,7 @@ class sqliteCreate():
     def get_sql(self) -> str:
         """ Return sql statement that lead to this database creation
         """
+
         conn = sqlite3.connect(database=self.output_path)
         cursor = conn.cursor()
         cursor.execute('SELECT sql from sqlite_master')
@@ -220,6 +234,8 @@ class sqliteCreate():
         
         conn.close()
 
+        self.sql_dump = sql_statement
+
         return sql_statement
 
 if __name__ == "__main__":
@@ -230,6 +246,7 @@ if __name__ == "__main__":
     
     getData = GetSpreadsheetData(filepath=args.filepath)
 
+    #? conf file to store check list
     check_funcs_list = [
         getData.check_no_shared_name,
         getData.check_pk_defined,
@@ -239,8 +256,8 @@ if __name__ == "__main__":
     ]
     checks_pipeline(check_funcs_list)
 
-    dbCreate = sqliteCreate(getData, output_dir= args.output_dir)
-    dbCreate.create_db()
-    dbCreate.insert_data()
-    dbCreate.ddict_schema_create()
-    dbCreate.meta_tables_create()
+    sqlite_db = sqliteCreate(getData, output_dir= args.output_dir)
+    sqlite_db.create_db()
+    sqlite_db.insert_data()
+    sqlite_db.ddict_schema_create()
+    sqlite_db.meta_tables_create()
