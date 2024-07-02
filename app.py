@@ -12,7 +12,8 @@ logging.basicConfig(level=logging.ERROR,
 try:
     from src.extraction.retrieve_data import GetSpreadsheetData
     from src.dbcreate.dbcreate import sqliteCreate
-    from src.utils import checks_pipeline, resource_path
+    from src.doccreate.pdf_create import docCreate
+    from src.utils import checks_pipeline
 except Exception as e:
     logging.error("An error occurred", exc_info=True)
     traceback.print_exc()
@@ -45,10 +46,18 @@ def main():
                 ]
                 checks_pipeline(check_funcs_list)
 
-                dbCreate = sqliteCreate(data, output_dir=output_dir)
-                dbCreate.create_db()
-                dbCreate.insert_data()
-                dbCreate.ddict_schema_create()
+                # create sqlite and erd.png
+                sqlite_db = sqliteCreate(getData=data, output_dir=output_dir)
+                sqlite_db.create_db()
+                sqlite_db.insert_data()
+                sqlite_db.ddict_schema_create()
+                sqlite_db.meta_tables_create()
+
+                # create documentation
+                pdf_doc = docCreate(getData=data, output_dir=output_dir)
+                pdf_doc.sql_dump = sqlite_db.sql_dump
+                pdf_doc.createPDF()
+
                 
         except Exception as e:
             logging.error("An error occurred", exc_info=True)

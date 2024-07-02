@@ -3,12 +3,12 @@ import os
 import pdfkit
 import base64
 from datetime import datetime
-import argparse
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
+from src.dbcreate.dbcreate import sqliteCreate
 from src.utils import resource_path, json2dict
-from src.extraction.retrieve_data import GetSpreadsheetData
+
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]
@@ -20,15 +20,16 @@ DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
 DDICT_A = TEMP_CONF["DDict_attributes"]["tab_name"]
 DDICT_A_ATT = TEMP_CONF["DDict_attributes"]["tab_attr"]
 
-class createDoc():
+class docCreate(sqliteCreate):
     """
-        Class that read html file, include parameter and convert to pdf
+        Class that inherit from sqliteCreate
+        This class that read html file, include parameters and convert to pdf
     """
 
-    def __init__(self, getData: object, output_dir, html_template = "src/templates/doc.html") -> None:
-        self.template = resource_path(html_template)
-        self.data = getData
+    def __init__(self, getData, output_dir, html_template = "src/templates/doc.html") -> None:
+        super().__init__(getData, output_dir)
         self.output_path = f"{os.path.join(output_dir, self.data.db_name)}.pdf"
+        self.template = resource_path(html_template)
         self.erd_path = f"{output_dir}/ERD_{self.data.db_name}.png"
 
     def createPDF(self) -> None:
@@ -41,6 +42,8 @@ class createDoc():
 
         pdfkit.from_string(html_content, self.output_path, options={"enable-local-file-access": None}, css="src/templates/doc.css")
 
+        return
+
     # to accept user's template
     def _get_template(self, html_template):
         """Return right path to the template"""
@@ -51,7 +54,7 @@ class createDoc():
         today = datetime.now()
         
         # Format the date in a string with the literal month
-        formatted_date = today.strftime("%A, %B %d, %Y")
+        formatted_date = today.strftime("%A, %d %B %Y")
         
         return formatted_date
     
@@ -94,11 +97,6 @@ class createDoc():
             " alt='Entity Relationship Diagram' </img>"
         )
 
-        # img_tag_erd = (
-        #     f"<img src=data:image/png;base64, '{self.img_base64(self.erd_path)}' class='full-page-image'"
-        #     " alt='Entity Relationship Diagram' </img>"
-        # )
-
         ddict_table_content = ""
         for _, row in ddict_table.iterrows():
             ddict_table_content += (
@@ -119,8 +117,6 @@ class createDoc():
                 "</tr>"
             )
 
-        sql_dump = "incoming"
-
         parameters = {
             'title': title,
             'authors_id_links': authors_id_links,
@@ -134,25 +130,14 @@ class createDoc():
             'img_tag_erd': img_tag_erd,
             'DDict_table_content': ddict_table_content,
             'DDict_attr_content': ddict_attr_content,
-            'sql_dump': sql_dump
+            'sql_dump': self.sql_dump
         }
 
         return parameters
-
+    
     def img_base64(self, img_path):
         
         with open(img_path, "rb") as image_file:
             img_base64_encoded = base64.b64encode(image_file.read())
         
         return img_base64_encoded
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("filepath", help="path to the spreadsheet you want to convert")
-    #parser.add_argument("output_dir", help="absolute path to the output directory")
-    args = parser.parse_args()
-    
-    getData = GetSpreadsheetData(filepath=args.filepath)
-
-    doc = createDoc(getData, "data/")
-    doc.createPDF()

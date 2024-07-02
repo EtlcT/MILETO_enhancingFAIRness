@@ -7,6 +7,7 @@ from data tables dataframes and Keys description.
 import sys
 import os
 import pkg_resources
+import sqlparse
 
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -36,7 +37,8 @@ class sqliteCreate():
     def __init__(self, getData: object, output_dir) -> None:
         assert isinstance(getData, GetSpreadsheetData)
         self.data = getData
-        self.output_path = f"{os.path.join(output_dir, self.data.db_name)}.sqlite"
+        self.output_sqlite = f"{os.path.join(output_dir, self.data.db_name)}.sqlite"
+        self.output_erd = f"{output_dir}/ERD_{self.data.db_name}.png"
         self.sql_dump = None
     
     #! check output dir exist or create it
@@ -49,7 +51,7 @@ class sqliteCreate():
         This function create a sqlite file
         """
 
-        db_file = self.output_path
+        db_file = self.output_sqlite
         conn = sqlite3.connect(database=db_file)
         
         group_by_table = self.data.tables_infos.groupby(by=INFO_ATT['table'])
@@ -112,12 +114,14 @@ class sqliteCreate():
 
         conn.close()
 
+        return
+
     def insert_data(self) -> None:
         """
         Insert data into database
         """
 
-        db_file = self.output_path
+        db_file = self.output_sqlite
         conn = sqlite3.connect(db_file)
         for table in self.data.datatables_list:
             self.data.sheets_dict[table].to_sql(
@@ -126,12 +130,15 @@ class sqliteCreate():
                 if_exists='append',
                 index=False             
             )
+        
+        conn.close()
+
         return
 
     def meta_tables_create(self) -> None:
         """ Create non data table
         """
-        db_file = self.output_path
+        db_file = self.output_sqlite
         conn = sqlite3.connect(db_file)
 
         for table in TEMP_CONF.keys():
@@ -144,6 +151,8 @@ class sqliteCreate():
                     index=False
                 )
         
+        conn.close()
+
         return None
 
     def ddict_schema_create(self) -> None:
@@ -156,7 +165,7 @@ class sqliteCreate():
         
         sql_statement = self.get_sql()
 
-        conn = sqlite3.connect(database=self.output_path)
+        conn = sqlite3.connect(database=self.output_sqlite)
 
         cursor = conn.cursor()
 
@@ -176,7 +185,7 @@ class sqliteCreate():
 
         conn.close()
 
-        return None
+        return
 
     def _add_FK_constraint(self, ref_table_name: str, fk_attribute: list) -> str:
         """
@@ -204,16 +213,16 @@ class sqliteCreate():
         try:
             # if eralchimy2 is installed
             pkg_resources.get_distribution('eralchemy2')
-            draw = ERD_maker(db_path=self.output_path)
-            blob_image = draw.eralchemy_draw_ERD()
+            draw = ERD_maker(db_path=self.output_sqlite)
+            blob_image = draw.eralchemy_draw_ERD(output_erd=self.output_erd)
 
         except pkg_resources.DistributionNotFound:
             # if not the ERD is made with networkx
             draw = ERD_maker(
-                db_path=self.output_path,
+                db_path=self.output_sqlite,
                 tables_infos=getData.tables_infos
             )
-            blob_image = draw.networkx_draw_ERD()
+            blob_image = draw.networkx_draw_ERD(output_erd=self.output_erd)
         
         return blob_image
 
@@ -221,7 +230,7 @@ class sqliteCreate():
         """ Return sql statement that lead to this database creation
         """
 
-        conn = sqlite3.connect(database=self.output_path)
+        conn = sqlite3.connect(database=self.output_sqlite)
         cursor = conn.cursor()
         cursor.execute('SELECT sql from sqlite_master')
 
@@ -234,7 +243,13 @@ class sqliteCreate():
         
         conn.close()
 
-        self.sql_dump = sql_statement
+        self.sql_dump = sqlparse.format(
+            sql=sql_statement,
+            encoding='utf-8',
+            reindent = True,
+            reindent_aligned=True,
+            keyword_case='upper'
+        )
 
         return sql_statement
 
