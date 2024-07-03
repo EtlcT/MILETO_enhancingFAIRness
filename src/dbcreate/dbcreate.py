@@ -1,24 +1,22 @@
 # -*-coding: utf-8 -*-
 
-""" This module does the creation of sqlite database
-from data tables dataframes and Keys description.
+""" This module creates sqlite database
+from data tables dataframes and tables_info description.
 """
 
 import sys
 import os
 import pkg_resources
+import sqlite3
+import pandas as pd
 import sqlparse
 
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-
-import argparse
-import sqlite3
-import pandas as pd
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
-from src.utils import checks_pipeline, json2dict
+from src.utils import json2dict
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]
@@ -35,7 +33,9 @@ class sqliteCreate():
     """
 
     def __init__(self, getData: object, output_dir) -> None:
-        assert isinstance(getData, GetSpreadsheetData)
+        assert isinstance(getData, GetSpreadsheetData), (
+            "Error getData should be an instance of sqliteCreate class"
+            )
         self.data = getData
         self.output_sqlite = f"{os.path.join(output_dir, self.data.db_name)}.sqlite"
         self.output_erd = f"{output_dir}/ERD_{self.data.db_name}.png"
@@ -220,7 +220,7 @@ class sqliteCreate():
             # if not the ERD is made with networkx
             draw = ERD_maker(
                 db_path=self.output_sqlite,
-                tables_infos=getData.tables_infos
+                tables_infos=self.data.tables_infos
             )
             blob_image = draw.networkx_draw_ERD(output_erd=self.output_erd)
         
@@ -252,27 +252,3 @@ class sqliteCreate():
         )
 
         return sql_statement
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("filepath", help="path to the spreadsheet you want to convert")
-    parser.add_argument("output_dir", help="absolute path to the output directory")
-    args = parser.parse_args()
-    
-    getData = GetSpreadsheetData(filepath=args.filepath)
-
-    #? conf file to store check list
-    check_funcs_list = [
-        getData.check_no_shared_name,
-        getData.check_pk_defined,
-        getData.check_pk_uniqueness,
-        getData.check_fk_get_ref,
-        getData.check_FK_existence_and_uniqueness
-    ]
-    checks_pipeline(check_funcs_list)
-
-    sqlite_db = sqliteCreate(getData, output_dir= args.output_dir)
-    sqlite_db.create_db()
-    sqlite_db.insert_data()
-    sqlite_db.ddict_schema_create()
-    sqlite_db.meta_tables_create()
