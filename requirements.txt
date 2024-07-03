@@ -6,5 +6,4 @@ eralchemy2
 networkx
 matplotlib
 pdfkit
-# sqlparse
-sql-formatter
+sqlparse
