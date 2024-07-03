@@ -1,3 +1,13 @@
+@page {
+    size: A4;
+    margin: 0;
+}
+
+body {
+    width: 210mm;
+    height: 297mm;
+}
+
 .center {
     text-align: center;
 }
@@ -10,16 +20,20 @@
     text-align: justify;
 }
 
-.full-page-image {
-    display: block;
-    max-width: 210mm;  /* A4 width */
-    max-height: 297mm; /* A4 height */
-    width: auto;
-    height: auto;
-    margin: 0 auto;
-    object-fit: contain; /* Maintain aspect ratio */
+.image-container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
+img {
+    max-width: inherit;
+    max-height: inherit;
+    height: inherit;
+    width: inherit;
+    object-fit: cover;
+}
 table, th, td{
     border: 2px solid black;
     border-collapse:collapse;

@@ -31,7 +31,7 @@ class GetSpreadsheetData:
 
     def __init__(self, filepath) -> None:
         self.sheets_dict = self._read_spreadsheet(filepath)
-        self.db_name = self._get_dbname()
+        self.db_name = os.path.splitext(os.path.basename(filepath))[0]
         self.datatables_list = self._get_datatables_list()
         self.tables_infos = self._get_tables_infos()
         self.compositePK_df = self._get_composite_pk()
@@ -88,20 +88,6 @@ class GetSpreadsheetData:
         tables_infos_wt = self._add_attr_type(tables_infos)
 
         return tables_infos_wt
-
-
-    def _get_dbname(self) -> str:
-        """
-        return the database name as specified in the spreadsheet meta_references sheet
-        """
-        db_name = self.sheets_dict[METAREF]\
-            [self.sheets_dict[METAREF][METAREF_ATT["property"]] == 'Title']\
-            ['value'].values[0]
-
-        # remove unwanted character from file name
-        db_name = re.sub("[$#%&?!+\-,;\.:'\"\/\\[\]{}|\s]", "", db_name)
-        return db_name
-
 
     def _get_composite_pk(self) -> pd.DataFrame:
         """

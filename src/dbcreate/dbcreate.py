@@ -32,13 +32,13 @@ class sqliteCreate():
     Class that create a sqlite file based on data from extraction module
     """
 
-    def __init__(self, getData: object, output_dir) -> None:
+    def __init__(self, getData: object, output_dir: str) -> None:
         assert isinstance(getData, GetSpreadsheetData), (
             "Error getData should be an instance of sqliteCreate class"
             )
         self.data = getData
-        self.output_sqlite = f"{os.path.join(output_dir, self.data.db_name)}.sqlite"
-        self.output_erd = f"{output_dir}/ERD_{self.data.db_name}.png"
+        self.output_sqlite = os.path.normpath((output_dir + '/' + self.data.db_name + '.sqlite'))
+        self.output_erd = os.path.normpath((output_dir + '/ERD_' + self.data.db_name + '.png'))
         self.sql_dump = None
     
     #! check output dir exist or create it
@@ -109,7 +109,7 @@ class sqliteCreate():
                 query += fk_statement
             
             query += ")"
-            print(query)
+
             conn.execute(query)
 
         conn.close()
@@ -123,6 +123,7 @@ class sqliteCreate():
 
         db_file = self.output_sqlite
         conn = sqlite3.connect(db_file)
+
         for table in self.data.datatables_list:
             self.data.sheets_dict[table].to_sql(
                 name=table,
@@ -130,7 +131,7 @@ class sqliteCreate():
                 if_exists='append',
                 index=False             
             )
-        
+
         conn.close()
 
         return
@@ -214,7 +215,7 @@ class sqliteCreate():
             # if eralchimy2 is installed
             pkg_resources.get_distribution('eralchemy2')
             draw = ERD_maker(db_path=self.output_sqlite)
-            blob_image = draw.eralchemy_draw_ERD(output_erd=self.output_erd)
+            blob_image = draw.eralchemy_draw_ERD()
 
         except pkg_resources.DistributionNotFound:
             # if not the ERD is made with networkx
@@ -222,7 +223,7 @@ class sqliteCreate():
                 db_path=self.output_sqlite,
                 tables_infos=self.data.tables_infos
             )
-            blob_image = draw.networkx_draw_ERD(output_erd=self.output_erd)
+            blob_image = draw.networkx_draw_ERD()
         
         return blob_image
 

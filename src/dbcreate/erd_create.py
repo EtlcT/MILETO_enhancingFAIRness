@@ -25,12 +25,15 @@ class ERD_maker():
         self.tables_structure = tables_structure
         self.db_dir = os.path.split(db_path)[0]
         self.db_name = os.path.basename(db_path)
+        self.output_erd = os.path.normpath((self.db_dir + "/ERD_" + self.db_name.replace('sqlite', 'png')))
         pass
 
-    def networkx_draw_ERD(self, output_erd) -> bytes:
+    def networkx_draw_ERD(self) -> bytes:
         """
         Create ERD schema with networkx
         """
+
+        output = os.path.normpath(self.output_erd)
 
         Graph = nx.Graph()
 
@@ -65,27 +68,26 @@ class ERD_maker():
         node_labels = nx.get_node_attributes(Graph, 'label')
         nx.draw_networkx_labels(Graph, pos, labels=node_labels, font_size=10, font_color='black', font_family='sans-serif')
 
-        plt.savefig(output_erd, format='png')
+        plt.savefig(output , format='png')
 
         binaryGraph = pickle.dumps(Graph)
         
         return binaryGraph
     
 
-    def eralchemy_draw_ERD(self, output_erd):
+    def eralchemy_draw_ERD(self):
         """
         Create ERD schema with eralchemy2
         """
 
-        norm_output = os.path.normpath(output_erd)
-        print(norm_output)
+        output = os.path.normpath(self.output_erd)
 
         eralchemy2.render_er(
             f"sqlite:///{os.path.join(self.db_dir, self.db_name)}",
-            norm_output
+            output
         )
 
-        with open(output_erd, "rb") as f:
+        with open(output, "rb") as f:
             binaryGraph = f.read()
         
         return binaryGraph
