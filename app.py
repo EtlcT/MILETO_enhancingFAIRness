@@ -35,6 +35,8 @@ def main():
 
                 output_dir = input("Please provide the output directory to save .sqlite .png and .pdf files\n")
 
+                output_path = os.path.normpath(output_dir)
+
                 data = GetSpreadsheetData(filepath=file_path)
 
                 check_funcs_list = [
@@ -47,14 +49,14 @@ def main():
                 checks_pipeline(check_funcs_list)
 
                 # create sqlite and erd.png
-                sqlite_db = sqliteCreate(getData=data, output_dir=output_dir)
+                sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
                 sqlite_db.create_db()
                 sqlite_db.insert_data()
                 sqlite_db.ddict_schema_create()
                 sqlite_db.meta_tables_create()
 
                 # create documentation
-                pdf_doc = docCreate(getData=data, output_dir=output_dir)
+                pdf_doc = docCreate(getData=data, output_dir=output_path)
                 pdf_doc.sql_dump = sqlite_db.sql_dump
                 pdf_doc.createPDF()
 
