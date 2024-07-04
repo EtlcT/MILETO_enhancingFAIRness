@@ -75,7 +75,7 @@ class ERD_maker():
         return binaryGraph
     
 
-    def eralchemy_draw_ERD(self):
+    def eralchemy_draw_ERD(self) -> bytes:
         """
         Create ERD schema with eralchemy2
         """

@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
-from src.utils import json2dict
+from src.utils import json2dict, file2Blob
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]
@@ -118,13 +118,18 @@ class sqliteCreate():
 
     def insert_data(self) -> None:
         """
-        Insert data into database
+        Process data and insert it into database
         """
 
         db_file = self.output_sqlite
         conn = sqlite3.connect(db_file)
 
         for table in self.data.datatables_list:
+            
+            # process_df convert any absolute filepath into 
+            # blob of relative file
+            self.process_df(table)
+
             self.data.sheets_dict[table].to_sql(
                 name=table,
                 con=conn,
@@ -253,3 +258,18 @@ class sqliteCreate():
         )
 
         return sql_statement
+    
+    # TODO CHECK
+    @staticmethod
+    def process_df(table: pd.DataFrame) -> None:
+        """
+        if a column contain filepath, relative file is accessed and
+        converted to blob
+        """
+
+        for col in table.columns:
+            table[col] = table[col].apply(
+                lambda x: file2Blob(x) if os.path.isabs(x) else x
+            )
+
+        return

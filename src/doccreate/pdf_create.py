@@ -40,7 +40,9 @@ class docCreate(sqliteCreate):
         parameters = self._get_parameters()
         html_content = html_template.format(**parameters)
 
-        pdfkit.from_string(html_content, self.output_path, options={"enable-local-file-access": None}, css="src/templates/doc.css")
+        css_template = resource_path("src/templates/doc.css")
+
+        pdfkit.from_string(html_content, self.output_path, options={"enable-local-file-access": None}, css=css_template)
 
         return
 

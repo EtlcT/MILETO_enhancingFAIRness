@@ -1,3 +1,5 @@
+import logging
+import traceback
 import json
 import sys
 import os
@@ -50,3 +52,24 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+def file2Blob(absolute_path: str) -> bytes:
+    """Take an absolute filepath, read relative file
+    convert content to blob
+
+    if the file does not exists orcan't be accessed,
+    let the absolute_path as it was and print error
+
+    """
+
+    try:
+        with open(absolute_path, 'rb') as file:
+            binary = file.read()
+
+        return binary
+    
+    except FileNotFoundError:
+        logging.error("An error occurred ", exc_info=True)
+        traceback.print_exc()
+
+        return absolute_path

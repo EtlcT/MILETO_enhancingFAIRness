@@ -107,6 +107,7 @@ class GetSpreadsheetData:
                 
         return composite_pk_df
     
+    # TODO CHECK
     def _add_attr_type(self, tables_infos) -> pd.DataFrame:
         """Auto detect attr types based on dataframe content
         store the type info in new column 'type' in tables_info
