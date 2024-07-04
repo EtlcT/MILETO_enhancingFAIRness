@@ -139,6 +139,11 @@ class GetSpreadsheetData:
                     attr_value = tables_infos[INFO_ATT['attribute']] == attr
                     # access row in tables_infos and change type value
                     tables_infos.loc[(table_value & attr_value), 'type'] = "TEXT"
+                    # force type to be str (prevent bug at insertion time)
+                    self.sheets_dict[table][attr] = (
+                        self.sheets_dict[table][attr].astype(str)
+                    )
+
         
         return tables_infos
 

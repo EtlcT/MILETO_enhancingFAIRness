@@ -128,7 +128,10 @@ class sqliteCreate():
             
             # process_df convert any absolute filepath into 
             # blob of relative file
-            self.process_df(table)
+            print(table)
+            self.process_df(self.data.sheets_dict[table])
+
+
 
             self.data.sheets_dict[table].to_sql(
                 name=table,
@@ -268,8 +271,9 @@ class sqliteCreate():
         """
 
         for col in table.columns:
-            table[col] = table[col].apply(
-                lambda x: file2Blob(x) if os.path.isabs(x) else x
-            )
+            if table[col].dtype == str:
+                table[col] = table[col].apply(
+                    lambda x: file2Blob(x) if os.path.isabs(x) else x
+                )
 
         return

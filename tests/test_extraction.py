@@ -482,9 +482,9 @@ class TestExtraction(unittest.TestCase):
     def test_get_dbname(self):
         """Check that db_name is correctly retrieved without forbidden character"""
 
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
+        getData = retrieve_data.GetSpreadsheetData('fakepath/to/spreadsheet/2022_ExampleTemplate_v2_1.xlsx')
         expected_result = '2022_ExampleTemplate_v2_1'
-        result = getData._get_dbname()
+        result = getData.db_name
 
         self.assertEqual(expected_result, result)
         
