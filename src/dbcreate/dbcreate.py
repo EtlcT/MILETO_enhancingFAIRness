@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
-from src.utils import json2dict, file2Blob
+from src.utils import json2dict
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]
@@ -73,7 +73,7 @@ class sqliteCreate():
                     f"{attr_statement}, "
                     f"PRIMARY KEY ({', '.join([pk_field_name for pk_field_name in pk_attr])})"
                 )
-            
+
             else:
                 # if PK not composite
                 # find index in attr_list to access its type
@@ -125,13 +125,6 @@ class sqliteCreate():
         conn = sqlite3.connect(db_file)
 
         for table in self.data.datatables_list:
-            
-            # process_df convert any absolute filepath into 
-            # blob of relative file
-            print(table)
-            self.process_df(self.data.sheets_dict[table])
-
-
 
             self.data.sheets_dict[table].to_sql(
                 name=table,
@@ -159,7 +152,7 @@ class sqliteCreate():
                     if_exists='replace',
                     index=False
                 )
-        
+
         conn.close()
 
         return None
@@ -176,22 +169,19 @@ class sqliteCreate():
 
         conn = sqlite3.connect(database=self.output_sqlite)
 
-        cursor = conn.cursor()
-
         create_query = (
             "CREATE TABLE IF NOT EXISTS DDict_schema"
-            "(ERD, sql_statement)"
+            "(ERD BLOB, sql_statement TEXT)"
         )
 
-        cursor.execute(create_query)
+        conn.execute(create_query)
 
         insert_query = (
             f"INSERT INTO DDict_schema (ERD, sql_statement) VALUES(?,?)"
         )
-        cursor.execute(insert_query, (blob_image, sql_statement))
 
-        conn.commit()
-
+        conn.execute(insert_query, (blob_image, sql_statement))
+        
         conn.close()
 
         return
@@ -249,7 +239,8 @@ class sqliteCreate():
         for row in raw_sql:
             if row[0] is not None:
                 sql_statement+= row[0] + "\n"
-        
+
+        cursor.close()
         conn.close()
 
         self.sql_dump = sqlparse.format(
@@ -260,19 +251,4 @@ class sqliteCreate():
             keyword_case='upper'
         )
 
-        return sql_statement
-    
-    # TODO CHECK
-    @staticmethod
-    def process_df(table: pd.DataFrame) -> None:
-        """
-        if a column contain filepath, relative file is accessed and
-        converted to blob
-        """
-
-        for col in table.columns:
-            table[col] = table[col].apply(
-                lambda x: file2Blob(x) if os.path.isabs(str(x).replace('\\','\\')) else x
-            )
-
-        return
+        return self.sql_dump

@@ -3,6 +3,7 @@ import traceback
 import json
 import sys
 import os
+import pandas as pd
 
 def check_uniqueness(fields, table) -> bool:
     """
@@ -73,3 +74,8 @@ def file2Blob(absolute_path: str) -> bytes:
         traceback.print_exc()
 
         return absolute_path
+    
+def bytes_in_df_col(column: pd.Series) -> bool:
+    is_bytes = pd.Series()
+    is_bytes = column.apply(lambda x: isinstance(x, bytes))
+    return is_bytes.any()
