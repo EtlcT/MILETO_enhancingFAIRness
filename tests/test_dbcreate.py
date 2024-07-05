@@ -3,6 +3,7 @@ import os
 import time
 from parameterized import parameterized
 from unittest.mock import MagicMock
+import psutil
 
 import pandas as pd
 import numpy as np
@@ -143,32 +144,36 @@ class TestDBCreate(unittest.TestCase):
         in the output directory
         """
 
-        data = GetSpreadsheetData('fakepath/to/spreadsheet/example.xlsx')
+        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx')
         output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
-        
+        db_name = f"{data.db_name}.sqlite"
+        db_file_path = os.path.join(output_path, db_name)
+        if os.path.exists(db_file_path):
+            os.remove(db_file_path)
+
         sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
 
         sqlite_db.create_db()
-
-        db_name = f"{data.db_name}.sqlite"
-        db_file_path = os.path.join(output_path, db_name)
 
         self.assertTrue(os.path.exists(db_file_path))
 
-        # then remove every created file from output path
-        os.unlink(db_file_path)
 
-    def test_insert_data(self):
-        """Check that insert_data modify the sqlite file"""
+    def test_insert_data_and_meta_tables_create(self):
+        """Check that insert_data and meta_tables_create 
+        modify the sqlite file
+        """
 
-        data = GetSpreadsheetData('fakepath/to/spreadsheet/example.xlsx')
+        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx')
         output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
-
-        sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
-        sqlite_db.create_db()
-
         db_name = f"{data.db_name}.sqlite"
         db_file_path = os.path.join(output_path, db_name)
+
+        if os.path.exists(db_file_path):
+            os.remove(db_file_path)
+
+        self.assertFalse(os.path.exists(db_file_path))
+        sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
+        sqlite_db.create_db()
 
         initial_modification_time = os.path.getmtime(db_file_path)
 
@@ -177,7 +182,48 @@ class TestDBCreate(unittest.TestCase):
 
         sqlite_db.insert_data()
 
-        self.assertGreater(os.path.getmtime(db_file_path), initial_modification_time)
+        first_modification_time = os.path.getmtime(db_file_path)
 
-        # then remove every created file from output path
-        os.unlink(db_file_path)
+        self.assertGreater(first_modification_time, initial_modification_time)
+
+        sqlite_db.meta_tables_create()
+
+        second_modification_time = os.path.getmtime(db_file_path)
+
+        self.assertGreater(second_modification_time, first_modification_time)
+
+    # def test_ddict_schema_create(self):
+    #     """Check that ddict_schema_create modify the sqlite
+    #     and create a ERD_dbname.png is created in output dir
+    #     """
+
+        
+    #     data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx')
+    #     output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
+    #     db_name = f"{data.db_name}.sqlite"
+    #     db_file_path = os.path.join(output_path, db_name)
+
+    #     if os.path.exists(db_file_path):
+    #         os.remove(db_file_path)
+
+    #     sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
+
+    #     sqlite_db.create_db()
+    #     sqlite_db.insert_data()
+
+    #     # for file modification tracking
+    #     initial_modification_time = os.path.getmtime(db_file_path)
+
+    #     erd_name = f"ERD_{data.db_name}.png"
+    #     erd_file_path = os.path.join(output_path, erd_name)
+
+    #     time.sleep(0.2)
+    #     sqlite_db.ddict_schema_create()
+
+    #     first_modification_time = os.path.getmtime(db_file_path)
+
+    #     # check sqlite is modified
+    #     self.assertGreater(first_modification_time, initial_modification_time)
+
+    #     # check ERD image is created
+    #     self.assertTrue(os.path.exists(erd_file_path))

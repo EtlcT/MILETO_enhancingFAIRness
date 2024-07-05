@@ -14,7 +14,7 @@ import os
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.utils import check_uniqueness, json2dict
+from src.utils import check_uniqueness, json2dict, file2Blob, bytes_in_df_col
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]
@@ -41,9 +41,15 @@ class GetSpreadsheetData:
         """
         return a dictionnary containing as many dataframes as sheets in the original file
         """
-        
-        return pd.read_excel(filepath, sheet_name=None)
-    
+
+        data = pd.read_excel(filepath, sheet_name=None)
+        for table_name in data.keys():
+
+            # process_df convert any absolute filepath into 
+            # blob of relative file
+            self.process_df(data[table_name])
+
+        return data
 
     #! add file for regex exclusion
     def _regex_exclude_meta(self, text) -> bool:
@@ -137,14 +143,21 @@ class GetSpreadsheetData:
                 else:
                     table_value = tables_infos[INFO_ATT['table']] == table
                     attr_value = tables_infos[INFO_ATT['attribute']] == attr
-                    # access row in tables_infos and change type value
-                    tables_infos.loc[(table_value & attr_value), 'type'] = "TEXT"
-                    # force type to be str (prevent bug at insertion time)
-                    self.sheets_dict[table][attr] = (
-                        self.sheets_dict[table][attr].astype(str)
-                    )
 
-        
+                    if(bytes_in_df_col(self.sheets_dict[table][attr])):
+                        tables_infos.loc[(table_value & attr_value), 'type'] = "BLOB"
+                        # force type to be str (prevent bug at insertion time)
+                        self.sheets_dict[table][attr] = (
+                            self.sheets_dict[table][attr].astype(bytes)
+                        )
+                    else:
+                        # access row in tables_infos and change type value
+                        tables_infos.loc[(table_value & attr_value), 'type'] = "TEXT"
+                        # force type to be str (prevent bug at insertion time)
+                        self.sheets_dict[table][attr] = (
+                            self.sheets_dict[table][attr].astype(str)
+                        )
+   
         return tables_infos
 
 
@@ -243,3 +256,18 @@ class GetSpreadsheetData:
             "Except for Foreign keys, different attributes should not"
             "have the same names"
         )
+
+    # TODO CHECK
+    @staticmethod
+    def process_df(table: pd.DataFrame) -> None:
+        """
+        if a column contain filepath, relative file is accessed and
+        converted to blob
+        """
+
+        for col in table.columns:
+            table[col] = table[col].apply(
+                lambda x: file2Blob(x) if os.path.isabs(str(x).replace('\\','\\')) else x
+            )
+
+        return
