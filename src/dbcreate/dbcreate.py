@@ -271,9 +271,8 @@ class sqliteCreate():
         """
 
         for col in table.columns:
-            if table[col].dtype == str:
-                table[col] = table[col].apply(
-                    lambda x: file2Blob(x) if os.path.isabs(x) else x
-                )
+            table[col] = table[col].apply(
+                lambda x: file2Blob(x) if os.path.isabs(str(x).replace('\\','\\')) else x
+            )
 
         return
