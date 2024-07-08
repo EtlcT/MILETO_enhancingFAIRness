@@ -1,13 +1,12 @@
 import sys
 import os
 import pdfkit
-import base64
 from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from src.dbcreate.dbcreate import sqliteCreate
-from src.utils import resource_path, json2dict
+from src.utils import resource_path, json2dict, img_base64
 
 
 TEMP_CONF = json2dict("conf/template_conf.json")
@@ -30,10 +29,9 @@ class docCreate(sqliteCreate):
         super().__init__(getData, output_dir)
         self.output_path = f"{os.path.join(output_dir, self.data.db_name)}.pdf"
         self.template = resource_path(html_template)
-        self.erd_path = f"{output_dir}/ERD_{self.data.db_name}.png"
+        self.erd_path = os.path.normpath(f"{output_dir}/ERD_{self.data.db_name}.png")
 
     def createPDF(self) -> None:
-        
         with open(self.template, 'r') as file:
             html_template = file.read()
         
@@ -42,7 +40,7 @@ class docCreate(sqliteCreate):
 
         css_template = resource_path("src/templates/doc.css")
 
-        pdfkit.from_string(html_content, self.output_path, options={"enable-local-file-access": None}, css=css_template)
+        pdfkit.from_string(html_content, self.output_path, options={"enable-local-file-access": ""}, css=css_template)
 
         return
 
@@ -95,9 +93,11 @@ class docCreate(sqliteCreate):
         exp_desc = "incoming"
 
         img_tag_erd = (
-            f"<img src='{os.path.abspath(self.erd_path)}' class='full-page-image'"
-            " alt='Entity Relationship Diagram' </img>"
+            f"<img src='{self.erd_path}' class='full-page-image'"
+            " alt='Entity Relationship Diagram'>"
         )
+
+        print(img_tag_erd)
 
         ddict_table_content = ""
         for _, row in ddict_table.iterrows():
@@ -137,9 +137,3 @@ class docCreate(sqliteCreate):
 
         return parameters
     
-    def img_base64(self, img_path):
-        
-        with open(img_path, "rb") as image_file:
-            img_base64_encoded = base64.b64encode(image_file.read())
-        
-        return img_base64_encoded

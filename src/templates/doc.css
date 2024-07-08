@@ -1,11 +1,6 @@
 @page {
     size: A4;
-    margin: 0;
-}
-
-body {
-    width: 210mm;
-    height: 297mm;
+    margin: 15mm 10mm 15mm 10mm;
 }
 
 .center {
@@ -20,13 +15,6 @@ body {
     text-align: justify;
 }
 
-.image-container {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-}
-
 img {
     max-width: inherit;
     max-height: inherit;
@@ -34,14 +22,18 @@ img {
     width: inherit;
     object-fit: cover;
 }
-table, th, td{
+
+table {
+    width: 100%;
+}
+
+table, th, td {
     border: 2px solid black;
     border-collapse:collapse;
-    padding: 10px;
     text-align: center;
-    width: max-content;
+    margin: 0 auto;
 }
 
 tr:nth-child(even) {
-    background-color: beige;
+    background-color: rgb(212, 211, 210);
 }

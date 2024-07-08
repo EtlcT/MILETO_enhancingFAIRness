@@ -4,6 +4,7 @@ import json
 import sys
 import os
 import pandas as pd
+import base64
 
 def check_uniqueness(fields, table) -> bool:
     """
@@ -79,3 +80,10 @@ def bytes_in_df_col(column: pd.Series) -> bool:
     is_bytes = pd.Series()
     is_bytes = column.apply(lambda x: isinstance(x, bytes))
     return is_bytes.any()
+
+def img_base64(img_path):
+        
+        with open(img_path, "rb") as image_file:
+            img_base64_encoded = base64.b64encode(image_file.read())
+        
+        return img_base64_encoded.decode('utf-8')
