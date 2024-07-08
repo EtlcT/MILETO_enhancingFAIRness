@@ -148,14 +148,15 @@ class TestDBCreate(unittest.TestCase):
         output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
         db_name = f"{data.db_name}.sqlite"
         db_file_path = os.path.join(output_path, db_name)
-        if os.path.exists(db_file_path):
-            os.remove(db_file_path)
 
         sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
 
         sqlite_db.create_db()
 
         self.assertTrue(os.path.exists(db_file_path))
+
+        if os.path.exists(db_file_path):
+            os.remove(db_file_path)
 
 
     def test_insert_data_and_meta_tables_create(self):
@@ -167,9 +168,6 @@ class TestDBCreate(unittest.TestCase):
         output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
         db_name = f"{data.db_name}.sqlite"
         db_file_path = os.path.join(output_path, db_name)
-
-        if os.path.exists(db_file_path):
-            os.remove(db_file_path)
 
         self.assertFalse(os.path.exists(db_file_path))
         sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
@@ -192,38 +190,44 @@ class TestDBCreate(unittest.TestCase):
 
         self.assertGreater(second_modification_time, first_modification_time)
 
-    # def test_ddict_schema_create(self):
-    #     """Check that ddict_schema_create modify the sqlite
-    #     and create a ERD_dbname.png is created in output dir
-    #     """
+        if os.path.exists(db_file_path):
+            os.remove(db_file_path)
+
+    #! can't delete files after test becausse eralchimy render_er() keep
+    #! connection to database opened
+    def test_ddict_schema_create(self):
+        """Check that ddict_schema_create modify the sqlite
+        and create a ERD_dbname.png is created in output dir
+        """
 
         
-    #     data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx')
-    #     output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
-    #     db_name = f"{data.db_name}.sqlite"
-    #     db_file_path = os.path.join(output_path, db_name)
+        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders_test_erd.xlsx')
+        output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
+        db_name = f"{data.db_name}.sqlite"
+        db_file_path = os.path.join(output_path, db_name)
 
-    #     if os.path.exists(db_file_path):
-    #         os.remove(db_file_path)
+        if os.path.exists(db_file_path):
+            os.remove(db_file_path)
 
-    #     sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
+        sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
 
-    #     sqlite_db.create_db()
-    #     sqlite_db.insert_data()
+        sqlite_db.create_db()
+        sqlite_db.insert_data()
 
-    #     # for file modification tracking
-    #     initial_modification_time = os.path.getmtime(db_file_path)
+        # for file modification tracking
+        initial_modification_time = os.path.getmtime(db_file_path)
 
-    #     erd_name = f"ERD_{data.db_name}.png"
-    #     erd_file_path = os.path.join(output_path, erd_name)
+        erd_name = f"ERD_{data.db_name}.png"
+        erd_file_path = os.path.join(output_path, erd_name)
 
-    #     time.sleep(0.2)
-    #     sqlite_db.ddict_schema_create()
+        time.sleep(0.2)
+        sqlite_db.ddict_schema_create()
 
-    #     first_modification_time = os.path.getmtime(db_file_path)
+        first_modification_time = os.path.getmtime(db_file_path)
 
-    #     # check sqlite is modified
-    #     self.assertGreater(first_modification_time, initial_modification_time)
+        # check sqlite is modified
+        self.assertGreater(first_modification_time, initial_modification_time)
 
-    #     # check ERD image is created
-    #     self.assertTrue(os.path.exists(erd_file_path))
+        # check ERD image is created
+        self.assertTrue(os.path.exists(erd_file_path))
+
