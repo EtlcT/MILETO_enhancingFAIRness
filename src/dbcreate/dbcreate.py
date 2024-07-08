@@ -9,14 +9,13 @@ import os
 import pkg_resources
 import sqlite3
 import pandas as pd
-import sqlparse
 
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
-from src.utils import json2dict
+from src.utils import json2dict, prettier_sql
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 METAREF = TEMP_CONF["meta_references"]["tab_name"]
@@ -64,13 +63,13 @@ class sqliteCreate():
 
             if len(pk_attr) > 1:
                 # if PK is composite
-                attr_statement = ", ".join(
+                attr_statement = ",\n".join(
                     [f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)]
                 )
 
                 query = (
-                    f"CREATE TABLE {table_name}("
-                    f"{attr_statement}, "
+                    f"CREATE TABLE {table_name}(\n"
+                    f"{attr_statement},\n"
                     f"PRIMARY KEY ({', '.join([pk_field_name for pk_field_name in pk_attr])})"
                 )
 
@@ -87,10 +86,10 @@ class sqliteCreate():
                         ), attr_list
                     )
                 )
-                attr_statement = ", ".join([f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)])
+                attr_statement = ",\n".join([f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)])
 
                 query = (
-                    f"CREATE TABLE {table_name}("
+                    f"CREATE TABLE {table_name}(\n"
                     f"{attr_statement}"
                 )
 
@@ -106,15 +105,15 @@ class sqliteCreate():
                     ref_table_name=ref_table_name,
                     fk_attribute=ref_info[INFO_ATT['attribute']].tolist()
                 )
-                query += fk_statement
+                query += f"{fk_statement}"
             
-            query += ")"
+            query += "\n)"
 
             conn.execute(query)
 
         conn.close()
 
-        return
+        return 
 
     def insert_data(self) -> None:
         """
@@ -182,6 +181,8 @@ class sqliteCreate():
 
         conn.execute(insert_query, (blob_image, sql_statement))
         
+        conn.commit()
+
         conn.close()
 
         return
@@ -199,7 +200,7 @@ class sqliteCreate():
         """
         fk_statement = str()
         fk_statement += (
-            f", FOREIGN KEY ({(', ').join(fk_attribute)}) "
+            f",\nFOREIGN KEY ({(', ').join(fk_attribute)}) "
             f"REFERENCES {ref_table_name}({(', ').join(fk_attribute)})"
         )
         
@@ -231,24 +232,17 @@ class sqliteCreate():
 
         conn = sqlite3.connect(database=self.output_sqlite)
         cursor = conn.cursor()
-        cursor.execute('SELECT sql from sqlite_master')
+        cursor.execute('SELECT sql from sqlite_master WHERE sql IS NOT NULL')
 
         raw_sql = cursor.fetchall()
-
-        sql_statement = str()
-        for row in raw_sql:
-            if row[0] is not None:
-                sql_statement+= row[0] + "\n"
 
         cursor.close()
         conn.close()
 
-        self.sql_dump = sqlparse.format(
-            sql=sql_statement,
-            encoding='utf-8',
-            reindent = True,
-            reindent_aligned=True,
-            keyword_case='upper'
-        )
+        formatted_sql = prettier_sql(raw_sql)
 
-        return self.sql_dump
+        self.sql_dump = formatted_sql
+
+        return formatted_sql
+    
+    

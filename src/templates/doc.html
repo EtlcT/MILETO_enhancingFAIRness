@@ -25,18 +25,17 @@
         <p><b>Database keywords</b>: {keywords}</p>
     </div>
     <div class="page-break"></div>
-    <h2>Experiment synthesis</h3>
+    <h2>Experiment synthesis</h2>
     <div class="description">
         <p class="description">{experiment_synthesis}</p>
     </div>
-    <h2>Experiment description</h3>
+    <h2>Experiment description</h2>
     <div>
         <p class="description">{experiment_description}</p>
     </div>
-    <div class="page-break">
-    </div>
+    <h2 class="page-break">Entity Relationship Diagram</h2>
     {img_tag_erd}
-    <div class="page-break">
+    <h2 class="page-break">Data Dictionnary tables</h2>
         <table>
             <tr>
                 <th>table</th>
@@ -44,8 +43,7 @@
             </tr>
             {DDict_table_content}
         </table>
-    </div>
-    <div class="page-break">
+    <h2 class="page-break">Data Dictionnary attributes</h2>
         <table>
             <tr>
                 <th>attribute</th>
@@ -55,10 +53,9 @@
             </tr>
             {DDict_attr_content}
         </table>
-    </div>
-    <div class="page-break">
-        <h3>SQL dump of the database</h3>
-        <pre>{sql_dump}</pre>
+    <h2 class="page-break">SQL dump of the database</h2>
+    <div id="sql_inside">
+        {sql_dump}
     </div>
 </body>
 </html>

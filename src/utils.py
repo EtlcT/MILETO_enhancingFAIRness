@@ -5,6 +5,7 @@ import sys
 import os
 import pandas as pd
 import base64
+import sqlparse
 
 def check_uniqueness(fields, table) -> bool:
     """
@@ -87,3 +88,19 @@ def img_base64(img_path):
             img_base64_encoded = base64.b64encode(image_file.read())
         
         return img_base64_encoded.decode('utf-8')
+
+def prettier_sql(raw_sql: list) -> str:
+        """Return readable sql statement from sqlite_master statement"""
+
+        formatted_sql = str()
+        for row in raw_sql:
+            formatted_row = (
+                row[0]
+                .replace('(', '(<br>&emsp;', 1) # brak line after
+                .replace(',\n', ',<br>&emsp;')
+                .rstrip(row[0][-1]) # remove last ) and break line
+            )
+                          
+            formatted_sql += formatted_row + "<br>)<br><br>"
+
+        return formatted_sql

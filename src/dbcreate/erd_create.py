@@ -5,8 +5,6 @@ which data is accessed by retrieve_data.py script
 """
 
 import os
-import sqlite3
-from sqlalchemy import create_engine
 
 try:
     import eralchemy2
@@ -84,16 +82,12 @@ class ERD_maker():
 
         output = os.path.normpath(self.output_erd)
         db_path = os.path.join(self.db_dir, self.db_name)
-        
-        conn = sqlite3.connect(db_path)
 
         eralchemy2.render_er(
             f'sqlite:///{db_path}',
             output
         )
 
-        conn.close()
-        
         with open(output, "rb") as f:
             binaryGraph = f.read()
         

@@ -96,9 +96,7 @@ class docCreate(sqliteCreate):
             f"<img src='{self.erd_path}' class='full-page-image'"
             " alt='Entity Relationship Diagram'>"
         )
-
-        print(img_tag_erd)
-
+        
         ddict_table_content = ""
         for _, row in ddict_table.iterrows():
             ddict_table_content += (
