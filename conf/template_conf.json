@@ -10,6 +10,14 @@
         }
     },
 
+    "meta_extra": {
+        "tab_name": "meta_extra",
+        "tab_attr": {
+            "property": "property",
+            "value": "value"
+        }
+    },
+
     "infos": {
         "tab_name": "tables_info",
         "tab_attr": {
