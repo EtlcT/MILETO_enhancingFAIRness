@@ -5,7 +5,6 @@ import sys
 import os
 import pandas as pd
 import base64
-import sqlparse
 
 def check_uniqueness(fields, table) -> bool:
     """

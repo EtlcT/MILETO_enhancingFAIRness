@@ -62,16 +62,16 @@ class docCreate(sqliteCreate):
         
         authors_name = meta_ref.loc[
             meta_ref[METAREF_ATT["property"]] == 'Creator' 
-            ][METAREF_ATT["value"]].iloc[0].split(sep=";")
+            ][METAREF_ATT["value"]].iloc[0].split(sep=" ; ")
         
         authors_id = meta_ref.loc[
             meta_ref[METAREF_ATT["property"]] == 'nameIdentifier' 
-            ][METAREF_ATT["value"]].iloc[0].split(sep=";")
+            ][METAREF_ATT["value"]].iloc[0].split(sep=" ; ")
 
         authors_id_links = ""
         for name, link in zip(authors_name, authors_id):
             authors_id_links += (
-                f"<a href='https://orcid.org/{link}' target='_blank'>{name}</a> "
+                f"<a href='https://orcid.org/{link}' target='_blank'>{name}</a>&emsp;"
             )
         
         doi_a_tag = "incoming"
@@ -113,7 +113,7 @@ class docCreate(sqliteCreate):
 
         parameters = {
             'title': title,
-            'authors_id_links': authors_id_links,
+            'authors_id_links': authors_id_links[:-6], #remove last emsp
             'creation_date': self.get_todays_date() ,
             'db_name': self.data.db_name,
             'DOI_a_tag': "incoming",
