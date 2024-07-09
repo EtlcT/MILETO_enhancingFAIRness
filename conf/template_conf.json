@@ -10,7 +10,7 @@
         }
     },
 
-    "info": {
+    "tables_info": {
         "tab_name": "tables_info",
         "tab_attr": {
             "table": "table",
@@ -53,9 +53,9 @@
             "property": "property",
             "value": "value"
         },
-        "properties": [
-            "synthesis",
-            "description"
-        ]
+        "properties": {
+            "synthesis": "synthesis",
+            "description": "description"
+        }
     }
 }

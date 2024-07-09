@@ -13,6 +13,7 @@ import pandas as pd
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
+from conf.config import *
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
 from src.utils import prettier_sql
