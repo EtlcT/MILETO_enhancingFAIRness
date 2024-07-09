@@ -5,6 +5,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
+from conf.config import *
 from src.dbcreate.dbcreate import sqliteCreate
 from src.utils import resource_path
 
@@ -53,6 +54,7 @@ class docCreate(sqliteCreate):
         meta_ref = self.data.sheets_dict[METAREF]
         ddict_table = self.data.sheets_dict[DDICT_T]
         ddict_attr = self.data.sheets_dict[DDICT_A]
+        meta_extra = self.data.sheets_dict[METAEXTRA]
 
         title = meta_ref.loc[
             meta_ref[METAREF_ATT["property"]] == 'Title'
@@ -69,7 +71,7 @@ class docCreate(sqliteCreate):
         authors_id_links = ""
         for name, link in zip(authors_name, authors_id):
             authors_id_links += (
-                f"<a href='{link}'>{name}</a> "
+                f"<a href='https://orcid.org/{link}' target='_blank'>{name}</a> "
             )
         
         doi_a_tag = "incoming"
@@ -77,9 +79,12 @@ class docCreate(sqliteCreate):
         keywords = meta_ref.loc[
             meta_ref[METAREF_ATT["property"]] == 'Subject' 
             ][METAREF_ATT["value"]].iloc[0]
-
-        exp_synthesis = "incoming"
-        exp_desc = "incoming"
+        extra_synthesis = meta_extra.loc[
+            meta_extra[METAEXTRA_ATT['property']] == METAEXTRA_PROP["synthesis"]
+            ][METAEXTRA_ATT['value']].iloc[0]
+        extra_desc = meta_extra.loc[
+            meta_extra[METAEXTRA_ATT['property']] == METAEXTRA_PROP["description"]
+            ][METAEXTRA_ATT['value']].iloc[0]
 
         img_tag_erd = (
             f"<img src='{self.erd_path}' class='full-page-image'"
@@ -114,8 +119,8 @@ class docCreate(sqliteCreate):
             'DOI_a_tag': "incoming",
             'gitlab_repo_a_tag': doi_a_tag,
             'keywords': keywords,
-            'experiment_synthesis': exp_synthesis ,
-            'experiment_description': exp_desc,
+            'extra_synthesis': extra_synthesis ,
+            'extra_description': extra_desc,
             'img_tag_erd': img_tag_erd,
             'DDict_table_content': ddict_table_content,
             'DDict_attr_content': ddict_attr_content,
