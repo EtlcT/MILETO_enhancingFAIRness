@@ -184,7 +184,7 @@ python -m PyInstaller \
 --name "spread2lite_v0_0_1" \
 --add-data "path_to_Miletto_Enhancing_FAIRness/conf/template_conf.json:conf/" \
 --add-data "path_to_Miletto_Enhancing_FAIRness/src/templates/:src/templates" \
---distpath "path_to_output_dir/distpath" \
+--distpath "path_to_output_dir/dist" \
 --workpath "path_to_output_dir/build" \
 --specpath "path_to_output_dir/" \
 --onedir app.py
@@ -195,7 +195,7 @@ python -m PyInstaller `
 --name "spread2lite_v0_0_1" `
 --add-data "path_to_Miletto_Enhancing_FAIRness\conf\template_conf.json:conf\" `
 --add-data "path_to_Miletto_Enhancing_FAIRness\src\templates\:src\templates" `
---distpath "path_to_output_dir\distpath" `
+--distpath "path_to_output_dir\dist" `
 --workpath "path_to_output_dir\build" `
 --specpath "path_to_output_dir\" `
 --onedir app.py
