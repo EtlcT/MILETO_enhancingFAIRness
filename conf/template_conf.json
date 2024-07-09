@@ -10,15 +10,7 @@
         }
     },
 
-    "meta_extra": {
-        "tab_name": "meta_extra",
-        "tab_attr": {
-            "property": "property",
-            "value": "value"
-        }
-    },
-
-    "infos": {
+    "info": {
         "tab_name": "tables_info",
         "tab_attr": {
             "table": "table",
@@ -53,5 +45,17 @@
             "ERD": "ERD",
             "sql": "sql_statement"
         }
+    },
+
+    "meta_extra": {
+        "tab_name": "meta_extra",
+        "tab_attr": {
+            "property": "property",
+            "value": "value"
+        },
+        "properties": [
+            "synthesis",
+            "description"
+        ]
     }
 }

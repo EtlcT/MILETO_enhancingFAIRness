@@ -6,18 +6,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from src.dbcreate.dbcreate import sqliteCreate
-from src.utils import resource_path, json2dict, img_base64
-
-
-TEMP_CONF = json2dict("conf/template_conf.json")
-METAREF = TEMP_CONF["meta_references"]["tab_name"]
-METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
-INFO = TEMP_CONF["infos"]["tab_name"]
-INFO_ATT = TEMP_CONF["infos"]["tab_attr"]
-DDICT_T = TEMP_CONF["DDict_tables"]["tab_name"]
-DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
-DDICT_A = TEMP_CONF["DDict_attributes"]["tab_name"]
-DDICT_A_ATT = TEMP_CONF["DDict_attributes"]["tab_attr"]
+from src.utils import resource_path
 
 class docCreate(sqliteCreate):
     """

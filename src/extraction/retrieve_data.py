@@ -14,15 +14,8 @@ import os
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from src.utils import check_uniqueness, json2dict, file2Blob, bytes_in_df_col
-
-TEMP_CONF = json2dict("conf/template_conf.json")
-METAREF = TEMP_CONF["meta_references"]["tab_name"]
-METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
-INFO = TEMP_CONF["infos"]["tab_name"]
-INFO_ATT = TEMP_CONF["infos"]["tab_attr"]
-DDICT_T = TEMP_CONF["DDict_tables"]["tab_name"]
-DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
+from conf.config import *
+from src.utils import check_uniqueness, file2Blob, bytes_in_df_col
 
 class GetSpreadsheetData:
     """
@@ -33,7 +26,7 @@ class GetSpreadsheetData:
         self.sheets_dict = self._read_spreadsheet(filepath)
         self.db_name = os.path.splitext(os.path.basename(filepath))[0]
         self.datatables_list = self._get_datatables_list()
-        self.tables_infos = self._get_tables_infos()
+        self.tables_info = self._get_tables_info()
         self.compositePK_df = self._get_composite_pk()
     
 
@@ -69,7 +62,7 @@ class GetSpreadsheetData:
         """
         Return a list containing the name of table that contains effective data
 
-        exclude extra.*, meta.* and DDict.*, tables_infos
+        exclude extra.*, meta.* and DDict.*, tables_info
         """
         datatable_list = list()
         for sheet_name in self.sheets_dict:
@@ -81,26 +74,26 @@ class GetSpreadsheetData:
     #! may be deprecated in the future if spreadsheet template is modified
     #? potential future behavior: directly modify sheet_dict[INFO]
     #? and access it instead of creating dedicated Df that is a duplication
-    def _get_tables_infos(self) -> pd.DataFrame:
+    def _get_tables_info(self) -> pd.DataFrame:
         """
-        return a dataframe that contain rows from tables_infos table
+        return a dataframe that contain rows from tables_info table
         where 'Table' belong to data table list (ie self.datatables_list)
         """
 
-        tables_infos = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
+        tables_info = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
                                         .isin(self.datatables_list)] \
                                         .iloc[:,:5]
         # add type info 
-        tables_infos_wt = self._add_attr_type(tables_infos)
+        tables_info_wt = self._add_attr_type(tables_info)
 
-        return tables_infos_wt
+        return tables_info_wt
 
     def _get_composite_pk(self) -> pd.DataFrame:
         """
         Return a Dataframe containing table name and composite key fields
         """
         composite_pk_df = pd.DataFrame(columns=['Table', 'pk_fields'])
-        group_by_table = self.tables_infos.groupby(by=INFO_ATT["table"])
+        group_by_table = self.tables_info.groupby(by=INFO_ATT["table"])
 
         for table_name, table_info in group_by_table:
             pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']].tolist()
@@ -114,51 +107,51 @@ class GetSpreadsheetData:
         return composite_pk_df
     
     # TODO CHECK
-    def _add_attr_type(self, tables_infos) -> pd.DataFrame:
+    def _add_attr_type(self, tables_info) -> pd.DataFrame:
         """Auto detect attr types based on dataframe content
         store the type info in new column 'type' in tables_info
 
-        return tables_infos with type info for each attribute
+        return tables_info with type info for each attribute
         """
 
-        tables_infos['type'] = pd.Series()
+        tables_info['type'] = pd.Series()
 
         for table in self.datatables_list:
             for attr, pd_type in self.sheets_dict[table].dtypes.items():
 
                 if re.search('int', str(pd_type)) != None:
                     # attribute type is an integer
-                    table_value = tables_infos[INFO_ATT['table']] == table
-                    attr_value = tables_infos[INFO_ATT['attribute']] == attr
-                    # access row in tables_infos and change type value
-                    tables_infos.loc[(table_value & attr_value), 'type'] = 'INTEGER'
+                    table_value = tables_info[INFO_ATT['table']] == table
+                    attr_value = tables_info[INFO_ATT['attribute']] == attr
+                    # access row in tables_info and change type value
+                    tables_info.loc[(table_value & attr_value), 'type'] = 'INTEGER'
                 
                 elif re.search('float', str(pd_type)) != None:
                     # attribute type is a float
-                    table_value = tables_infos[INFO_ATT['table']] == table
-                    attr_value = tables_infos[INFO_ATT['attribute']] == attr
-                    # access row in tables_infos and change type value
-                    tables_infos.loc[(table_value & attr_value), 'type'] = "REAL"
+                    table_value = tables_info[INFO_ATT['table']] == table
+                    attr_value = tables_info[INFO_ATT['attribute']] == attr
+                    # access row in tables_info and change type value
+                    tables_info.loc[(table_value & attr_value), 'type'] = "REAL"
 
                 else:
-                    table_value = tables_infos[INFO_ATT['table']] == table
-                    attr_value = tables_infos[INFO_ATT['attribute']] == attr
+                    table_value = tables_info[INFO_ATT['table']] == table
+                    attr_value = tables_info[INFO_ATT['attribute']] == attr
 
                     if(bytes_in_df_col(self.sheets_dict[table][attr])):
-                        tables_infos.loc[(table_value & attr_value), 'type'] = "BLOB"
+                        tables_info.loc[(table_value & attr_value), 'type'] = "BLOB"
                         # force type to be str (prevent bug at insertion time)
                         self.sheets_dict[table][attr] = (
                             self.sheets_dict[table][attr].astype(bytes)
                         )
                     else:
-                        # access row in tables_infos and change type value
-                        tables_infos.loc[(table_value & attr_value), 'type'] = "TEXT"
+                        # access row in tables_info and change type value
+                        tables_info.loc[(table_value & attr_value), 'type'] = "TEXT"
                         # force type to be str (prevent bug at insertion time)
                         self.sheets_dict[table][attr] = (
                             self.sheets_dict[table][attr].astype(str)
                         )
    
-        return tables_infos
+        return tables_info
 
 
     def check_pk_uniqueness(self) -> None:
@@ -166,7 +159,7 @@ class GetSpreadsheetData:
         Raise assertion error if fields defined as Primary Key does not
         respect uniqueness criteria
         """
-        pk_constraint = self.tables_infos[self.tables_infos[INFO_ATT['isPK']] == 'Y'][[INFO_ATT['table'],INFO_ATT['attribute']]]
+        pk_constraint = self.tables_info[self.tables_info[INFO_ATT['isPK']] == 'Y'][[INFO_ATT['table'],INFO_ATT['attribute']]]
         pk_groupedby_table = pk_constraint.groupby(by=INFO_ATT['table'])
         for table_name, pk_info in pk_groupedby_table:
             pk_info = pk_info[INFO_ATT['attribute']].tolist()
@@ -188,9 +181,9 @@ class GetSpreadsheetData:
         if the reference attribute does not respect unicity 
         """
 
-        isFK_condition = self.tables_infos[INFO_ATT['isFK']]=='Y'
+        isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
         fk_by_table_and_ref = (
-            self.tables_infos[isFK_condition][[
+            self.tables_info[isFK_condition][[
                 INFO_ATT["table"],
                 INFO_ATT['attribute'],
                 INFO_ATT['refTable']
@@ -222,7 +215,7 @@ class GetSpreadsheetData:
     def check_pk_defined(self) -> None:
         """Raise AssertionError if a table has no Primary Key defined"""
 
-        for table, table_info in self.tables_infos.groupby(by=INFO_ATT["table"]):
+        for table, table_info in self.tables_info.groupby(by=INFO_ATT["table"]):
             assert 'Y' in table_info[INFO_ATT['isPK']].values, f"Table {table} has no Primary Key defined"
         
         return
@@ -234,8 +227,8 @@ class GetSpreadsheetData:
         but has empty ReferenceTable field
         """
 
-        isFK_condition = self.tables_infos[INFO_ATT['isFK']]=='Y'
-        fk_constraint = self.tables_infos[isFK_condition]
+        isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
+        fk_constraint = self.tables_info[isFK_condition]
 
         assert not fk_constraint[INFO_ATT['refTable']].isna().any(), (
             "Every FK should have a reference table defined"
@@ -249,8 +242,8 @@ class GetSpreadsheetData:
         it could be normal to share the same name as their reference)
         """
 
-        notFK_condition = self.tables_infos[INFO_ATT['isFK']].isna()
-        attr_no_FK = self.tables_infos[notFK_condition]
+        notFK_condition = self.tables_info[INFO_ATT['isFK']].isna()
+        attr_no_FK = self.tables_info[notFK_condition]
 
         assert attr_no_FK[INFO_ATT['attribute']].is_unique, (
             "Except for Foreign keys, different attributes should not"

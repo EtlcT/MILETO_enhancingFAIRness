@@ -15,15 +15,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
-from src.utils import json2dict, prettier_sql
-
-TEMP_CONF = json2dict("conf/template_conf.json")
-METAREF = TEMP_CONF["meta_references"]["tab_name"]
-METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
-INFO = TEMP_CONF["infos"]["tab_name"]
-INFO_ATT = TEMP_CONF["infos"]["tab_attr"]
-DDICT_T = TEMP_CONF["DDict_tables"]["tab_name"]
-DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
+from src.utils import prettier_sql
 
 
 class sqliteCreate():
@@ -43,7 +35,7 @@ class sqliteCreate():
     #! check output dir exist or create it
     def create_db(self) -> None:
         """
-        Iterate through tables_infos dataframe to create table
+        Iterate through tables_info dataframe to create table
         with both PK and FK constraints
         CHANGES:  also specify data types
 
@@ -53,7 +45,7 @@ class sqliteCreate():
         db_file = self.output_sqlite
         conn = sqlite3.connect(database=db_file)
         
-        group_by_table = self.data.tables_infos.groupby(by=INFO_ATT['table'])
+        group_by_table = self.data.tables_info.groupby(by=INFO_ATT['table'])
         for table_name, table_info in group_by_table:
 
             # looks for composite pk
@@ -220,7 +212,7 @@ class sqliteCreate():
             # if not the ERD is made with networkx
             draw = ERD_maker(
                 db_path=self.output_sqlite,
-                tables_infos=self.data.tables_infos
+                tables_info=self.data.tables_info
             )
             blob_image = draw.networkx_draw_ERD()
         
