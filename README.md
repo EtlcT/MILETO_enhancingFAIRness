@@ -114,7 +114,7 @@ python -m venv venv
 .\venv\Scripts\activate
 
 # Linux / MacOS
-source/bin/activate
+source venv/bin/activate
 ```
 
 ### 3. ⚠️Pre-requisites

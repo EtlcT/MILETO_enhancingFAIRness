@@ -3,23 +3,13 @@ import os
 import time
 from parameterized import parameterized
 from unittest.mock import MagicMock
-import psutil
 
 import pandas as pd
 import numpy as np
 from src import utils
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.dbcreate import sqliteCreate
-
-TEMP_CONF = utils.json2dict("conf/template_conf.json")
-METAREF = TEMP_CONF["meta_references"]["tab_name"]
-METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
-INFO = TEMP_CONF["infos"]["tab_name"]
-INFO_ATT = TEMP_CONF["infos"]["tab_attr"]
-DDICT_T = TEMP_CONF["DDict_tables"]["tab_name"]
-DDICT_T_ATT = TEMP_CONF["DDict_tables"]["tab_attr"]
-DDICT_A = TEMP_CONF["DDict_attributes"]["tab_name"]
-DDICT_A_ATT = TEMP_CONF["DDict_attributes"]["tab_attr"]
+from conf.config import *
 
 TEST_CONF = utils.json2dict("tests/conf.json")
 IMG_1 = TEST_CONF['img_path']["img_1"]
@@ -63,8 +53,8 @@ def rs_mock() -> pd.DataFrame:
         ]
     )
 
-    fields_tables_infos = list(TEMP_CONF["infos"]["tab_attr"].values())
-    values_tables_infos = [
+    fields_tables_info = list(TEMP_CONF["info"]["tab_attr"].values())
+    values_tables_info = [
         ['clients', 'client_name', 'Y', np.nan, np.nan],
         ['clients', 'client_address', 'Y', np.nan, np.nan],
         ['clients', 'city_id', np.nan, 'Y', "cities"],
@@ -81,7 +71,7 @@ def rs_mock() -> pd.DataFrame:
         ['products', 'price', np.nan, np.nan, np.nan],
         ['products', 'photo', np.nan, np.nan, np.nan],
     ]
-    tables_infos = pd.DataFrame(data=values_tables_infos, columns=fields_tables_infos)
+    tables_info = pd.DataFrame(data=values_tables_info, columns=fields_tables_info)
 
     table_REF = pd.DataFrame(
             columns=list(TEMP_CONF['meta_references']['tab_attr'].values())[0:3],
@@ -130,7 +120,7 @@ def rs_mock() -> pd.DataFrame:
         'orders': orders,
         'cities': cities,
         'products': products,
-        INFO: tables_infos,
+        INFO: tables_info,
         METAREF: table_REF,
         DDICT_T: ddict_tables,
         DDICT_A: ddict_attr
