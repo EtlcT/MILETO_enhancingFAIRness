@@ -103,7 +103,7 @@ A brief description of files and folders of interests is made ## IN UPPERCASE
 
 ```bash
 git clone https://github.com/EtlcT/MILETO_enhancingFAIRness.git
-cd MILETO_EnhancingFAIRness
+cd MILETO_enhancingFAIRness
 ```
 
 ### 2. Create and activate virtual environment
@@ -114,7 +114,7 @@ python -m venv venv
 .\venv\Scripts\activate
 
 # Linux / MacOS
-source/bin/activate
+source venv/bin/activate
 ```
 
 ### 3. ⚠️Pre-requisites
