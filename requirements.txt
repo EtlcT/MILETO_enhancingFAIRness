@@ -5,3 +5,6 @@ eralchemy2
 networkx
 matplotlib
 pdfkit
+importlib-resources # for PyInstaller? check if necessary ??
+psycopg2 # hidden-import for PyInstaller
+mysqlclient # hidden-import for PyInstaller

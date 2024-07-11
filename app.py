@@ -3,12 +3,21 @@ import traceback
 import sys
 import os
 
+# access binaries
+if getattr(sys, 'frozen', False):
+    # If running as a PyInstaller bundle
+    bundle_dir = sys._MEIPASS
+    os.environ["PATH"] = (
+        os.path.join(bundle_dir, "graphviz_bin")
+        + os.pathsep 
+        + os.path.join(bundle_dir, "wkhtml_bin") 
+        + os.pathsep + os.environ["PATH"]
+    )
 # Configure logging
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s', 
                     handlers=[logging.FileHandler("error.log"),
                               logging.StreamHandler()])
-
 try:
     from src.extraction.retrieve_data import GetSpreadsheetData
     from src.dbcreate.dbcreate import sqliteCreate
