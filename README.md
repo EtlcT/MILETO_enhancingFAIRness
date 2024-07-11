@@ -126,11 +126,6 @@ Otherwise you can find the main steps to achieve below but as explained by PyGra
 
 2. <b>Ss2db also relies on wkhtmltopdf. You can download it <a href="https://wkhtmltopdf.org/downloads.html" target="_blank">wkhtmltopdf website</a>.</b>
 
-#### On windows
-Add to system environment variables path to:
-- Path\to\Graphiz\bin
-- Path\to\wkhtml\bin
-
 #### Linux / MacOS
 
 ```bash
@@ -162,6 +157,10 @@ python -m pip install `
 --config-settings="--global-option=-LC:\Program Files\Graphviz\lib" `
 pygraphviz
 ```
+
+Add to system environment variables path to:
+- Path\to\Graphiz\bin
+- Path\to\wkhtml\bin
 
 ### 4. Install dependencies
 
