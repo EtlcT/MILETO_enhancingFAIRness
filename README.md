@@ -118,11 +118,18 @@ source venv/bin/activate
 ```
 
 ### 3. ⚠️Pre-requisites
-<b>Ss2db relies on Pygraphiz to generates the ERD, if you want to make full profit of Ss2db we advise you to follow the intructions in this section. If you don't the ERD will be created using another library with a worse render.</b>
+1. <b>Ss2db relies on Pygraphiz to generates the ERD, if you want to make full profit of Ss2db we advise you to follow the intructions in this section. If you don't the ERD will be created using another library with a worse render.</b>
 <br>
 For detailed intructions see <a href="https://github.com/pygraphviz/pygraphviz/blob/main/INSTALL.txt" target="_blank">PyGraphiz INTALL instructions</a>
 <br>
 Otherwise you can find the main steps to achieve below but as explained by PyGraphiz developpers additionnal advanced steps may be required. If you encounter issues please refers to PyGraphiz instructions directly.
+
+2. <b>Ss2db also relies on wkhtmltopdf. You can download it <a href="https://wkhtmltopdf.org/downloads.html" target="_blank">wkhtmltopdf website</a>.</b>
+
+#### On windows
+Add to system environment variables path to:
+- Path\to\Graphiz\bin
+- Path\to\wkhtml\bin
 
 #### Linux / MacOS
 
