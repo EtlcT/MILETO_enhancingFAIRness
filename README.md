@@ -137,7 +137,7 @@ pip install pygraphviz
 sudo apt-get install libpq-dev
 sudo apt-get install pkg-config
 sudo apt-get install libmysqlclient-dev
-
+sudo apt-get install wkhtmltopdf
 ```
 
 ```bash
