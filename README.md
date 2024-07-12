@@ -175,8 +175,22 @@ pip install -r requirements.txt
 python app.py
 ```
 
-## About testing
+## Testing the app
+You can test our app with spreadsheets present in the data folder.
+
+## About unittest
 Several unittest have been implemented using unittest and parametrized libraries. There are stored in tests folder and can be runned with unittest command from project's root folder.
+
+<b>Before running unittest</b> please create a into tests folder a conf.json file with the following content:
+```json
+{
+    "img_path": {
+        "img_1": "absolute_path_to\\suitcase.jpg",
+        "img_2": "C:\\Users\\SSAran\\Desktop\\Files\\duty\\Uniss\\excel_data\\images\\phone_charger.jpg",
+        "img_3": "C:\\Users\\SSAran\\Desktop\\Files\\duty\\Uniss\\excel_data\\images\\lotr_dvd.jpg"
+    }
+}
+```
 
 ```bash
 python -m unittest
