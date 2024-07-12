@@ -131,6 +131,7 @@ Otherwise you can find the main steps to achieve below but as explained by PyGra
 ```bash
 # Linux
 sudo apt-get install graphviz graphviz-dev
+sudo apt-get install python3-dev
 pip install pygraphviz
 ```
 
