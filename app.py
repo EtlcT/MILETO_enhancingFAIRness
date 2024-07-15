@@ -28,11 +28,11 @@ except Exception as e:
     traceback.print_exc()
 
 def main():
-    print('Welcome into Ss2db\nEnter exit or Ctrl+C to quit.\n')
+    print(r'Welcome into Ss2db\nEnter exit or Ctrl+C to quit.\n')
 
     while True:
         try:
-            user_input = input("Please provide the absolute pathfile to your spreadsheet\n")
+            user_input = input(r'Please provide the absolute pathfile to your spreadsheet\n')
 
             if user_input=='exit':
                 print('Thank your for using Ss2db')
