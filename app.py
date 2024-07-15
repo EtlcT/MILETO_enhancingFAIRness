@@ -32,7 +32,7 @@ def main():
 
     while True:
         try:
-            user_input = input(r'Please provide the absolute pathfile to your spreadsheet\n')
+            user_input = input('Please provide the absolute pathfile to your spreadsheet\n')
 
             if user_input=='exit':
                 print('Thank your for using Ss2db')
