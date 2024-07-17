@@ -29,16 +29,33 @@ class docCreate(sqliteCreate):
         html_content = html_template.format(**parameters)
 
         css_template = resource_path("src/templates/doc.css")
-        
+
         if(sys.platform.startswith('linux')):
+        # code here is added to solve issue on Linux not finding path to binaries properly
             if getattr(sys, 'frozen', False):
+                # define path tho qt platforms plugins
+                qt_plugins_path = os.path.join(sys._MEIPASS, 'qt5', 'plugins', 'platforms')
+                # Set the environment variable
+                os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = qt_plugins_path
+                
                 base_path_wkhtmltopdf = os.path.join(sys._MEIPASS, 'wkhtmltopdf', 'wkhtmltopdf')
                 config = pdfkit.configuration(wkhtmltopdf=base_path_wkhtmltopdf)
-                pdfkit.from_string(html_content, self.output_path, options={"enable-local-file-access": ""}, css=css_template, configuration=config)
-                
+                pdfkit.from_string(
+                    html_content,
+                    self.output_path,
+                    options={"enable-local-file-access": ""},
+                    css=css_template, configuration=config
+                )
+
                 return
+            
         else:
-            pdfkit.from_string(html_content, self.output_path, options={"enable-local-file-access": ""}, css=css_template)
+            pdfkit.from_string(
+                html_content,
+                self.output_path,
+                options={"enable-local-file-access": ""},
+                css=css_template
+            )
 
         return
 

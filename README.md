@@ -205,24 +205,33 @@ python -m unittest
 The executable has been created using <a href="https://pyinstaller.org/en/stable/" target="_blank">PyInstaller</a>. To reproduce the bundled app follow the instructions below.
 
 ```bash
-# Linux / MacOS
+# Linux
 python -m PyInstaller \
---name "spread2lite_v0_0_1" \
---add-data "path_to_Miletto_Enhancing_FAIRness/conf/template_conf.json:conf/" \
---add-data "path_to_Miletto_Enhancing_FAIRness/src/templates/:src/templates" \
---distpath "path_to_output_dir/dist" \
---workpath "path_to_output_dir/build" \
---specpath "path_to_output_dir/" \
+--name "Ss2db_v0_0_1-prealpha" \
+--add-data "/home/aranatuniss/duty/uniss/MILETO_enhancingFAIRness/conf/template_conf.json:conf/" \
+--add-data "/home/aranatuniss/duty/uniss/MILETO_enhancingFAIRness/src/templates/:src/templates" \
+--add-binary "/usr/lib/x86_64-linux-gnu/graphviz:graphviz/" \
+--add-binary "/usr/bin/wkhtmltopdf:wkhtmltopdf/" \
+--add-binary "/usr/lib/x86_64-linux-gnu/qt5/plugins:qt5/plugins" \
+--distpath "/home/aranatuniss/duty/uniss/software/dist" \
+--workpath "/home/aranatuniss/duty/uniss/software/build" \
+--specpath "/home/aranatuniss/duty/uniss/software/" \
 --onedir app.py
 ```
+
 ```Powershell
 # Windows
 python -m PyInstaller `
---name "spread2lite_v0_0_1" `
---add-data "path_to_Miletto_Enhancing_FAIRness\conf\template_conf.json:conf\" `
---add-data "path_to_Miletto_Enhancing_FAIRness\src\templates\:src\templates" `
---distpath "path_to_output_dir\dist" `
---workpath "path_to_output_dir\build" `
---specpath "path_to_output_dir\" `
+--additional-hooks-dir "path_to_\MILETO_enhancingFAIRness\hooks" `
+--name "Ss2db_v0_0_1-prealpha" `
+--add-data "path_to_\MILETO_enhancingFAIRness\conf\template_conf.json:conf\" `
+--add-data "path_to_\MILETO_enhancingFAIRness\src\templates\:src\templates" `
+--add-binary "C:\Program Files\Graphviz\bin\*:graphviz_bin" `
+--add-binary "C:\Program Files\wkhtmltopdf\bin\*:wkhtml_bin" `
+--hidden-import MySQLdb `
+--hidden-import psycopg2 `
+--distpath "path_to_software\dist" `
+--workpath "path_to_software\build" `
+--specpath "path_to_software\" `
 --onedir app.py
 ```
