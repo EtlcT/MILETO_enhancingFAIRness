@@ -190,9 +190,9 @@ Several unittest have been implemented using unittest and parametrized libraries
 ```json
 {
     "img_path": {
-        "img_1": "absolute_path_to\\suitcase.jpg",
-        "img_2": "C:\\Users\\SSAran\\Desktop\\Files\\duty\\Uniss\\excel_data\\images\\phone_charger.jpg",
-        "img_3": "C:\\Users\\SSAran\\Desktop\\Files\\duty\\Uniss\\excel_data\\images\\lotr_dvd.jpg"
+        "img_1": "absolute_path_to\\MILETO_enhancingFAIRness\\data\\images\\suitcase.jpg",
+        "img_2": "absolute_path_to\\MILETO_enhancingFAIRness\\data\\images\\phone_charger.jpg",
+        "img_3": "absolute_path_to\\MILETO_enhancingFAIRness\\data\\images\\lotr_dvd.jpg"
     }
 }
 ```
