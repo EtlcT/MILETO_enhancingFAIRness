@@ -208,14 +208,14 @@ The executable has been created using <a href="https://pyinstaller.org/en/stable
 # Linux
 python -m PyInstaller \
 --name "Ss2db_v0_0_1-prealpha" \
---add-data "/home/aranatuniss/duty/uniss/MILETO_enhancingFAIRness/conf/template_conf.json:conf/" \
---add-data "/home/aranatuniss/duty/uniss/MILETO_enhancingFAIRness/src/templates/:src/templates" \
+--add-data "path_to/MILETO_enhancingFAIRness/conf/template_conf.json:conf/" \
+--add-data "path_to/MILETO_enhancingFAIRness/src/templates/:src/templates" \
 --add-binary "/usr/lib/x86_64-linux-gnu/graphviz:graphviz/" \
 --add-binary "/usr/bin/wkhtmltopdf:wkhtmltopdf/" \
 --add-binary "/usr/lib/x86_64-linux-gnu/qt5/plugins:qt5/plugins" \
---distpath "/home/aranatuniss/duty/uniss/software/dist" \
---workpath "/home/aranatuniss/duty/uniss/software/build" \
---specpath "/home/aranatuniss/duty/uniss/software/" \
+--distpath "path_to_output_dir/dist" \
+--workpath "path_to_output_dir/build" \
+--specpath "path_to_output_dir/" \
 --onedir app.py
 ```
 
@@ -230,8 +230,8 @@ python -m PyInstaller `
 --add-binary "C:\Program Files\wkhtmltopdf\bin\*:wkhtml_bin" `
 --hidden-import MySQLdb `
 --hidden-import psycopg2 `
---distpath "path_to_software\dist" `
---workpath "path_to_software\build" `
---specpath "path_to_software\" `
+--distpath "path_to_output_dir\dist" `
+--workpath "path_to_output_dir\build" `
+--specpath "path_to_output_dir\" `
 --onedir app.py
 ```
