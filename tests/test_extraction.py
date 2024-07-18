@@ -43,7 +43,7 @@ def _read_spreadsheet_mock():
     ]
     table_D = pd.DataFrame(data=values_D, columns=fields_D)
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -75,7 +75,7 @@ def _read_spreadsheet_mock():
         'Table_B': table_B,
         'Table_C': table_C,
         'Table_D': table_D,
-        TEMP_CONF["info"]["tab_name"]: table_KEYS,
+        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -96,7 +96,7 @@ def rs_mock_undefined_pk():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -118,7 +118,7 @@ def rs_mock_undefined_pk():
     return {
         'Table_B': table_B,
         'Table_A': table_A,
-        TEMP_CONF["info"]["tab_name"]: table_KEYS,
+        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -190,7 +190,7 @@ def rs_mock_pk_duplicate():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -212,7 +212,7 @@ def rs_mock_pk_duplicate():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        TEMP_CONF["info"]["tab_name"]: table_KEYS,
+        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -234,7 +234,7 @@ def rs_mock_cpk_duplicate():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -256,7 +256,7 @@ def rs_mock_cpk_duplicate():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        TEMP_CONF["info"]["tab_name"]: table_KEYS,
+        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -279,7 +279,7 @@ def rs_mock_fk_not_unique():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -301,7 +301,7 @@ def rs_mock_fk_not_unique():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        TEMP_CONF["info"]["tab_name"]: table_KEYS,
+        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -324,7 +324,7 @@ def rs_mock_fk_not_exist():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -346,7 +346,7 @@ def rs_mock_fk_not_exist():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        TEMP_CONF["info"]["tab_name"]: table_KEYS,
+        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -369,7 +369,7 @@ def rs_mock_fk_without_ref():
     ]
     table_B = pd.DataFrame(data=values_B, columns=fields_B)
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
@@ -391,7 +391,7 @@ def rs_mock_fk_without_ref():
     return {
         'Table_A': table_A,
         'Table_B': table_B,
-        TEMP_CONF['info']['tab_name']: table_KEYS,
+        TEMP_CONF['tables_info']['tab_name']: table_KEYS,
         TEMP_CONF['meta_references']['tab_name']: table_REF
     }
 
@@ -414,7 +414,7 @@ def attr_shared_name() -> pd.DataFrame:
         ]
     )
 
-    fields_KEYS = list(TEMP_CONF["info"]["tab_attr"].values())
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
     values_KEYS = [
         ['brand', 'id', 'Y', np.nan, np.nan],
         ['brand', 'brand_name', np.nan, np.nan, np.nan],
@@ -435,7 +435,7 @@ def attr_shared_name() -> pd.DataFrame:
     return {
         'brand': brand,
         'car': car,
-        TEMP_CONF['info']['tab_name']: table_KEYS,
+        TEMP_CONF['tables_info']['tab_name']: table_KEYS,
         TEMP_CONF['meta_references']['tab_name']: table_REF
     }
     
@@ -449,12 +449,12 @@ class TestExtraction(unittest.TestCase):
         ('meta_Something', True),
         ('MeTa_CaseUnsensitive', True),
         ('metacognitive', False),
-        (TEMP_CONF["info"]["tab_name"], True),
+        (TEMP_CONF["tables_info"]["tab_name"], True),
         ('keys_table', False),
     ])
 
     def test_regex_exclude_meta(self, text, regexMatch):
-        """Check that sheet that contains either 'meta.', TEMP_CONF["info"]["tab_name"] or 'extra' 
+        """Check that sheet that contains either 'meta.', TEMP_CONF["tables_info"]["tab_name"] or 'extra' 
         matches the regex and so return True.
         """
 

@@ -101,7 +101,6 @@ class sqliteCreate():
                 query += f"{fk_statement}"
             
             query += "\n)"
-            print(query)
             conn.execute(query)
 
         conn.close()
