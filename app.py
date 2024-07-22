@@ -16,7 +16,7 @@ if getattr(sys, 'frozen', False):
 # Configure logging
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s', 
-                    handlers=[logging.FileHandler("error.log"),
+                    handlers=[logging.FileHandler("logs"),
                               logging.StreamHandler()])
 try:
     from src.extraction.retrieve_data import GetSpreadsheetData

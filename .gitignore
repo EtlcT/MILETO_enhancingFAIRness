@@ -4,3 +4,7 @@ app_dev.ipynb
 Dockerfile
 **/__pycache__
 old**
+logs
+tests/conf.json
+data/output/
+tree.txt

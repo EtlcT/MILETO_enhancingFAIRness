@@ -1,0 +1,2 @@
+psycopg2 # hidden-import for PyInstaller ?? for WINDOWS only ??
+mysqlclient # hidden-import for PyInstaller for WINDOWS only
