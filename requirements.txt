@@ -5,3 +5,4 @@ eralchemy2
 networkx
 matplotlib
 pdfkit
+customtkinter
