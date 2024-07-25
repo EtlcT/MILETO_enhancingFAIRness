@@ -8,7 +8,6 @@ import tkinter as tk
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.dbcreate import sqliteCreate
 from src.doccreate.pdf_create import docCreate
-import time
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, 
@@ -268,8 +267,6 @@ class App(ctk.CTk):
                 task["function"]()
                 self.sqlite_create_progress.step()
                 self.sqlite_create_progress.update()
-                #! comment following line before release
-                time.sleep(0.5)
 
             sqlite_db = sqliteCreate(getData=self.data, output_dir=output_directory)
             self.sqlite_create_progress.step()
@@ -286,8 +283,6 @@ class App(ctk.CTk):
                 task["function"]()
                 self.sqlite_create_progress.step()
                 self.sqlite_create_progress.update()
-                #! comment following line before release
-                time.sleep(0.5)
 
             self.sqlite_create_progress.set(1)
             self.sqlite_create_progress.update()

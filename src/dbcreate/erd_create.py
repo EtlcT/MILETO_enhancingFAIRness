@@ -67,7 +67,9 @@ class ERD_maker():
         
         erd.render(self.output_erd_svg, format='svg', cleanup=True)
 
-        return pickle.dumps(erd)
+        png_as_blob = erd.pipe(format='png')
+
+        return png_as_blob
 
     def add_entity(self, graph, entity_name, html_label) -> None:
         """Create a node in graph object
