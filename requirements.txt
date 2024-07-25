@@ -1,9 +1,6 @@
 pandas
 openpyxl # required to read excel
 parameterized
-eralchemy2
-networkx
-matplotlib
 pdfkit
 customtkinter
 CTkMessagebox

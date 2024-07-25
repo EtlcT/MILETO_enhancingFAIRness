@@ -29,8 +29,8 @@ class sqliteCreate():
             "Error getData should be an instance of sqliteCreate class"
             )
         self.data = getData
+        self.output_dir = output_dir
         self.output_sqlite = os.path.normpath((output_dir + '/' + self.data.db_name + '.sqlite'))
-        self.output_erd = os.path.normpath((output_dir + '/ERD_' + self.data.db_name + '.png'))
         self.sql_dump = None
     
     #! check output dir exist or create it
@@ -154,7 +154,7 @@ class sqliteCreate():
         insert the Entity-Relationship Diagram and sql statement
         """
 
-        blob_image = self._create_ERD()
+        blob_image = self.create_ERD()
         
         sql_statement = self.get_sql()
 
@@ -198,23 +198,18 @@ class sqliteCreate():
         
         return fk_statement
 
-    def _create_ERD(self) -> bytes:
-        """Create ERD schema, save it to png and return it as a Blob
+    def create_ERD(self) -> bytes:
+        """Create ERD schema, save it as svg
+        and return it as a Blob
         """
 
-        try:
-            # if eralchimy2 is installed
-            pkg_resources.get_distribution('eralchemy2')
-            draw = ERD_maker(db_path=self.output_sqlite)
-            blob_image = draw.eralchemy_draw_ERD()
+        draw = ERD_maker(
+            db_name= self.data.db_name,
+            output_dir= self.output_dir,
+            tables_infos= self.data.tables_info
+        )
 
-        except pkg_resources.DistributionNotFound:
-            # if not the ERD is made with networkx
-            draw = ERD_maker(
-                db_path=self.output_sqlite,
-                tables_info=self.data.tables_info
-            )
-            blob_image = draw.networkx_draw_ERD()
+        blob_image = draw.create_erd()
         
         return blob_image
 
