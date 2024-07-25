@@ -1,10 +1,12 @@
 import logging
 import traceback
-import sys
+
+import argparse
 import os
+import tkinter as tk
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
-import tkinter as tk
+
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.dbcreate import sqliteCreate
 from src.doccreate.pdf_create import docCreate
@@ -340,5 +342,5 @@ class App(ctk.CTk):
 
 if __name__ == "__main__":
     app = App()
-    # app.attributes("-fullscreen", "True")
+    app._state_before_windows_set_titlebar_color = 'zoomed'
     app.mainloop()
