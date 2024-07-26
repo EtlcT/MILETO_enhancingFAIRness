@@ -15,7 +15,8 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from conf.config import *
-from src.utils import check_uniqueness, file2Blob, bytes_in_df_col
+from src.utils import file2Blob, bytes_in_df_col
+from src.extraction.check import CheckSpreadsheet
 
 class GetSpreadsheetData:
     """
@@ -28,7 +29,8 @@ class GetSpreadsheetData:
         self.datatables_list = self._get_datatables_list()
         self.tables_info = self._get_tables_info()
         self.compositePK_df = self._get_composite_pk()
-    
+        
+        self._run_checker()
 
     def _read_spreadsheet(self, filepath) -> dict:
         """
@@ -152,103 +154,10 @@ class GetSpreadsheetData:
                         )
    
         return tables_info
-
-
-    def check_pk_uniqueness(self) -> None:
-        """
-        Raise assertion error if fields defined as Primary Key does not
-        respect uniqueness criteria
-        """
-        pk_constraint = self.tables_info[self.tables_info[INFO_ATT['isPK']] == 'Y'][[INFO_ATT['table'],INFO_ATT['attribute']]]
-        pk_groupedby_table = pk_constraint.groupby(by=INFO_ATT['table'])
-        for table_name, pk_info in pk_groupedby_table:
-            pk_info = pk_info[INFO_ATT['attribute']].tolist()
-
-            assert check_uniqueness(
-                fields=pk_info,
-                table=self.sheets_dict[table_name]
-            ), (
-                f"invalid primary key constraint {pk_info} for table {table_name}\n"
-                "Primary must be unique"
-            )
-            
-        return
     
-
-    def check_FK_existence_and_uniqueness(self) -> None:
-        """
-        Raise assertion error if FK is not present in Reference Table or
-        if the reference attribute does not respect unicity 
-        """
-
-        isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
-        fk_by_table_and_ref = (
-            self.tables_info[isFK_condition][[
-                INFO_ATT["table"],
-                INFO_ATT['attribute'],
-                INFO_ATT['refTable']
-            ]]
-            .groupby(by=[INFO_ATT["table"],INFO_ATT['refTable']])
-        )
-
-        for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
-                exist_in_ref = (col in self.sheets_dict[ref_table_name].columns
-                                for col in fk_info[INFO_ATT['attribute']])
-                
-                # check that the attribute exist in reference table
-                assert all(exist_in_ref),(
-                    f"invalid Foreign key {fk_info[INFO_ATT['attribute']].tolist()} for {table_name}\n"
-                    f"all attributes must be present in {ref_table_name}"
-                )
-
-                assert check_uniqueness(
-                    fields=fk_info['attribute'].tolist(),
-                    table=self.sheets_dict[ref_table_name]
-                ), (
-                    f"invalid Foreign key {fk_info['attribute'].tolist()} for {table_name}\n"
-                    f"the reference attribute in {ref_table_name} should be unique"
-                )
-
-        return
-    
-
-    def check_pk_defined(self) -> None:
-        """Raise AssertionError if a table has no Primary Key defined"""
-
-        for table, table_info in self.tables_info.groupby(by=INFO_ATT["table"]):
-            assert 'Y' in table_info[INFO_ATT['isPK']].values, f"Table {table} has no Primary Key defined"
-        
-        return
-    
-
-    def check_fk_get_ref(self) -> None:
-        """
-        Raise AssertionError if a field is defined as FK 
-        but has empty ReferenceTable field
-        """
-
-        isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
-        fk_constraint = self.tables_info[isFK_condition]
-
-        assert not fk_constraint[INFO_ATT['refTable']].isna().any(), (
-            "Every FK should have a reference table defined"
-            f"{fk_constraint[fk_constraint[INFO_ATT['refTable']].isna()==True]}"
-        )
-    
-    def check_no_shared_name(self) -> None:
-        """
-        Raise AssertionError if fields that belong to different 
-        tables have the same name, except for foreign keys (for which
-        it could be normal to share the same name as their reference)
-        """
-
-        notFK_condition = self.tables_info[INFO_ATT['isFK']].isna()
-        attr_no_FK = self.tables_info[notFK_condition]
-
-        assert attr_no_FK[INFO_ATT['attribute']].is_unique, (
-            "Except for Foreign keys, different attributes should not"
-            "have the same names"
-        )
+    def _run_checker(self):
+        checker = CheckSpreadsheet(self.sheets_dict, self.tables_info)
+        checker.validate_spreadsheet()
 
     # TODO CHECK
     @staticmethod

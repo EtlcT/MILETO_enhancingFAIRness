@@ -1,21 +1,22 @@
 import logging
 import traceback
 
-import sys
-import argparse
 import os
 import tkinter as tk
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 
 from src.extraction.retrieve_data import GetSpreadsheetData
+from src.extraction.check import CheckDataError
 from src.dbcreate.dbcreate import sqliteCreate
 from src.doccreate.pdf_create import docCreate
+from src.utils import checks_pipeline
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, 
-                    format='%(asctime)s %(levelname)s %(message)s', 
-                    handlers=[logging.FileHandler("logs"),
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    encoding="utf-8",
+                    handlers=[logging.FileHandler("Ss2db.log"),
                               logging.StreamHandler()])
 
 # set mode on user system value
@@ -245,60 +246,82 @@ class App(ctk.CTk):
 
         # instantiate progress bar at 0
         self.sqlite_create_progress.set(0)
-        self.sqlite_create_progress.update()
+        self.sqlite_create_progress.start()
 
         spreadsheet_path = os.path.normpath(self.filepath)
         output_directory = os.path.normpath(self.folder_path)
-
         try:
-            self.task_label.configure(text="Retrieving data from spreadsheet")
             self.data = GetSpreadsheetData(filepath=spreadsheet_path)
-            self.sqlite_create_progress.step()
-            self.sqlite_create_progress.update()
+        except RuntimeError as e:
+            self.show_error(msg=f"Spreadsheet validation failed because of the following error(s):\n {e}")
+            self.sqlite_create_progress.destroy()
 
-            # test from extraction module to run before db creation
-            tests_steps = [
-                {"function": self.data.check_no_shared_name, "label": "Checking different fields have different names"},
-                {"function": self.data.check_pk_defined, "label": "Checking each table have a PK defined"},
-                {"function": self.data.check_pk_uniqueness, "label": "Checking PK fields have no duplicate"},
-                {"function": self.data.check_fk_get_ref, "label": "Checking FK fields have a reference table defined"},
-                {"function": self.data.check_FK_existence_and_uniqueness, "label": "Checking FK fields exist in reference table and have no duplicate"}
-            ]
-            
-            for task in tests_steps:
-                self.task_label.configure(text=task["label"])
-                task["function"]()
-                self.sqlite_create_progress.step()
-                self.sqlite_create_progress.update()
-
-            sqlite_db = sqliteCreate(getData=self.data, output_dir=output_directory)
-            self.sqlite_create_progress.step()
-
-            db_create_steps = [
-                {"function": sqlite_db.create_db, "label": "Creating sqlite"},
-                {"function": sqlite_db.insert_data, "label": "Inserting data in database"},
-                {"function": sqlite_db.ddict_schema_create, "label": "Creating and inserting ERD"},
-                {"function": sqlite_db.meta_tables_create, "label": "Inserting metadata tables"}
-            ]
-
-            for task in db_create_steps:
-                self.task_label.configure(text=task["label"])
-                task["function"]()
-                self.sqlite_create_progress.step()
-                self.sqlite_create_progress.update()
-
-            self.sqlite_create_progress.set(1)
-            self.sqlite_create_progress.update()
-            self.show_success(
-                msg=f"sqlite database of {self.data.db_name} successfully created !"
-            )
-
-            self.running_process_frame.grid_forget()
         
-        except Exception as e:
-            logging.error("An error occurred", exc_info=True)
-            traceback.print_exc()
-            self.show_error(msg=f"An error occured: {e}")
+        sqlite_db = sqliteCreate(getData=self.data, output_dir=output_directory)
+
+        sqlite_db.create_db()
+        sqlite_db.insert_data()
+        sqlite_db.ddict_schema_create()
+        sqlite_db.meta_tables_create()
+
+        self.sqlite_create_progress.stop()
+        self.sqlite_create_progress.destroy()
+
+        # try:
+        #     self.task_label.configure(text="Retrieving data from spreadsheet")
+        #     self.data = GetSpreadsheetData(filepath=spreadsheet_path)
+        #     self.sqlite_create_progress.step()
+        #     self.sqlite_create_progress.update()
+
+        #     # test from extraction module to run before db creation
+        #     tests_steps = [
+        #         {"function": self.data.check_no_shared_name, "label": "Checking different fields have different names"},
+        #         {"function": self.data.check_pk_defined, "label": "Checking each table have a PK defined"},
+        #         {"function": self.data.check_pk_uniqueness, "label": "Checking PK fields have no duplicate"},
+        #         {"function": self.data.check_fk_get_ref, "label": "Checking FK fields have a reference table defined"},
+        #         {"function": self.data.check_FK_existence_and_uniqueness, "label": "Checking FK fields exist in reference table and have no duplicate"}
+        #     ]
+            
+        #     errors = []
+        #     for task in tests_steps:
+        #         self.task_label.configure(text=task["label"])
+        #         try:
+        #             task["function"]()
+        #         except:
+        #             logging.error(f"Exception occurred in {task["function"]().__name__}: {str(e)}", exc_info=True)
+        #             logging.error(traceback.format_exc(), exc_info=True)
+        #             errors.append(f"Exception in {task["function"]().__name__}: {str(e)}")
+        #         self.sqlite_create_progress.step()
+        #         self.sqlite_create_progress.update()
+
+        #     sqlite_db = sqliteCreate(getData=self.data, output_dir=output_directory)
+        #     self.sqlite_create_progress.step()
+
+        #     db_create_steps = [
+        #         {"function": sqlite_db.create_db, "label": "Creating sqlite"},
+        #         {"function": sqlite_db.insert_data, "label": "Inserting data in database"},
+        #         {"function": sqlite_db.ddict_schema_create, "label": "Creating and inserting ERD"},
+        #         {"function": sqlite_db.meta_tables_create, "label": "Inserting metadata tables"}
+        #     ]
+
+        #     for task in db_create_steps:
+        #         self.task_label.configure(text=task["label"])
+        #         task["function"]()
+        #         self.sqlite_create_progress.step()
+        #         self.sqlite_create_progress.update()
+
+        #     self.sqlite_create_progress.set(1)
+        #     self.sqlite_create_progress.update()
+        #     self.show_success(
+        #         msg=f"sqlite database of {self.data.db_name} successfully created !"
+        #     )
+
+        #     self.running_process_frame.grid_forget()
+        
+        # except Exception as e:
+        #     logging.error("An error occurred", exc_info=True)
+        #     traceback.print_exc()
+        #     self.show_error(msg=f"An error occured: {e}")
 
         # pdf_doc = docCreate(getData=self.data, output_dir=output_directory)
         # pdf_doc.sql_dump = sqlite_db.sql_dump

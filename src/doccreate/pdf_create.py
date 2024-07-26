@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from conf.config import *
 from src.dbcreate.dbcreate import sqliteCreate
-from src.utils import resource_path, prettier_sql
+from src.utils import resource_path, html_formatted_sql
 
 class docCreate():
     """
@@ -21,7 +21,7 @@ class docCreate():
         self.output_path = f"{os.path.join(database.output_dir, database.data.db_name)}.pdf"
         self.template = resource_path(html_template)
         self.erd_path = os.path.normpath(f"{database.output_dir}/ERD_{self.data.db_name}.png")
-        self.sql = prettier_sql(database.sql_dump)
+        self.sql = html_formatted_sql(database.sql_dump)
 
     def createPDF(self) -> None:
         with open(self.template, 'r') as file:

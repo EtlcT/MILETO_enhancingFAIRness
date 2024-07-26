@@ -13,7 +13,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.dbcreate import sqliteCreate
-from src.utils import checks_pipeline
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -22,16 +21,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     getData = GetSpreadsheetData(filepath=args.filepath)
-
-    #? conf file to store check list
-    check_funcs_list = [
-        getData.check_no_shared_name,
-        getData.check_pk_defined,
-        getData.check_pk_uniqueness,
-        getData.check_fk_get_ref,
-        getData.check_FK_existence_and_uniqueness
-    ]
-    checks_pipeline(check_funcs_list)
 
     sqlite_db = sqliteCreate(getData, output_dir= args.output_dir)
     sqlite_db.create_db()
