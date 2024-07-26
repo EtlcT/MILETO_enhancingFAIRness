@@ -11,6 +11,7 @@ import graphviz
 import pickle
 
 from conf.config import *
+from src.utils import rotate_image
 
 class ERD_maker():
     """
@@ -20,7 +21,7 @@ class ERD_maker():
     def __init__(self, db_name: str, output_dir: str, tables_infos: pd.DataFrame) -> None:
         self.tables_info = tables_infos
         self.db_name = db_name
-        self.output_erd_svg = os.path.normpath((output_dir + '/ERD_' + self.db_name))
+        self.output_erd = os.path.normpath((output_dir + '/ERD_' + self.db_name))
 
     def create_erd(self) -> bytes:
         """Create a simple ERD with Entities, their attributes,
@@ -65,7 +66,13 @@ class ERD_maker():
             html_label = f"<b>{table_name}</b><br/>" + html_label
             self.add_entity(erd, table_name, html_label)
         
-        erd.render(self.output_erd_svg, format='svg', cleanup=True)
+        # png to facilitate insertion in pdf,
+        # deleted after pdf generation
+        erd.render(self.output_erd, format='png', cleanup=True)
+        rotate_image((self.output_erd + ".png"))
+
+        # svg to facilitate customization by the user
+        erd.render(self.output_erd, format='svg', cleanup=True)
 
         png_as_blob = erd.pipe(format='png')
 

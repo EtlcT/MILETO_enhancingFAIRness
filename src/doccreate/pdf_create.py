@@ -9,17 +9,19 @@ from conf.config import *
 from src.dbcreate.dbcreate import sqliteCreate
 from src.utils import resource_path
 
-class docCreate(sqliteCreate):
+class docCreate():
     """
-        Class that inherit from sqliteCreate
         This class that read html file, include parameters and convert to pdf
     """
 
-    def __init__(self, getData, output_dir, html_template = "src/templates/doc.html") -> None:
-        super().__init__(getData, output_dir)
-        self.output_path = f"{os.path.join(output_dir, self.data.db_name)}.pdf"
+    def __init__(self, database, html_template = "src/templates/doc.html") -> None:
+        if not isinstance(database, sqliteCreate):
+            raise TypeError("database must be an instance of sqliteCreate")
+        self.data = database.data
+        self.output_path = f"{os.path.join(database.output_dir, database.data.db_name)}.pdf"
         self.template = resource_path(html_template)
-        self.erd_path = os.path.normpath(f"{output_dir}/ERD_{self.data.db_name}.png")
+        self.erd_path = os.path.normpath(f"{database.output_dir}/ERD_{self.data.db_name}.png")
+        self.sql = database.sql_dump
 
     def createPDF(self) -> None:
         with open(self.template, 'r') as file:
@@ -149,7 +151,7 @@ class docCreate(sqliteCreate):
             'img_tag_erd': img_tag_erd,
             'DDict_table_content': ddict_table_content,
             'DDict_attr_content': ddict_attr_content,
-            'sql_dump': self.sql_dump
+            'sql_dump': self.sql
         }
 
         return parameters

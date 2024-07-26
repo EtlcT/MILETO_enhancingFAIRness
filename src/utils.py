@@ -5,6 +5,7 @@ import sys
 import os
 import pandas as pd
 import base64
+from PIL import Image
 
 def check_uniqueness(fields, table) -> bool:
     """
@@ -103,3 +104,12 @@ def prettier_sql(raw_sql: list) -> str:
             formatted_sql += formatted_row + "<br>)<br><br>"
 
         return formatted_sql
+
+def rotate_image(image_path, format="png"):
+    """Rotate image from 90°"""
+    
+    with Image.open(image_path) as image:
+        rotated_image = image.rotate(-90, expand=True)
+        rotated_image.save(image_path)
+    
+    return
