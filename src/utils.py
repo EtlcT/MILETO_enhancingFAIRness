@@ -30,12 +30,26 @@ def check_uniqueness(fields, table) -> bool:
         else:
             return table[fields[0]].is_unique
 
-def checks_pipeline(funcs: list):
+def checks_pipeline(check_funcs: list):
     """
     Execute a list of function
     """
-    for func in funcs:
-        func()
+
+    errors = []
+    for check in check_funcs:
+        try:
+            check()
+        except Exception as e:
+            logging.error(f"Exception occurred in {check.__name__}: {str(e)}", exc_info=True)
+            logging.error(traceback.format_exc(), exc_info=True)
+            errors.append(f"Exception in {check.__name__}: {str(e)}")
+    
+    if errors:
+        logging.info("Errors occurred:")
+        for error in errors:
+            logging.info(f"- {error}")
+    else:
+        logging.info("All checks passed successfully.")
 
 def json2dict(json_filepath) -> dict :
     """Read a config files
@@ -89,23 +103,34 @@ def img_base64(img_path):
         
         return img_base64_encoded.decode('utf-8')
 
-def prettier_sql(raw_sql: list) -> str:
+def prettier_sql(raw_sql: str) -> str:
         """Return readable sql statement from sqlite_master statement"""
 
-        formatted_sql = str()
-        for row in raw_sql:
-            formatted_row = (
-                row[0]
-                .replace('(', '(<br>&emsp;', 1) # brak line after
-                .replace(',\n', ',<br>&emsp;')
-                .rstrip(row[0][-1]) # remove last ) and break line
-            )
-                          
-            formatted_sql += formatted_row + "<br>)<br><br>"
+        formatted_sql = (
+            raw_sql
+            .replace('    ', '&emsp;') # brak line after
+            .replace('\n', '<br>')
+        )
 
         return formatted_sql
 
-def rotate_image(image_path, format="png"):
+# def prettier_sql(raw_sql: list) -> str:
+#         """Return readable sql statement from sqlite_master statement"""
+
+#         formatted_sql = str()
+#         for row in raw_sql:
+#             formatted_row = (
+#                 row[0]
+#                 .replace('(', '(<br>&emsp;', 1) # brak line after
+#                 .replace(',\n', ',<br>&emsp;')
+#                 .rstrip(row[0][-1]) # remove last ) and break line
+#             )
+                          
+#             formatted_sql += formatted_row + "<br>)<br><br>"
+
+#         return formatted_sql
+
+def rotate_image(image_path):
     """Rotate image from 90°"""
     
     with Image.open(image_path) as image:

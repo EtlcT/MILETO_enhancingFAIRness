@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 from conf.config import *
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
-from src.utils import prettier_sql
+
 
 
 class sqliteCreate():
@@ -31,7 +31,7 @@ class sqliteCreate():
         self.data = getData
         self.output_dir = output_dir
         self.output_sqlite = os.path.normpath((output_dir + '/' + self.data.db_name + '.sqlite'))
-        self.sql_dump = None
+        self.sql_dump = str()
     
     #! check output dir exist or create it
     def create_db(self) -> None:
@@ -56,34 +56,33 @@ class sqliteCreate():
 
             if len(pk_attr) > 1:
                 # if PK is composite
-                attr_statement = ",\n".join(
+                attr_statement = ",\n    ".join(
                     [f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)]
                 )
 
                 query = (
                     f"CREATE TABLE {table_name}(\n"
-                    f"{attr_statement},\n"
-                    f"PRIMARY KEY ({', '.join([pk_field_name for pk_field_name in pk_attr])})"
+                    f"    {attr_statement},\n"
+                    f"    PRIMARY KEY ({', '.join([pk_field_name for pk_field_name in pk_attr])})"
                 )
 
             else:
                 # if PK not composite
                 # find index in attr_list to access its type
                 index = attr_list.index(f'{pk_attr[0]}')
-                # add PRIMARY KEY just after the pk attribute
-                attr_list = list(
-                    map(
-                        lambda x: x.replace(
-                            f"{pk_attr[0]} {attr_type[index]}",
-                            f'{pk_attr[0]} PRIMARY KEY'
-                        ), attr_list
-                    )
+                
+                attr_statement = ",\n    ".join(
+                    [f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)]
                 )
-                attr_statement = ",\n".join([f"{item1} {item2}" for item1, item2 in zip(attr_list, attr_type)])
-
+                
+                attr_statement = attr_statement.replace(
+                    f"{pk_attr[0]} {attr_type[index]}",
+                    f"{pk_attr[0]} {attr_type[index]} PRIMARY KEY"
+                )
+                
                 query = (
                     f"CREATE TABLE {table_name}(\n"
-                    f"{attr_statement}"
+                    f"    {attr_statement}"
                 )
 
             isFK_condition = ~table_info[INFO_ATT['isFK']].isna()
@@ -100,7 +99,8 @@ class sqliteCreate():
                 )
                 query += f"{fk_statement}"
             
-            query += "\n)"
+            query += "\n)\n"
+            self.sql_dump+=query
             conn.execute(query)
 
         conn.close()
@@ -156,7 +156,7 @@ class sqliteCreate():
 
         blob_image = self.create_ERD()
         
-        sql_statement = self.get_sql()
+        sql_statement = self.sql_dump
 
         conn = sqlite3.connect(database=self.output_sqlite)
 
@@ -192,7 +192,7 @@ class sqliteCreate():
         """
         fk_statement = str()
         fk_statement += (
-            f",\nFOREIGN KEY ({(', ').join(fk_attribute)}) "
+            f",\n    FOREIGN KEY ({(', ').join(fk_attribute)}) "
             f"REFERENCES {ref_table_name}({(', ').join(fk_attribute)})"
         )
         
@@ -213,23 +213,23 @@ class sqliteCreate():
         
         return blob_image
 
-    def get_sql(self) -> str:
-        """ Return sql statement that lead to this database creation
-        """
+    # def get_sql(self) -> str:
+    #     """ Return sql statement that lead to this database creation
+    #     """
 
-        conn = sqlite3.connect(database=self.output_sqlite)
-        cursor = conn.cursor()
-        cursor.execute('SELECT sql from sqlite_master WHERE sql IS NOT NULL')
+    #     conn = sqlite3.connect(database=self.output_sqlite)
+    #     cursor = conn.cursor()
+    #     cursor.execute('SELECT sql from sqlite_master WHERE sql IS NOT NULL')
 
-        raw_sql = cursor.fetchall()
+    #     raw_sql = cursor.fetchall()
 
-        cursor.close()
-        conn.close()
+    #     cursor.close()
+    #     conn.close()
 
-        formatted_sql = prettier_sql(raw_sql)
+    #     formatted_sql = prettier_sql(raw_sql)
 
-        self.sql_dump = formatted_sql
+    #     self.sql_dump = formatted_sql
 
-        return formatted_sql
+    #     return formatted_sql
     
     
