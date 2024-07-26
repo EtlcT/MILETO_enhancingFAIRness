@@ -1,6 +1,7 @@
 import logging
 import traceback
 
+import sys
 import argparse
 import os
 import tkinter as tk
@@ -340,7 +341,7 @@ class App(ctk.CTk):
             msg.destroy()
 
 
-if __name__ == "__main__":
+def main_gui():
     app = App()
     app._state_before_windows_set_titlebar_color = 'zoomed'
     app.mainloop()
