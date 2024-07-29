@@ -419,9 +419,8 @@ class TestCheckSpreadsheet(unittest.TestCase):
         if expected_exception:
             with self.assertRaises(check.InvalidData) as context:
                 checker.validate_spreadsheet()
-            aggregated_error = context.exception
-            self.assertTrue(any(isinstance(e, expected_exception) for e in aggregated_error.errors))
-            self.assertTrue(any(type(e).__name__ == expected_exception.__name__ for e in aggregated_error.errors))
+            exception_message = context.exception.errors
+            self.assertTrue(any(expected_exception.__name__ in msg for msg in exception_message))
         else:
             try:
                 checker.validate_spreadsheet()

@@ -1,5 +1,4 @@
 import logging
-import traceback
 import pandas as pd
 
 from conf.config import *
@@ -35,8 +34,8 @@ class CheckSpreadsheet:
             try:
                 check()
             except CheckDataError as e:
-                logging.error(f"Exception occurred in {check.__name__}: {str(e)}")
-                errors.append(e)
+                logging.error(f"{e.__class__.__name__}: {str(e)}")
+                errors.append(f"{e.__class__.__name__}: {e}")
             except KeyError as e:
                 pass
         
@@ -165,7 +164,7 @@ class CheckSpreadsheet:
         duplicates_list =  [group for _, group in group_by_attribute if len(group) > 1]
         if duplicates_list:
             duplicates = pd.concat(duplicates_list)
-            raise AttributesDuplicateError(duplicates)
+            raise AttributesDuplicateError(duplicates.to_string(index=False))
 
 class CheckDataError(Exception):
     """Base class for all exceptions raised by CheckData"""
@@ -176,8 +175,8 @@ class InvalidData(CheckDataError):
 
     def __init__(self, errors):
         self.errors = errors
-        error_message = "\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
-        super().__init__(f"Validation failed with {len(errors)} errors: {error_message}")
+        error_message = "\n\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
+        super().__init__(f"Validation failed with {len(errors)} errors:\n{error_message}")
 
 class PrimaryKeyMissingError(CheckDataError):
     """Raised whan a table lacks a Primary Key"""
@@ -218,7 +217,7 @@ class ReferenceUndefinedError(CheckDataError):
     """Raised if a Foreign key has no reference table defined"""
     def __init__(self, fk_without_ref) -> None:
         super().__init__(
-            "Every FK should have a reference table defined"
+            "Every FK should have a reference table defined. See Foreign key with no reference below\n"
             f"{fk_without_ref}"
         )
 
