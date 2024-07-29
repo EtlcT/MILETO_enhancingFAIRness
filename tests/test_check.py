@@ -1,16 +1,15 @@
 import unittest
 from parameterized import parameterized
-from unittest.mock import MagicMock
 
 import pandas as pd
 import numpy as np
 
-from src.extraction import retrieve_data
-from src import utils
+from src.extraction import check
 from conf.config import *
 
+def read_spreadsheet_mock():
+    """Example compliant with template"""
 
-def _read_spreadsheet_mock():
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
         ['Ref_A1', 'value_1', 'some_value_1'],
@@ -79,100 +78,9 @@ def _read_spreadsheet_mock():
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
-def rs_mock_undefined_pk():
-    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
-    values_A = [
-        ['Ref_A1', 'value_1', 'some_value_1'],
-        ['Ref_A2', 'value_2', 'some_value_2'],
-                ]
-    table_A = pd.DataFrame(data=values_A, columns=fields_A)
-
-    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
-    values_B = [
-        ['Ref_B1', 11, 'value_aa'],
-        ['Ref_B2', 23, 'value_ab'],
-        ['Ref_B1', 456, 'value_aa'],
-        ['Ref_B2', 7, 'value_ac'],
-    ]
-    table_B = pd.DataFrame(data=values_B, columns=fields_B)
-
-    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
-    values_KEYS = [
-        ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
-        ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
-        ['Table_A', 'Attribute_A3', np.nan, np.nan, np.nan],
-        ['Table_B', 'Attribute_B1', np.nan, np.nan, np.nan],
-        ['Table_B', 'Attribute_B2', np.nan, np.nan, np.nan],
-        ['Table_B', 'Attribute_B3', np.nan, np.nan, np.nan],
-    ]
-    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
-
-    table_REF = pd.DataFrame(
-        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
-        data=[
-            ['Date', 2024],
-            ['Title', '2022_Example#/Template_v2_1; ' ]
-        ]
-    )
-
-    return {
-        'Table_B': table_B,
-        'Table_A': table_A,
-        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
-        TEMP_CONF["meta_references"]["tab_name"]: table_REF
-    }
-
-def df1_no_duplicate():
-    
-    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
-    values_A = [
-        ['Ref_A1', 'value_1', 'some_value_1'],
-        ['Ref_A2', 'value_2', 'some_value_2'],
-        ['Ref_A3', 'value_2', 'some_value_2']
-                ]
-    table_A = pd.DataFrame(data=values_A, columns=fields_A)
-
-    return table_A
-
-def df1_with_duplicate():
-    
-    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
-    values_A = [
-        ['Ref_A1', 'value_1', 'some_value_1'],
-        ['Ref_A1', 'value_2', 'some_value_2'],
-        ['Ref_A2', 'value_2', 'some_value_2']
-                ]
-    table_A = pd.DataFrame(data=values_A, columns=fields_A)
-
-    return table_A
-
-def df2_with_duplicate():
-
-    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
-    values_B = [
-        ['Ref_B1', 11, 'value_aa'],
-        ['Ref_B2', 23, 'value_ab'],
-        ['Ref_B1', 11, 'value_ac'],
-        ['Ref_B2', 7, 'value_ac'],
-    ]
-    table_B = pd.DataFrame(data=values_B, columns=fields_B)
-
-    return table_B
-
-def df3_no_duplicate():
-
-    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
-    values_B = [
-        ['Ref_B1', 11, 'value_aa'],
-        ['Ref_B2', 23, 'value_ab'],
-        ['Ref_B1', 456, 'value_ac'],
-        ['Ref_B2', 7, 'value_ac'],
-    ]
-    table_B = pd.DataFrame(data=values_B, columns=fields_B)
-
-    return table_B
-
 def rs_mock_pk_duplicate():
+    """Primary key not unique"""
+
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
         ['Ref_A1', 'value_1', 'some_value_1'],
@@ -217,6 +125,7 @@ def rs_mock_pk_duplicate():
     }
 
 def rs_mock_cpk_duplicate():
+    """Composite Primary Key not unique"""
 
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -261,6 +170,7 @@ def rs_mock_cpk_duplicate():
     }
 
 def rs_mock_fk_not_unique():
+    """Foreign key not unique"""
 
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -306,6 +216,7 @@ def rs_mock_fk_not_unique():
     }
 
 def rs_mock_fk_not_exist():
+    """Foreign key doesn't exist in reference table"""
 
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -351,6 +262,7 @@ def rs_mock_fk_not_exist():
     }
 
 def rs_mock_fk_without_ref():
+    """Foreign key has not reference table defined"""
 
     fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
     values_A = [
@@ -395,7 +307,53 @@ def rs_mock_fk_without_ref():
         TEMP_CONF['meta_references']['tab_name']: table_REF
     }
 
-def attr_shared_name() -> pd.DataFrame:
+def rs_mock_undefined_pk():
+    """Table with no Primary Key"""
+
+    fields_A = ['Attribute_A1', 'Attribute_A2', 'Attribute_A3']
+    values_A = [
+        ['Ref_A1', 'value_1', 'some_value_1'],
+        ['Ref_A2', 'value_2', 'some_value_2'],
+                ]
+    table_A = pd.DataFrame(data=values_A, columns=fields_A)
+
+    fields_B = ['Attribute_B1', 'Attribute_B2', 'Attribute_B3']
+    values_B = [
+        ['Ref_B1', 11, 'value_aa'],
+        ['Ref_B2', 23, 'value_ab'],
+        ['Ref_B1', 456, 'value_aa'],
+        ['Ref_B2', 7, 'value_ac'],
+    ]
+    table_B = pd.DataFrame(data=values_B, columns=fields_B)
+
+    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
+    values_KEYS = [
+        ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
+        ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
+        ['Table_A', 'Attribute_A3', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B1', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B2', np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B3', np.nan, np.nan, np.nan],
+    ]
+    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
+
+    table_REF = pd.DataFrame(
+        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
+        data=[
+            ['Date', 2024],
+            ['Title', '2022_Example#/Template_v2_1; ' ]
+        ]
+    )
+
+    return {
+        'Table_B': table_B,
+        'Table_A': table_A,
+        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
+        TEMP_CONF["meta_references"]["tab_name"]: table_REF
+    }
+
+def rs_mock_shared_name() -> pd.DataFrame:
+    """Not foreign keys field have the same name as another field"""
     
     brand = pd.DataFrame(
         columns= ['id', 'brand_name'],
@@ -442,201 +400,31 @@ def attr_shared_name() -> pd.DataFrame:
 
 ################################################
 
-class TestExtraction(unittest.TestCase):
-    
-
-    @parameterized.expand([
-        ('meta_Something', True),
-        ('MeTa_CaseUnsensitive', True),
-        ('metacognitive', False),
-        (TEMP_CONF["tables_info"]["tab_name"], True),
-        ('keys_table', False),
-    ])
-
-    def test_regex_exclude_meta(self, text, regexMatch):
-        """Check that sheet that contains either 'meta.', TEMP_CONF["tables_info"]["tab_name"] or 'extra' 
-        matches the regex and so return True.
-        """
-
-        result = retrieve_data.GetSpreadsheetData._regex_exclude_meta(self, text=text)
-
-        self.assertEqual(result, regexMatch)
-
-
-    def test_get_datatables_list(self):
-        """Check that all tables that contains data are correctly retrieved"""
-
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=_read_spreadsheet_mock())
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-        result = getData._get_datatables_list()
-
-        self.assertListEqual(result, ['Table_A', 'Table_B', 'Table_C', 'Table_D'])
-
-    def test_get_dbname(self):
-        """Check that db_name is correctly retrieved without forbidden character"""
-
-        getData = retrieve_data.GetSpreadsheetData('fakepath/to/spreadsheet/2022_ExampleTemplate_v2_1.xlsx')
-        expected_result = '2022_ExampleTemplate_v2_1'
-        result = getData.db_name
-
-        self.assertEqual(expected_result, result)
-        
-    def test_composite_pk(self):
-        """Check that all composite PK are retrieved"""
-
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=_read_spreadsheet_mock())
-        expected_data = [
-            ['Table_B', ['Attribute_B1', 'Attribute_B2']]
-        ]
-        expected_result = pd.DataFrame(
-            columns=['Table', 'pk_fields'],
-            data=expected_data
-        )
-
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-        result = getData._get_composite_pk()
-
-        self.assertEqual(expected_result.equals(result), True)
-
-    @parameterized.expand([
-        (df1_no_duplicate(), 'Attribute_A1', True),
-        (df1_with_duplicate(), 'Attribute_A1', False),
-        (df1_with_duplicate(), ['Attribute_A1'], False),
-        (df2_with_duplicate(), ['Attribute_B1', 'Attribute_B2'], False),
-        (df3_no_duplicate(), ['Attribute_B1', 'Attribute_B2'], True)
-    ])
-
-    def test_check_uniqueness(self, table_df, fields, expected_result):
-        """
-            Check that function utils.check_uniqueness properly return False
-            when there are duplicate True if not
-        """
-
-        result = utils.check_uniqueness(table=table_df, fields=fields)
-        
-        self.assertEqual(result, expected_result)
-        
-        
-
-    error_pk_not_unique = (
-        "invalid primary key constraint ['Attribute_A1'] for table Table_A\n"
-        "Primary must be unique"
-    )
-    
-    error_cpk_not_unique = (
-        "invalid primary key constraint ['Attribute_B1', 'Attribute_B2'] for table Table_B\n"
-        "Primary must be unique"
-    )
+class TestCheckSpreadsheet(unittest.TestCase):
     
     @parameterized.expand([
-        (MagicMock(return_value=rs_mock_pk_duplicate()), error_pk_not_unique ),
-        (MagicMock(return_value=rs_mock_cpk_duplicate()), error_cpk_not_unique),
+        ("Primary Key not defined", rs_mock_undefined_pk(), check.PrimaryKeyMissingError),
+        ("Primary Key contains duplicate", rs_mock_pk_duplicate(), check.PrimaryKeyNonUniqueError),
+        ("Composite Primary Key duplicate", rs_mock_cpk_duplicate(), check.PrimaryKeyNonUniqueError),
+        ("Foreign Key with no reference table", rs_mock_fk_without_ref(), check.ReferenceUndefinedError),
+        ("Foreing Key doesn't exist in reference table", rs_mock_fk_not_exist(), check.ForeignKeyNotFoundError),
+        ("Foreign Key contains duplicate", rs_mock_fk_not_unique(), check.ForeignKeyNonUniqueError),
+        ("Fields have the same name without being Foreing keys", rs_mock_shared_name(), check.AttributesDuplicateError),
+        ("Valid spreadsheet does not raise error", read_spreadsheet_mock(), None)
     ])
 
-    def test_check_PK_uniqueness(self, mock_object, errorRaised):
-        """
-            Check that an assertion is raised if primary key or composite
-            primary key contain duplicate
-        """
+    def test_validate_spreadsheet(self, name, sheet_dict, expected_exception):
 
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = mock_object
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-
-        with self.assertRaises(AssertionError) as custom_error:
-            getData.check_pk_uniqueness()
-
-        
-        self.assertEqual(str(custom_error.exception), errorRaised)
-
-    
-    error_fk_not_unique = (
-        "invalid Foreign key ['Attribute_A3'] for Table_B\n"
-        "the reference attribute in Table_A should be unique"
-    )
-    error_fk_not_exist = (
-        "invalid Foreign key ['Attribute_B3'] for Table_B\n"
-        "all attributes must be present in Table_A"
-    )
-
-    @parameterized.expand([
-        (MagicMock(return_value=rs_mock_fk_not_unique()), error_fk_not_unique),
-        (MagicMock(return_value=rs_mock_fk_not_exist()), error_fk_not_exist),
-        (MagicMock(return_value=_read_spreadsheet_mock()), None)
-    ])
-
-    def test_check_fk_existence_and_uniqueness(self, mockObject, expected_result):
-        """
-        Check that an assertion error is raised if :
-         - FK reference does not exist in the reference table
-         - FK reference exists but does not comply with unicity constraint
-        """
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = mockObject
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-
-        if expected_result is not None:
-
-            with self.assertRaises(AssertionError) as custom_error:
-                getData.check_FK_existence_and_uniqueness()
-            self.assertEqual(str(custom_error.exception), expected_result)
-
+        checker = check.CheckSpreadsheet(sheet_dict, sheet_dict["tables_info"])
+        if expected_exception:
+            with self.assertRaises(check.InvalidData) as context:
+                checker.validate_spreadsheet()
+            aggregated_error = context.exception
+            self.assertTrue(any(isinstance(e, expected_exception) for e in aggregated_error.errors))
+            self.assertTrue(any(type(e).__name__ == expected_exception.__name__ for e in aggregated_error.errors))
         else:
-            self.assertEqual(getData.check_FK_existence_and_uniqueness(),expected_result)
-
-    
-    def test_check_pk_defined(self):
-        """
-        Check that an assertion error is raised if a table has no
-        primary key defined
-        """
-
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=rs_mock_undefined_pk())
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-        expected_result = 'Table Table_B has no Primary Key defined'
-
-        with self.assertRaises(AssertionError) as custom_error:
-            getData.check_pk_defined()
-
-        self.assertEqual(str(custom_error.exception), expected_result)
-
-
-    def test_check_fk_get_ref(self):
-        """
-        Check that an assertion is raised if a field is defined as
-        a foreing key without having a reference table defined
-        """
-
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=rs_mock_fk_without_ref())
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-
-        with self.assertRaises(AssertionError) as custom_error:
-            getData.check_fk_get_ref()
-        
-        self.assertIn("Every FK should have a reference table defined", str(custom_error.exception))
-
-    error_shared_name = (
-        "Except for Foreign keys, different attributes should not"
-        "have the same names"
-    )
-
-    @parameterized.expand([
-            (MagicMock(return_value=attr_shared_name()), error_shared_name),
-            (MagicMock(return_value=_read_spreadsheet_mock()), None)
-        ])
-
-    def test_check_no_shared_name(self, mockObject, expected_result):
-        """Check that an assertion error is raised if distinct attributes
-        have the same name (except for Foreign Keys)
-        """
-
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = mockObject
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-
-        if expected_result is not None:
-            with self.assertRaises(AssertionError) as custom_error:
-                getData.check_no_shared_name()
-
-            self.assertEqual(str(custom_error.exception), expected_result)
-        
-        else:
-            self.assertEqual(getData.check_no_shared_name(),None)
-
+            try:
+                checker.validate_spreadsheet()
+            except check.CheckDataError:
+                self.fail(f"{name} raised CheckDataError unexpectedly!")
+                

@@ -29,6 +29,7 @@ def check_uniqueness(fields, table) -> bool:
             return (count_combination['count']==1).all()
         else:
             return table[fields[0]].is_unique
+    else: raise TypeError(f"fields should be of type list or string but has type {type(fields)}")
 
 def checks_pipeline(check_funcs: list):
     """

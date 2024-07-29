@@ -8,9 +8,9 @@ if getattr(sys, 'frozen', False):
     # If running as a PyInstaller bundle
     bundle_dir = sys._MEIPASS
     os.environ["PATH"] = (
-        os.path.join(bundle_dir, "graphviz_bin")
+        os.path.join(bundle_dir, "graphviz")
         + os.pathsep 
-        + os.path.join(bundle_dir, "wkhtml_bin") 
+        + os.path.join(bundle_dir, "wkhtml") 
         + os.pathsep + os.environ["PATH"]
     )
 

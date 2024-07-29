@@ -7,7 +7,6 @@ from src.utils import check_uniqueness
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
-                    encoding="utf-8",
                     handlers=[logging.FileHandler("Ss2db.log"),
                               logging.StreamHandler()])
 
@@ -37,13 +36,12 @@ class CheckSpreadsheet:
                 check()
             except CheckDataError as e:
                 logging.error(f"Exception occurred in {check.__name__}: {str(e)}")
-                errors.append(f"{check.__name__}: {str(e)}")
+                errors.append(e)
             except KeyError as e:
                 pass
         
         if errors:
-            error_message = f"Validation failed with {len(errors)} errors:\n" + "\n".join(errors)
-            raise RuntimeError(error_message)
+            raise InvalidData(errors)
             
     def check_pk_uniqueness(self) -> None:
         """
@@ -172,6 +170,14 @@ class CheckSpreadsheet:
 class CheckDataError(Exception):
     """Base class for all exceptions raised by CheckData"""
     pass
+
+class InvalidData(CheckDataError):
+    """Raised when one or several errors are found in spreadsheet"""
+
+    def __init__(self, errors):
+        self.errors = errors
+        error_message = "\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
+        super().__init__(f"Validation failed with {len(errors)} errors: {error_message}")
 
 class PrimaryKeyMissingError(CheckDataError):
     """Raised whan a table lacks a Primary Key"""
