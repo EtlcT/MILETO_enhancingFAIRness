@@ -1,5 +1,4 @@
 import logging
-import traceback
 import argparse
 import os
 
@@ -10,12 +9,12 @@ logging.basicConfig(level=logging.ERROR,
                               logging.StreamHandler()])
 try:
     from src.extraction.retrieve_data import GetSpreadsheetData
+    from src.extraction.check import InvalidData
     from src.dbcreate.dbcreate import sqliteCreate
     from src.doccreate.pdf_create import docCreate
-    from src.utils import checks_pipeline
+
 except Exception as e:
     logging.error("An error occurred", exc_info=True)
-    traceback.print_exc()
 
 def main_cli():
 
@@ -41,16 +40,6 @@ def main_cli():
     output_path = os.path.normpath(args.output)
     
     data = GetSpreadsheetData(filepath=input_path)
-
-    #? conf file to store check list
-    check_funcs_list = [
-        data.check_no_shared_name,
-        data.check_pk_defined,
-        data.check_pk_uniqueness,
-        data.check_fk_get_ref,
-        data.check_FK_existence_and_uniqueness
-    ]
-    checks_pipeline(check_funcs_list)
 
     sqlite_db = sqliteCreate(data, output_dir=output_path)
     sqlite_db.create_db()
