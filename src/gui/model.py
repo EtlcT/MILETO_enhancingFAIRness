@@ -5,6 +5,7 @@ import pandas as pd
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.extraction.check import CheckSpreadsheet
 from src.dbcreate.dbcreate import sqliteCreate
+from src.doccreate.pdf_create import docCreate
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -16,7 +17,7 @@ class Model:
         self.spreadsheet_path = None
         self.output_path = None
         self.tmp_data = None
-        self.data = None
+        self.checked_data = None
     
     def load_spreadsheet(self, filepath):
         try:
@@ -31,6 +32,26 @@ class Model:
         checker = CheckSpreadsheet(self.tmp_data)
         checker.validate_spreadsheet()
 
+        self.checked_data = checker.sheets_dict
+
     def convert_all(self):
 
-        self.data = GetSpreadsheetData(self.spreadsheet_path)
+        self.data = GetSpreadsheetData(
+            filepath=self.spreadsheet_path,
+            checked_data=self.checked_data
+            )
+        
+        # create sqlite and erd_schema
+        sqlite_db = sqliteCreate(
+            self.data,
+            output_dir=self.output_path
+            )
+        sqlite_db.create_db()
+        sqlite_db.insert_data()
+        sqlite_db.ddict_schema_create()
+        sqlite_db.meta_tables_create()
+
+        # create pdf
+        doc = docCreate(sqlite_db)
+
+        doc.createPDF()

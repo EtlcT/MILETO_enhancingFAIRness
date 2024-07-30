@@ -15,8 +15,13 @@ class CheckSpreadsheet:
         This class checks that data retrieved by GetSpreadSheet data is correct
     """
 
-    def __init__(self, filepath):
-        self.sheets_dict = pd.read_excel(filepath, sheet_name=None)
+    def __init__(self, spreadsheet):
+        ## GUI: spreadsheet has already been loaded and is stored as dict
+        if isinstance(spreadsheet, dict):
+            self.sheets_dict = spreadsheet
+        ## CLI: spreadsheet is read for the first time
+        else:
+            self.sheets_dict = pd.read_excel(spreadsheet, sheet_name=None)
         self.tables_info = self._get_tables_info()
 
     def validate_spreadsheet(self):

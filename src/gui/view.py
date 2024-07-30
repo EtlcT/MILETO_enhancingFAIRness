@@ -204,8 +204,7 @@ class View(ctk.CTk):
             self.convert_btn = ctk.CTkButton(
                 master=self.conversion_frame,
                 text="Convert spreadsheet",
-                state="disabled",
-                command=self.controller.convert_all
+                command=lambda: self.controller.convert_all(self.output_dir)
             )
             self.convert_btn.grid(
                 row = 2,
@@ -223,13 +222,24 @@ class View(ctk.CTk):
             row=2,
             column=0
         )
-
-        self.output_dir_btn = ctk.CTkButton(
+        
+        self.outdir_lbl = ctk.CTkLabel(
             master=self.conversion_frame,
-            command=self.browse_outdir
+            text="Select a directory to store outputs"
         )
-        self.output_dir_btn.grid(
+        self.outdir_lbl.grid(
             row=0,
+            column=0
+        )
+
+        self.outdir_btn = ctk.CTkButton(
+            master=self.conversion_frame,
+            command=self.browse_outdir,
+            text="Browse Folder"
+        )
+        self.outdir_btn.grid(
+            row=0,
+            column=1
         )
 
 
@@ -237,7 +247,15 @@ class View(ctk.CTk):
         # TODO: add checkbox to enable full process or only sqlite + erd
         pass
 
-        
+    def show_success(self, msg):
+        """ Open Window with success message"""
+        CTkMessagebox(
+            master=self,
+            title="Success",
+            message=msg,
+            icon="check",
+            option_1="OK"
+        )
 
     def _rm_elmt_in_view(self):
         """On changes relative to spreadsheet path or verification

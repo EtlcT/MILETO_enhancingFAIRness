@@ -25,9 +25,10 @@ class Controller:
         except InvalidData as e:
             self.view.display_errors(str(e).replace("str: ", ""))
         else:
+            self.view.show_success("Valid spreadsheet provided")
             self.view.allow_conversion()
     
-    # def convert_all(self,  output_dir):
+    def convert_all(self, output_dir):
 
-    #     self.model.output_path = output_dir
-    #     self.model.
+        self.model.output_path = output_dir
+        self.model.convert_all()
