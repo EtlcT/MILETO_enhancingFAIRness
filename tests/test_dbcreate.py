@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 import numpy as np
-from src import utils
+from src.utils import utils
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.dbcreate import sqliteCreate
 from conf.config import *

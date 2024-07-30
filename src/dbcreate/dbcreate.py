@@ -6,7 +6,6 @@ from data tables dataframes and tables_info description.
 
 import sys
 import os
-import pkg_resources
 import sqlite3
 import pandas as pd
 

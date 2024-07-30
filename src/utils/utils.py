@@ -123,3 +123,8 @@ def rotate_image(image_path):
         rotated_image.save(image_path)
     
     return
+
+def file_exists(file_path):
+    """Return true if file exists, False if not"""
+
+    return os.path.exists(file_path)

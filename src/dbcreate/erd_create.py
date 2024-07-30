@@ -8,10 +8,9 @@ import os
 import pandas as pd
 import numpy as np
 import graphviz
-import pickle
 
 from conf.config import *
-from src.utils import rotate_image
+from src.utils.utils import rotate_image
 
 class ERD_maker():
     """

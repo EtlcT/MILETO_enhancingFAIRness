@@ -1,4 +1,4 @@
-from src.utils import json2dict
+from src.utils.utils import json2dict
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 

@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 from src.extraction import retrieve_data
-from src import utils
+from src.utils import utils
 from conf.config import *
 
 def _read_spreadsheet_mock():

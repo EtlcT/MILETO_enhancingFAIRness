@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.ERROR,
                               logging.StreamHandler()])
 try:
     from src.extraction.retrieve_data import GetSpreadsheetData
-    from src.extraction.check import InvalidData
+    from src.extraction.check import CheckSpreadsheet, InvalidData
     from src.dbcreate.dbcreate import sqliteCreate
     from src.doccreate.pdf_create import docCreate
 
@@ -39,14 +39,21 @@ def main_cli():
     input_path = os.path.normpath(args.input)
     output_path = os.path.normpath(args.output)
     
-    data = GetSpreadsheetData(filepath=input_path)
+    # check data in spreadsheet is valid
+    checker = CheckSpreadsheet(input_path)
+    checker.validate_spreadsheet()
 
+    # retrieve and process data for sqlite generation based on valid data
+    data = GetSpreadsheetData(filepath=input_path, checked_data=checker.sheets_dict)
+
+    # create sqlite and erd_schema
     sqlite_db = sqliteCreate(data, output_dir=output_path)
     sqlite_db.create_db()
     sqlite_db.insert_data()
     sqlite_db.ddict_schema_create()
     sqlite_db.meta_tables_create()
 
+    # create pdf
     doc = docCreate(sqlite_db)
 
     doc.createPDF()

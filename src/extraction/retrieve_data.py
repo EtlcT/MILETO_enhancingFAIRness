@@ -15,63 +15,36 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from conf.config import *
-from src.utils import file2Blob, bytes_in_df_col
-from src.extraction.check import CheckSpreadsheet
+from src.utils.utils_extraction import get_datatables_list
+from src.utils.utils import file2Blob, bytes_in_df_col
 
 class GetSpreadsheetData:
     """
-    Class that read a spreadsheet and retrieve required data from it 
+    Class that retrieve and process data that has been retrieved from
+    pd.read_excel and already checked by CheckSpreadsheet class
     """
 
-    def __init__(self, filepath) -> None:
-        self.sheets_dict = self._read_spreadsheet(filepath)
+    def __init__(self, filepath, checked_data) -> None:
+        self.datatables_list = get_datatables_list(checked_data)
+        self.sheets_dict = self._process_data(checked_data)
         self.db_name = os.path.splitext(os.path.basename(filepath))[0]
-        self.datatables_list = self._get_datatables_list()
         self.tables_info = self._get_tables_info()
         self.compositePK_df = self._get_composite_pk()
         
-        self._run_checker()
 
-    def _read_spreadsheet(self, filepath) -> dict:
+    def _process_data(self, checked_data) -> dict:
         """
         return a dictionnary containing as many dataframes as sheets in the original file
+        and convert path_file into blob of the file
         """
 
-        data = pd.read_excel(filepath, sheet_name=None)
-        for table_name in data.keys():
+        for table_name in checked_data.keys():
+            if table_name not in self.datatables_list:
+                # process_df convert any absolute filepath into 
+                # blob of relative file
+                self.process_df(checked_data[table_name])
 
-            # process_df convert any absolute filepath into 
-            # blob of relative file
-            self.process_df(data[table_name])
-
-        return data
-
-    #! add file for regex exclusion
-    def _regex_exclude_meta(self, text) -> bool:
-        """
-        return True if text match one of the regex to exclude, false either
-
-        case insensitive regex to keep only data tables
-        """
-        no_info = re.search(r"(?i)tables_info", text)
-        no_meta = re.search(r"(?i)meta\_", text)
-        no_DDict = re.search(r"(?i)DDict\_", text)
-        no_extra = re.search(r"(?i)extra_sheet\.", text)
-        return any([no_DDict, no_meta, no_extra, no_info])
-
-
-    def _get_datatables_list(self) -> list:
-        """
-        Return a list containing the name of table that contains effective data
-
-        exclude extra.*, meta.* and DDict.*, tables_info
-        """
-        datatable_list = list()
-        for sheet_name in self.sheets_dict:
-            if(self._regex_exclude_meta(sheet_name) == False):
-                datatable_list.append(sheet_name)
-        return datatable_list
-
+        return checked_data
 
     #! may be deprecated in the future if spreadsheet template is modified
     #? potential future behavior: directly modify sheet_dict[INFO]
@@ -154,10 +127,6 @@ class GetSpreadsheetData:
                         )
    
         return tables_info
-    
-    def _run_checker(self):
-        checker = CheckSpreadsheet(self.sheets_dict, self.tables_info)
-        checker.validate_spreadsheet()
 
     # TODO CHECK
     @staticmethod

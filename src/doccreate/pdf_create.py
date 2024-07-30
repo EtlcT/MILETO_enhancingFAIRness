@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from conf.config import *
 from src.dbcreate.dbcreate import sqliteCreate
-from src.utils import resource_path, html_formatted_sql
+from src.utils.utils import resource_path, html_formatted_sql
 
 class docCreate():
     """

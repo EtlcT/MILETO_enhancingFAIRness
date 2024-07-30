@@ -2,7 +2,8 @@ import logging
 import pandas as pd
 
 from conf.config import *
-from src.utils import check_uniqueness
+from src.utils.utils import check_uniqueness
+from src.utils.utils_extraction import get_datatables_list
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -14,9 +15,9 @@ class CheckSpreadsheet:
         This class checks that data retrieved by GetSpreadSheet data is correct
     """
 
-    def __init__(self, sheets_dict, tables_info):
-        self.sheets_dict = sheets_dict
-        self.tables_info = tables_info
+    def __init__(self, filepath):
+        self.sheets_dict = pd.read_excel(filepath, sheet_name=None)
+        self.tables_info = self._get_tables_info()
 
     def validate_spreadsheet(self):
         """Raise error if spreadsheet contains errors
@@ -165,6 +166,15 @@ class CheckSpreadsheet:
         if duplicates_list:
             duplicates = pd.concat(duplicates_list)
             raise AttributesDuplicateError(duplicates.to_string(index=False))
+    
+    def _get_tables_info(self):
+
+        datatables_list = get_datatables_list(self.sheets_dict)
+
+        tables_info = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
+                                        .isin(datatables_list)] \
+                                        .iloc[:,:5]
+        return tables_info
 
 class CheckDataError(Exception):
     """Base class for all exceptions raised by CheckData"""
