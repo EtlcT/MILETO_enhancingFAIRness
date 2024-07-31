@@ -34,18 +34,23 @@ class Model:
 
         self.checked_data = checker.sheets_dict
 
-    def convert_all(self):
-
+    # TODO split in getData, sqlite create and pdf create
+    def convert(self, output_name=None):
+    
         self.data = GetSpreadsheetData(
             filepath=self.spreadsheet_path,
             checked_data=self.checked_data
             )
+        
+        if output_name:
+            self.data.db_name = output_name
         
         # create sqlite and erd_schema
         sqlite_db = sqliteCreate(
             self.data,
             output_dir=self.output_path
             )
+        
         sqlite_db.create_db()
         sqlite_db.insert_data()
         sqlite_db.ddict_schema_create()
