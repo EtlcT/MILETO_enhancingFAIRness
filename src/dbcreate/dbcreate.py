@@ -16,8 +16,6 @@ from conf.config import *
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.erd_create import ERD_maker
 
-
-
 class sqliteCreate():
     """
     Class that create a sqlite file based on data from extraction module
@@ -25,7 +23,7 @@ class sqliteCreate():
 
     def __init__(self, getData: object, output_dir: str) -> None:
         assert isinstance(getData, GetSpreadsheetData), (
-            "Error getData should be an instance of sqliteCreate class"
+            "Error getData should be an instance of GetSpreadsheetData class"
             )
         self.data = getData
         self.output_dir = output_dir
