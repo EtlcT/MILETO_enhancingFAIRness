@@ -4,14 +4,14 @@ import os
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR, 
-                    format='%(asctime)s %(levelname)s %(message)s', 
-                    handlers=[logging.FileHandler("logs"),
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    handlers=[logging.FileHandler("Ss2db.log"),
                               logging.StreamHandler()])
 try:
     from src.extraction.retrieve_data import GetSpreadsheetData
     from src.extraction.check import CheckSpreadsheet, InvalidData
     from src.dbcreate.dbcreate import sqliteCreate
-    from src.doccreate.pdf_create import docCreate
+    from src.doccreate.pdf_create import docCreate, sqlite2pdf
 
 except Exception as e:
     logging.error("An error occurred", exc_info=True)
@@ -50,44 +50,80 @@ def main_cli():
         help="basename of output, default behavior will be using spreadsheet name"
     )
 
+    parser.add_argument(
+        "--from-sqlite",
+        nargs="?",
+        const=False,
+        type=bool,
+        help="default False, set on True if you provide path to sqlite file and want a PDF creation from it only"
+    )
+
     args = parser.parse_args()
 
     input_path = os.path.normpath(args.input)
     output_path = os.path.normpath(args.output)
     
-    # check data in spreadsheet is valid
-    checker = CheckSpreadsheet(input_path)
-    checker.validate_spreadsheet()
+    if args.from_sqlite == True:
+        doc = sqlite2pdf(input_path, output_path)
+        doc.createPDF()
+    else:
+        # check data in spreadsheet is valid
+        checker = CheckSpreadsheet(input_path)
+        checker.validate_spreadsheet()
 
 
-    data = GetSpreadsheetData(
-                filepath=input_path,
-                checked_data=checker.sheets_dict
-            )
- 
-    if os.path.isfile(os.path.join(output_path, os.path.splitext(os.path.basename(input_path))[0] + ".sqlite")):
-        # if sqlite file for this spreadsheet already exists in output directory
-        if args.overwrite != None:
-            # if user specifies he want the file to be overwritten, delete sqlite
-            os.remove(os.path.join(output_path, os.path.splitext(os.path.basename(input_path))[0] + ".sqlite"))
-        elif args.filename:
-            # if user specifies another filename as output instead of spreadsheet name
-            data.db_name =args.filename
-        else:
-            # file already exists and user doesn't specify how to handle it
-            logging.error(
-                f"{FileExistsError}: {os.path.splitext(os.path.basename(input_path))[0]} already exists"
-                "Overwrite it with -ow --overwritte flag OR specify anothe name using --filename"
+        data = GetSpreadsheetData(
+                    filepath=input_path,
+                    checked_data=checker.sheets_dict
                 )
-            
-    # create sqlite and erd_schema
-    sqlite_db = sqliteCreate(data, output_dir=output_path)
-    sqlite_db.create_db()
-    sqlite_db.insert_data()
-    sqlite_db.ddict_schema_create()
-    sqlite_db.meta_tables_create()
+        
+        spreadsheet_name = os.path.splitext(os.path.basename(input_path))[0]
+    
+        if args.overwrite != None and args.filename:
+            # overwrite the specified filename if exists
+            rm_if_exists(os.path.join(output_path, args.filename + ".sqlite"))
+            data.db_name = args.filename
+        elif args.overwrite != None and args.filename is None:
+            # user overwrite file with default filename if exits
+            rm_if_exists(os.path.join(output_path, spreadsheet_name + ".sqlite"))
+        elif args.overwrite is None and args.filename:
+            # user specified filename but donesn't want to overwrite
+            fileExistsHandler(os.path.join(output_path, args.filename + ".sqlite"))
+            data.db_name = args.filename
+        if args.overwrite is None and args.filename is None:
+            # user haven't specified 
+            fileExistsHandler(os.path.join(output_path, spreadsheet_name + ".sqlite"))
+                
+        # create sqlite and erd_schema
+        sqlite_db = sqliteCreate(data, output_dir=output_path)
+        sqlite_db.create_db()
+        sqlite_db.insert_data()
+        sqlite_db.ddict_schema_create()
+        sqlite_db.meta_tables_create()
 
-    # create pdf
-    doc = docCreate(sqlite_db)
+        # create pdf
+        doc = docCreate(sqlite_db)
 
-    doc.createPDF()
+        doc.createPDF()
+
+    
+def rm_if_exists(filepath):
+    try:
+        os.remove(filepath)
+    except FileNotFoundError:
+        pass
+
+def fileExistsHandler(filepath):
+    """Raise error and log error if file exist"""
+
+    filename = os.path.splitext(os.path.basename(filepath))[0]
+    if os.path.isfile(filepath):
+    # file already exists and user doesn't specify how to handle it
+        logging.error(
+            f"{FileExistsError}: {filename} already exists in output directory\n"
+            "Overwrite it with -ow --overwritte flag OR specify anothe name using --filename"
+        )
+        raise FileExistsError(
+            f"{filename} already exists in output directory"
+            "Overwrite it with -ow --overwritte flag OR specify another filename using --filename"
+        )

@@ -42,7 +42,7 @@ class View(ctk.CTk):
         self.browse_file_btn = ctk.CTkButton(
             self.input_frame,
             text="Browse",
-            command=self.browse_file
+            command=lambda: self.browse_file(self.check_fsqlite)
             )
         self.browse_file_btn.grid(
             row=0,
@@ -52,25 +52,54 @@ class View(ctk.CTk):
             sticky="w"
         )
 
+        # from sqlite checkbox that enable to select sqlite file
+        self.check_fsqlite = ctk.StringVar()
+        self.from_sqlite_cb = ctk.CTkCheckBox(
+            master = self.input_frame,
+            text="generate pdf from existing sqlite",
+            variable=self.check_fsqlite,
+            onvalue="on",
+            offvalue="off"
+        )
+        self.from_sqlite_cb.grid(
+            row=1,
+            column=1,
+            padx=10,
+            pady=5,
+        )
+
 
     def set_controller(self, controller):
         self.controller = controller
 
-    def browse_file(self):
+    def browse_file(self, from_sqlite):
         """Open a file dialog window for spreadsheets files
         then display selected file
         """
+        self.variables["from_sqlite"] = from_sqlite
+        if from_sqlite == "off":
 
-        self.filepath = ctk.filedialog.askopenfilename(
-            title="Select a file",
-            filetypes=[("All Excel files", "*.xlsx;*.xls;*.xlsm;*.xlsb;*.odf;*.ods;*.odt")]
-        )
+            self.filepath = ctk.filedialog.askopenfilename(
+                title="Select a file",
+                filetypes=[("All Excel files", "*.xlsx;*.xls;*.xlsm;*.xlsb;*.odf;*.ods;*.odt")]
+            )
 
-        if self.filepath:
-            # TODO ?? rm children from dict store and separate dict frame from dict widget
-            self.rm_widget("error_frame")
-            self.rm_widget("conversion_frame")
-            self.controller.spreadsheet_loader(self.filepath)
+            if self.filepath:
+                # TODO ?? rm children from dict store and separate dict frame from dict widget
+                self.rm_widget("error_frame")
+                self.rm_widget("conversion_frame")
+                self.controller.spreadsheet_loader(self.filepath)
+        
+        else:
+            self.filepath = ctk.filedialog.askopenfilename(
+                title="Select a file",
+                filetypes=[("sqlite File", "*.sqlite")]
+            )
+            
+            if self.filepath:
+                self.rm_widget("error_frame")
+                self.rm_widget("conversion_frame")
+                self.controller.display_conversion_frame()
             
 
     def browse_outdir(self):
@@ -79,14 +108,19 @@ class View(ctk.CTk):
 
         if self.output_dir:
 
-            output_sqlite = os.path.normpath(os.path.join(
-                self.output_dir,
-                os.path.splitext(os.path.basename(self.filepath))[0]
-                + ".sqlite"
-                ))
+            if self.get_var("from_sqlite") == "off":
 
-            # TODO rename following function
-            self.controller.display_convert_option(output_sqlite)
+                output_sqlite = os.path.normpath(os.path.join(
+                    self.output_dir,
+                    os.path.splitext(os.path.basename(self.filepath))[0]
+                    + ".sqlite"
+                    ))
+
+                # TODO rename following function
+                self.controller.display_convert_option(output_sqlite)
+            
+            else:
+                self.controller.display_pdf_from_sqlite()
 
     def convert_spreadsheet_option(self):
         # TODO: add checkbox to enable full process or only sqlite + erd
@@ -125,5 +159,7 @@ class View(ctk.CTk):
         to_del_obj.delete(*to_del_obj.get_children())
 
     def get_var(self, var_name):
-        """Access variable value"""
-        return self.variables.get(var_name)
+        """Return variable value from dict
+        if key doesn't exist, return None
+        """
+        return self.variables.get(var_name, None)

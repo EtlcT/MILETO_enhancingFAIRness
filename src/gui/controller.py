@@ -1,4 +1,5 @@
 import os
+import logging
 from tkinter import ttk
 import customtkinter as ctk
 from PIL import Image
@@ -6,6 +7,11 @@ from PIL import Image
 from src.gui.view import View
 from src.gui.model import Model
 from src.extraction.check import InvalidData
+
+logging.basicConfig(level=logging.ERROR, 
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    handlers=[logging.FileHandler("Ss2db.log"),
+                              logging.StreamHandler()])
 
 class Controller:
     def __init__(self, model, view):
@@ -67,7 +73,7 @@ class Controller:
 
     def load_spreadsheet(self, spreadsheet_path):
         """Load spreadsheet data"""
-        self.model.spreadsheet_path = spreadsheet_path
+        self.model.input_path = spreadsheet_path
         tmp_data = self.model.load_spreadsheet(spreadsheet_path)
         return tmp_data
     
@@ -211,7 +217,7 @@ class Controller:
         Add a conversion frame to view with:
         - browse folder button for output directory selection
         - conversion option radio buttons
-        (generate all, only sqlite and erd, from sqlite)
+        (generate all, only sqlite and erd)
         """
 
         # TODO : ADD radiobuttons and code action
@@ -306,11 +312,12 @@ class Controller:
 
             def callback_entry(*args):
                 """Enable convert button if output name doesn't already exist"""
-                if not os.path.isfile(os.path.normpath(os.path.join(
+                ow_state = self.view.get_var("check_ow")
+                if (not os.path.isfile(os.path.normpath(os.path.join(
                         self.view.output_dir,
                         filename_var.get() + ".sqlite"
                     )
-                )) and filename_var.get() != "":
+                )) and filename_var.get() != "") or ow_state == True:
                     # fie does not exists yet
                     self.view.get_widget("convert_btn").configure(state="normal")
                     self.add_variable("filename_var", filename_var.get())
@@ -318,7 +325,7 @@ class Controller:
                     self.view.get_widget("convert_btn").configure(state="disabled")
                     # if invalid filename remove it from
                     if "filename_var" in self.view.variables:
-                        del self.view.variables[filename_var.get()] 
+                        del self.view.variables["filename_var"] 
                     
 
             # Add Entry widget to allow user to chose
@@ -345,14 +352,16 @@ class Controller:
                 if check_ow.get() == "on":
                     self.view.get_widget("convert_btn").configure(state="normal")
                     self.add_variable("check_ow", True)
-                elif check_ow.get() == "off" and file.get() == "":
-                    #! if user write file that already exist, enable and disable cb it will allow to convert with wrong filename
-                    #! won't fix and handle with file already exist error
+                elif check_ow.get() == "off" and (file.get() == "" or os.path.isfile(os.path.normpath(os.path.join(
+                        self.view.output_dir,
+                        filename_var.get() + ".sqlite"
+                    ))
+                )):
                     self.view.get_widget("convert_btn").configure(state="disabled")
                     self.view.variables["check_ow"] = False
 
             # Add checkbox for overwrite previous output option
-            check_ow = ctk.StringVar(value="off")
+            check_ow = ctk.StringVar()
             overwrite_cb = ctk.CTkCheckBox(
                 master=self.view.get_widget("conversion_frame"),
                 text="Overwrite existing file in output directory",
@@ -379,18 +388,60 @@ class Controller:
         ie: create database, erd and pdf
         """
         self.model.output_path = self.view.output_dir
+        spreadsheet_name = os.path.splitext(os.path.basename(self.view.filepath))[0]
+        ow_state = self.view.variables.get("check_ow")
+        user_defined_filename = self.view.variables.get("filename_var")
 
-        if self.view.variables.get("check_ow") == True:
-            # user want to overwrite existing file
-            print(os.path.join(self.view.output_dir, os.path.splitext(os.path.basename(self.view.filepath))[0] + ".sqlite"))
-            os.remove(os.path.join(self.view.output_dir, os.path.splitext(os.path.basename(self.view.filepath))[0] + ".sqlite"))
+        if ow_state == True and user_defined_filename:
+            # overwrite the specified filename if exists
+            try:
+                os.remove(os.path.join(self.view.output_dir, user_defined_filename + ".sqlite"))
+            except FileNotFoundError:
+                pass
+            self.model.convert(output_name=user_defined_filename)
+        elif ow_state == True and user_defined_filename is None:
+            os.remove(os.path.join(self.view.output_dir, spreadsheet_name + ".sqlite"))
             self.model.convert()
-        elif self.view.variables.get("filename_var"):
-            self.model.convert(output_name=self.view.variables.get("filename_var"))
-        else:
+        elif ow_state != True and user_defined_filename:
+            # create with specified filename without overwrite
+            self.model.convert(output_name=user_defined_filename)
+        elif ow_state != True and user_defined_filename is None:
             self.model.convert()
         
         self.view.show_success(msg="Your spreadsheet has been converted succesfully !")
+
+    def display_pdf_from_sqlite(self):
+        """Display a Generate PDF from sqlite button"""
+
+        convert_btn = ctk.CTkButton(
+            master=self.view.get_widget("conversion_frame"),
+            text="Convert spreadsheet",
+            command=self.sqlite2pdf,
+        )
+        convert_btn_gridoptions = {
+            "row":1,
+            "column":0,
+            "sticky": "nsew"
+        }
+        self.add_widget(
+            widget=convert_btn,
+            widget_name="convert_btn",
+            widget_grid=convert_btn_gridoptions
+        )
+
+    def sqlite2pdf(self):
+        """Run documentation creation from sqlite"""
+        self.model.input_path = self.view.filepath
+        self.model.output_path = self.view.output_dir
+        try:
+            self.model.sqlite2pdf()
+        except Exception as e:
+            logging.error(
+                "An error occured during pdf creation: {}".format(str(e)),
+                "\nPlease ensure you maintained metadata tables name, attributes and properties"
+            )
+        else:
+            self.view.show_success(msg="Your pdf has been generated successfully !")
 
     def add_widget(self, widget, widget_name, widget_grid:dict):
         """Add widget to view"""

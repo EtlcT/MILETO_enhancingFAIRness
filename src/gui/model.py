@@ -5,7 +5,7 @@ import pandas as pd
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.extraction.check import CheckSpreadsheet
 from src.dbcreate.dbcreate import sqliteCreate
-from src.doccreate.pdf_create import docCreate
+from src.doccreate.pdf_create import docCreate, sqlite2pdf
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -14,16 +14,17 @@ logging.basicConfig(level=logging.ERROR,
 
 class Model:
     def __init__(self):
-        self.spreadsheet_path = None
+        self.input_path = None
         self.output_path = None
         self.tmp_data = None
         self.checked_data = None
+        self.data = None
     
     def load_spreadsheet(self, filepath):
         try:
             self.tmp_data = pd.read_excel(filepath, sheet_name=None)
         except Exception as e:
-            logging.error(f"An error occured reading your file but it si probably not due to the app {e}")
+            logging.error(f"An error occured reading your file but it si probably not due to the app {str(e)}")
         else:
             return self.tmp_data
 
@@ -34,18 +35,28 @@ class Model:
 
         self.checked_data = checker.sheets_dict
 
-    # TODO split in getData, sqlite create and pdf create
     def convert(self, output_name=None):
-    
-        self.data = GetSpreadsheetData(
-            filepath=self.spreadsheet_path,
-            checked_data=self.checked_data
-            )
         
+        self.getData()
+
         if output_name:
             self.data.db_name = output_name
         
         # create sqlite and erd_schema
+        createdDb = self.dbCreate()
+
+        # create pdf
+        self.pdfCreate(createdDb)
+
+    def getData(self):
+
+        self.data = GetSpreadsheetData(
+            filepath=self.input_path,
+            checked_data=self.checked_data
+        )
+    
+    def dbCreate(self) -> sqliteCreate:
+
         sqlite_db = sqliteCreate(
             self.data,
             output_dir=self.output_path
@@ -56,7 +67,13 @@ class Model:
         sqlite_db.ddict_schema_create()
         sqlite_db.meta_tables_create()
 
-        # create pdf
-        doc = docCreate(sqlite_db)
+        return sqlite_db
 
+    def pdfCreate(self, createdDb):
+
+        doc = docCreate(createdDb)
+        doc.createPDF()
+
+    def sqlite2pdf(self):
+        doc = sqlite2pdf(self.input_path, self.output_path)
         doc.createPDF()
