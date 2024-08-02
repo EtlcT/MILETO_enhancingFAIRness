@@ -10,7 +10,7 @@ if getattr(sys, 'frozen', False):
     os.environ["PATH"] = (
         os.path.join(bundle_dir, "graphviz")
         + os.pathsep 
-        + os.path.join(bundle_dir, "wkhtml") 
+        + os.path.join(bundle_dir, "wkhtmltopdf") 
         + os.pathsep + os.environ["PATH"]
     )
 
