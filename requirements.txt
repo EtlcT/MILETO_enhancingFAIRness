@@ -1,6 +1,7 @@
 pandas
 openpyxl # required to read excel
 parameterized
+graphviz
 pdfkit
 customtkinter
 CTkMessagebox
