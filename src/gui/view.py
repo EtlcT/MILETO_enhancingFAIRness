@@ -42,7 +42,7 @@ class View(ctk.CTk):
         self.browse_file_btn = ctk.CTkButton(
             self.input_frame,
             text="Browse",
-            command=lambda: self.browse_file(self.check_fsqlite)
+            command=self.browse_file
             )
         self.browse_file_btn.grid(
             row=0,
@@ -72,12 +72,12 @@ class View(ctk.CTk):
     def set_controller(self, controller):
         self.controller = controller
 
-    def browse_file(self, from_sqlite):
+    def browse_file(self):
         """Open a file dialog window for spreadsheets files
         then display selected file
         """
-        self.variables["from_sqlite"] = from_sqlite
-        if from_sqlite == "off":
+        self.variables["from_sqlite"] = self.check_fsqlite.get()
+        if self.get_var("from_sqlite") == "off" or self.get_var("from_sqlite") == "":
 
             self.filepath = ctk.filedialog.askopenfilename(
                 title="Select a file",
