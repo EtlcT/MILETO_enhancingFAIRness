@@ -64,12 +64,11 @@ def json2dict(json_filepath) -> dict :
 def resource_path(relative_path):
     """ Get absolute path to resource for PyInstaller executable """
     try:
-        # PyInstaller creates a temporary folder and stores the path in _MEIPASS
         base_path = sys._MEIPASS
     except AttributeError:
         base_path = os.path.abspath(".")
 
-    return os.path.join(base_path, relative_path)
+    return os.path.normpath(os.path.join(base_path, relative_path))
 
 def file2Blob(absolute_path: str) -> bytes:
     """Take an absolute filepath, read relative file
@@ -88,8 +87,6 @@ def file2Blob(absolute_path: str) -> bytes:
     
     except FileNotFoundError:
         logging.error("An error occurred ", exc_info=True)
-        traceback.print_exc()
-
         return absolute_path
     
 def bytes_in_df_col(column: pd.Series) -> bool:

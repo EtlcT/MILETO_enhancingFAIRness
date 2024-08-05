@@ -81,7 +81,8 @@ class View(ctk.CTk):
 
             self.filepath = ctk.filedialog.askopenfilename(
                 title="Select a file",
-                filetypes=[("All Excel files", "*.xlsx;*.xls;*.xlsm;*.xlsb;*.odf;*.ods;*.odt")]
+                initialdir=os.path.expanduser("~"),
+                filetypes=[("All Excel files", "*.xlsx *.xls *.xlsm *.xlsb *.odf *.ods *.odt")]
             )
 
             if self.filepath:
@@ -108,7 +109,7 @@ class View(ctk.CTk):
 
         if self.output_dir:
 
-            if self.get_var("from_sqlite") == "off":
+            if self.get_var("from_sqlite") == "off" or self.get_var("from_sqlite") == "":
 
                 output_sqlite = os.path.normpath(os.path.join(
                     self.output_dir,

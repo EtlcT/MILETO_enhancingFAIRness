@@ -7,6 +7,7 @@ from PIL import Image
 from src.gui.view import View
 from src.gui.model import Model
 from src.extraction.check import InvalidData
+from src.utils.utils import resource_path
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -184,7 +185,7 @@ class Controller:
 
         # create error icon
         error_icon_img = ctk.CTkImage(
-            light_image=Image.open(os.path.join("src/gui/assets/error.png")),
+            light_image=Image.open(os.path.normpath(resource_path("src/gui/assets/error.png"))),
             size=(40,40)
         )
         error_icon = ctk.CTkLabel(master=self.view.get_widget("error_frame"), image=error_icon_img, text="")
@@ -415,7 +416,7 @@ class Controller:
 
         convert_btn = ctk.CTkButton(
             master=self.view.get_widget("conversion_frame"),
-            text="Convert spreadsheet",
+            text="Generate PDF",
             command=self.sqlite2pdf,
         )
         convert_btn_gridoptions = {
