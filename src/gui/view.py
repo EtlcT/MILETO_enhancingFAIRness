@@ -105,7 +105,9 @@ class View(ctk.CTk):
 
     def browse_outdir(self):
         """Open file dialog window to select output directory"""
-        self.output_dir = ctk.filedialog.askdirectory()
+        self.output_dir = ctk.filedialog.askdirectory(
+            initialdir=os.path.expanduser("~")
+        )
 
         if self.output_dir:
 
