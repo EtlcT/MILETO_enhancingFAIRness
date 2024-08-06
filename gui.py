@@ -6,13 +6,14 @@ from src.utils.utils_gui import get_zoomed_geometry
 
 def main_gui():
     model = Model()
-    view = View()
 
     # open in fullscreen mode
     if(sys.platform.startswith('linux')):
         geometry = get_zoomed_geometry()
+        view = View()
         view.geometry(geometry)
     else:
+        view = View()
         view._state_before_windows_set_titlebar_color = 'zoomed'
 
     controller = Controller(model, view)
