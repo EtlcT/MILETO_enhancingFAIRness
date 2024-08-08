@@ -1,0 +1,27 @@
+{
+    "data": {
+      "type": "dois",
+      "attributes": {
+        "event": "publish",
+        "prefix": "",
+        "creators": [
+          {
+            "name": ""
+          }
+        ],
+        "titles": [
+          {
+            "title": ""
+          }
+        ],
+        "subjects": [],
+        "contributors": [],
+        "publisher": "",
+        "publicationYear": "",
+        "types": {
+          "resourceTypeGeneral": ""
+        }
+      }
+    }
+  }
+  

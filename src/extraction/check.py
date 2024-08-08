@@ -2,6 +2,7 @@ import logging
 import pandas as pd
 
 from conf.config import *
+from create_metadata import *
 from src.utils.utils import check_uniqueness
 from src.utils.utils_extraction import get_datatables_list
 
@@ -33,6 +34,9 @@ class CheckSpreadsheet:
         check_tasks = [
             self.check_metadata_exists,
             self.check_metadata_not_empty,
+            self.check_infos,
+            self.check_attributes,
+            self.check_tables,
         ]
         for check in check_tasks:
             try:
@@ -83,24 +87,38 @@ class CheckSpreadsheet:
         
         return
 
+    ## TODO
     def check_metadata_not_empty(self):
         """
             Raise error if mandatory fields are not completed
         """
         pass
 
+    ## TODO
     def check_infos(self):
         """
             Raise error for missing fields in tables_infos
         """
+        missing_attribute = []
+        merged_df = self.sheets_dict[INFO].merge(
+            GenerateMeta(self.sheets_dict).generate_tables_info(),
+            how="outer",
+            on=["table", "attribute"],
+            indicator=True
+        )
+        left_only = merged_df[merged_df["_merge"]=="left_only"]
+        right_only = merged_df[merged_df["_merge"]=="right_only"]
+
         pass
 
+    ## TODO
     def check_attributes(self):
         """
             Raise error for missing attributes in DDict_Attributes
         """
         pass
-
+    
+    ## TODO
     def check_tables(self):
         """
             Raise error for missing tables in DDict_tables
@@ -324,3 +342,11 @@ class MissingMetadataError(CheckSpreadsheetError):
             f"{missing_tables}\n"
             "Please check your spreadsheet"
         )
+
+class InvalidInformationSchema(CheckSpreadsheetError):
+    """Raised if invalid fields are detected in tables_infos
+    metadata table ie: missing field or unknown field
+    """
+
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)

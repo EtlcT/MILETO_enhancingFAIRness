@@ -1,0 +1,106 @@
+import pandas as pd
+from conf.config import *
+
+class GenerateMeta:
+    """
+        This class generate empty metadata tables compliant
+        with the template
+    """
+
+    def __init__(self, spreadsheet):
+        ## GUI: spreadsheet has already been loaded and is stored as dict
+        if isinstance(spreadsheet, dict):
+            self.sheets_dict = spreadsheet
+        ## CLI: spreadsheet is read for the first time
+        else:
+            self.sheets_dict = pd.read_excel(spreadsheet, sheet_name=None)
+        
+    def generate_ddict_tables(self):
+        """Generate DDict_tables metadata table which contains
+        information relative to table content
+        """
+        
+        data = {"table": [], "caption": []}
+
+        for table_name in self.sheets_dict:
+            data["table"].append(table_name)
+            data["caption"].append(str())
+
+        ddict_tables = pd.DataFrame(data)
+        self.sheets_dict[DDICT_T] = ddict_tables
+
+        return ddict_tables
+
+    def generate_ddict_attr(self):
+        """Generate DDict_attributes metadata table which contains
+        attributes description
+        """
+        data = {"attribute": [], "unit": [], "caption": []}
+        attribute_list = set()
+        for table_name, table in self.sheets_dict.items():
+            attribute_list.update(table.columns)
+
+        data["attribute"] = list(attribute_list)
+        for i in range(len(attribute_list)):
+            data["unit"].append(str())
+            data["caption"].append(str())
+
+        ddict_attr = pd.DataFrame(data)
+        self.sheets_dict[DDICT_A] = ddict_attr
+        
+        return ddict_attr
+
+    def generate_tables_info(self):
+        """Generate tables_infos metadata table which contains
+        information schema data, ie. Primary Key and Foreign Key
+        constraints, reference_table
+        """
+        data = {"table": [], "attribute": [], "isPK": [], "isFK": [], "referenceTable": []}
+        for table_name, table in self.sheets_dict.items():
+            for column in table.columns:
+                data["table"].append(table_name)
+                data["attribute"].append(column)
+                data["isPK"].append(str())
+                data["isFK"].append(str())
+                data["referenceTable"].append(str())
+        tables_infos = pd.DataFrame(data)
+        self.sheets_dict[INFO] = tables_infos
+        return tables_infos
+
+    def generate_meta_ref(self):
+        """Generate meta_references metadata table which contains
+        Datacite schema metadata terms
+        """
+        data = {
+            "Identifier": str(),
+            "Creators": str(),
+            "Titles": str(),
+            "Subjects": str(),
+            "Publisher": str(),
+            "Contributors": str(),
+            "PublicationYear": str(),
+            "ResourceType": str()
+        }
+
+        metaref = pd.DataFrame(data)
+        self.sheets_dict[METAREF] = metaref
+        return metaref
+
+    def generate_meta_extra(self):
+        """Generate meta_extra metadata table which contains abstract
+        and description fiels for rich metadata
+        """
+        data = {"abstract": str(), "description": str()}
+
+        meta_extra = pd.DataFrame(data)
+        self.sheets_dict[METAEXTRA] = meta_extra
+        return meta_extra
+
+def update_metatable(self):
+    """Update metadata tables,
+    keep state of actual data in metadata tables,
+    remove attribute that does not exist,
+    add new attributes,
+    keep unchanged others
+    """
+    pass
