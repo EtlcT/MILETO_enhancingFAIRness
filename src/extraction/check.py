@@ -12,7 +12,8 @@ logging.basicConfig(level=logging.ERROR,
 
 class CheckSpreadsheet:
     """
-        This class checks that data retrieved by GetSpreadSheet data is correct
+        This class checks that data from spreadsheet is compliant with 
+        relationnal schema and template
     """
 
     def __init__(self, spreadsheet):
@@ -23,10 +24,30 @@ class CheckSpreadsheet:
         else:
             self.sheets_dict = pd.read_excel(spreadsheet, sheet_name=None)
         self.tables_info = self._get_tables_info()
+        self.metadata_tables = [METAREF, INFO, DDICT_T, DDICT_A]
+
+    def validate_template(self):
+        """Raise error if spreasheet is not compliant with template"""
+
+        errors = []
+        check_tasks = [
+            self.check_metadata_exists,
+            self.check_metadata_not_empty,
+        ]
+        for check in check_tasks:
+            try:
+                check()
+            except CheckSpreadsheetError as e:
+                logging.error(f"{e.__class__.__name__}: {str(e)}")
+                errors.append(f"{e.__class__.__name__}: {e}")
+            except KeyError as e:
+                pass
+        
+        if errors:
+            raise InvalidTemplate(errors)
 
     def validate_spreadsheet(self):
-        """Raise error if spreadsheet contains errors
-        """
+        """Raise error if spreadsheet contains errors"""
         errors = []
         check_tasks = [
             self.check_pk_defined,
@@ -36,10 +57,11 @@ class CheckSpreadsheet:
             self.check_fk_uniqueness,
             self.check_no_shared_name
         ]
+
         for check in check_tasks:
             try:
                 check()
-            except CheckDataError as e:
+            except CheckSpreadsheetError as e:
                 logging.error(f"{e.__class__.__name__}: {str(e)}")
                 errors.append(f"{e.__class__.__name__}: {e}")
             except KeyError as e:
@@ -47,6 +69,43 @@ class CheckSpreadsheet:
         
         if errors:
             raise InvalidData(errors)
+    
+    def check_metadata_exists(self):
+        """
+            Raise error if mandatory metadata tables does not exist
+        """
+        missing_tables = []
+        for table_name in self.metadata_tables:
+            if self.sheets_dict.get(table_name, None) is None:
+                missing_tables.append(table_name)
+        if missing_tables:
+            raise MissingMetadataError(missing_tables)
+        
+        return
+
+    def check_metadata_not_empty(self):
+        """
+            Raise error if mandatory fields are not completed
+        """
+        pass
+
+    def check_infos(self):
+        """
+            Raise error for missing fields in tables_infos
+        """
+        pass
+
+    def check_attributes(self):
+        """
+            Raise error for missing attributes in DDict_Attributes
+        """
+        pass
+
+    def check_tables(self):
+        """
+            Raise error for missing tables in DDict_tables
+        """
+        pass
             
     def check_pk_uniqueness(self) -> None:
         """
@@ -181,24 +240,32 @@ class CheckSpreadsheet:
                                         .iloc[:,:5]
         return tables_info
 
-class CheckDataError(Exception):
+class CheckSpreadsheetError(Exception):
     """Base class for all exceptions raised by CheckData"""
     pass
 
-class InvalidData(CheckDataError):
-    """Raised when one or several errors are found in spreadsheet"""
+class InvalidData(CheckSpreadsheetError):
+    """Raised when one or several errors are found in spreadsheet data"""
 
     def __init__(self, errors):
         self.errors = errors
         error_message = "\n\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
-        super().__init__(f"Validation failed with {len(errors)} errors:\n{error_message}")
+        super().__init__(f"Data validation failed with {len(errors)} errors:\n{error_message}")
 
-class PrimaryKeyMissingError(CheckDataError):
+class InvalidTemplate(CheckSpreadsheetError):
+    """Raised when one or several errors are found in spreadsheet template"""
+
+    def __init__(self, errors):
+        self.errors = errors
+        error_message = "\n\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
+        super().__init__(f"Template validation failed with {len(errors)} errors:\n{error_message}")
+
+class PrimaryKeyMissingError(CheckSpreadsheetError):
     """Raised whan a table lacks a Primary Key"""
     def __init__(self, table):
         super().__init__(f"Table {table} has no Primary Key defined")
     
-class PrimaryKeyNonUniqueError(CheckDataError):
+class PrimaryKeyNonUniqueError(CheckSpreadsheetError):
     """Raised if a Primary Key is not unique,
     ie: PK field/s contain duplicates
     """
@@ -208,7 +275,7 @@ class PrimaryKeyNonUniqueError(CheckDataError):
             "Primary must be unique"
         )
 
-class ForeignKeyNotFoundError(CheckDataError):
+class ForeignKeyNotFoundError(CheckSpreadsheetError):
     """Raised if a field defined as a Foreign Key is missing from 
     its reference table
     """
@@ -218,7 +285,7 @@ class ForeignKeyNotFoundError(CheckDataError):
             f"\nSee invalid Foreing key below\n{issues_summary}"
         )
 
-class ForeignKeyNonUniqueError(CheckDataError):
+class ForeignKeyNonUniqueError(CheckSpreadsheetError):
     """Raised if a Foreign Key is based on non unique field
     ie: attribute/s in the reference table contain duplicates
     """
@@ -228,7 +295,7 @@ class ForeignKeyNonUniqueError(CheckDataError):
             f"\nSee invalid Foreing key below\n{issues_summary}"
         )
 
-class ReferenceUndefinedError(CheckDataError):
+class ReferenceUndefinedError(CheckSpreadsheetError):
     """Raised if a Foreign key has no reference table defined"""
     def __init__(self, fk_without_ref) -> None:
         super().__init__(
@@ -236,7 +303,7 @@ class ReferenceUndefinedError(CheckDataError):
             f"{fk_without_ref}"
         )
 
-class AttributesDuplicateError(CheckDataError):
+class AttributesDuplicateError(CheckSpreadsheetError):
     """Raised if two attributes have the same name
     without one being defined as a Foreign key based
     on the other
@@ -246,4 +313,14 @@ class AttributesDuplicateError(CheckDataError):
             "Except for Foreign keys, different attributes should not"
             "have the same names\nSee duplicates infos:\n"
             f"{duplicates}"
+        )
+
+class MissingMetadataError(CheckSpreadsheetError):
+    """Raised if mandatory metadata tables do not exist"""
+
+    def __init__(self, missing_tables) -> None:
+        super().__init__(
+            "The following metadata tables are missing:\n"
+            f"{missing_tables}\n"
+            "Please check your spreadsheet"
         )

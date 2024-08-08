@@ -16,13 +16,23 @@ from src.dbcreate.dbcreate import sqliteCreate
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("filepath", help="path to the spreadsheet you want to convert")
-    parser.add_argument("output_dir", help="absolute path to the output directory")
+    parser.add_argument(
+        "-i",
+        "--input", 
+        help="Absolute path to the spreadsheet to convert",
+        required=True
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Absolute path to the output directory of your choice",
+        required=True
+    )
     args = parser.parse_args()
     
-    getData = GetSpreadsheetData(filepath=args.filepath)
+    getData = GetSpreadsheetData(filepath=args.input)
 
-    sqlite_db = sqliteCreate(getData, output_dir= args.output_dir)
+    sqlite_db = sqliteCreate(getData, output_dir= args.output)
     sqlite_db.create_db()
     sqlite_db.insert_data()
     sqlite_db.ddict_schema_create()

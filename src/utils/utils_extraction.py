@@ -1,7 +1,6 @@
 import re
 
-#! add file for regex exclusion
-def _regex_exclude_meta(text) -> bool:
+def regex_exclude_meta(text) -> bool:
     """
     return True if text match one of the regex to exclude, false either
 
@@ -22,6 +21,6 @@ def get_datatables_list(sheets_dict) -> list:
     """
     datatable_list = list()
     for sheet_name in sheets_dict:
-        if(_regex_exclude_meta(sheet_name) == False):
+        if(regex_exclude_meta(sheet_name) == False):
             datatable_list.append(sheet_name)
     return datatable_list

@@ -67,18 +67,18 @@ class GetSpreadsheetData:
         """
         Return a Dataframe containing table name and composite key fields
         """
-        composite_pk_df = pd.DataFrame(columns=['Table', 'pk_fields'])
+        composite_pk_df = pd.DataFrame(columns=['table', 'pk_fields'])
         group_by_table = self.tables_info.groupby(by=INFO_ATT["table"])
 
         for table_name, table_info in group_by_table:
             pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']].tolist()
             if len(pk_attr)>1:
-                new_row = pd.DataFrame([{'Table': table_name,'pk_fields': pk_attr}])
+                new_row = pd.DataFrame([{'table': table_name,'pk_fields': pk_attr}])
                 composite_pk_df = pd.concat(
                     [composite_pk_df, new_row],
                     ignore_index=True
                 )
-                
+
         return composite_pk_df
     
     # TODO CHECK

@@ -7,14 +7,12 @@ logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(levelname)s %(message)s',
                     handlers=[logging.FileHandler("Ss2db.log"),
                               logging.StreamHandler()])
-try:
-    from src.extraction.retrieve_data import GetSpreadsheetData
-    from src.extraction.check import CheckSpreadsheet, InvalidData
-    from src.dbcreate.dbcreate import sqliteCreate
-    from src.doccreate.pdf_create import docCreate, sqlite2pdf
 
-except Exception as e:
-    logging.error("An error occurred", exc_info=True)
+from src.extraction.retrieve_data import GetSpreadsheetData
+from src.extraction.check import CheckSpreadsheet,
+from src.dbcreate.dbcreate import sqliteCreate
+from src.doccreate.pdf_create import docCreate, sqlite2pdf
+
 
 def main_cli():
 

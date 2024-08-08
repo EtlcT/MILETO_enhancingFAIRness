@@ -136,14 +136,13 @@ def rs_mock() -> pd.DataFrame:
     }
 
 class TestDBCreate(unittest.TestCase):
-    GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=rs_mock())
 
     def test_create_db(self):
         """Check that a sqlite file with database name is created
         in the output directory
         """
-
-        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx')
+        checked_data = MagicMock(return_value=rs_mock())
+        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx', checked_data)
         output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
         db_name = f"{data.db_name}.sqlite"
         db_file_path = os.path.join(output_path, db_name)
@@ -162,8 +161,8 @@ class TestDBCreate(unittest.TestCase):
         """Check that insert_data and meta_tables_create 
         modify the sqlite file
         """
-
-        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx')
+        checked_data = MagicMock(return_value=rs_mock())
+        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx', checked_data)
         output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
         db_name = f"{data.db_name}.sqlite"
         db_file_path = os.path.join(output_path, db_name)
@@ -176,13 +175,13 @@ class TestDBCreate(unittest.TestCase):
 
         # the modification is done too fast so we simulate more time
         time.sleep(0.2)
-
         sqlite_db.insert_data()
 
         first_modification_time = os.path.getmtime(db_file_path)
 
         self.assertGreater(first_modification_time, initial_modification_time)
 
+        time.sleep(0.2)
         sqlite_db.meta_tables_create()
 
         second_modification_time = os.path.getmtime(db_file_path)
@@ -192,15 +191,12 @@ class TestDBCreate(unittest.TestCase):
         if os.path.exists(db_file_path):
             os.remove(db_file_path)
 
-    #! can't delete files after test becausse eralchimy render_er() keep
-    #! connection to database opened
     def test_ddict_schema_create(self):
         """Check that ddict_schema_create modify the sqlite
         and create a ERD_dbname.png is created in output dir
         """
-
-        
-        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders_test_erd.xlsx')
+        checked_data = MagicMock(return_value=rs_mock())
+        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders_test_erd.xlsx', checked_data)
         output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
         db_name = f"{data.db_name}.sqlite"
         db_file_path = os.path.join(output_path, db_name)
@@ -230,3 +226,5 @@ class TestDBCreate(unittest.TestCase):
         # check ERD image is created
         self.assertTrue(os.path.exists(erd_file_path))
 
+        if os.path.exists(db_file_path):
+            os.remove(db_file_path)

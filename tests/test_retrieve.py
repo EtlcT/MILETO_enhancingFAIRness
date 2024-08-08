@@ -1,12 +1,11 @@
 import unittest
 from parameterized import parameterized
-from unittest.mock import MagicMock
 
 import pandas as pd
 import numpy as np
 
 from src.extraction import retrieve_data
-from src.utils import utils
+from src.utils import utils, utils_extraction
 from conf.config import *
 
 def _read_spreadsheet_mock():
@@ -74,7 +73,7 @@ def _read_spreadsheet_mock():
         'Table_B': table_B,
         'Table_C': table_C,
         'Table_D': table_D,
-        TEMP_CONF["tables_info"]["tab_name"]: table_KEYS,
+        INFO: table_KEYS,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -137,33 +136,31 @@ class TestExtraction(unittest.TestCase):
         ('meta_Something', True),
         ('MeTa_CaseUnsensitive', True),
         ('metacognitive', False),
-        (TEMP_CONF["tables_info"]["tab_name"], True),
+        (INFO, True),
         ('keys_table', False),
     ])
 
     def test_regex_exclude_meta(self, text, regexMatch):
-        """Check that sheet that contains either 'meta.', TEMP_CONF["tables_info"]["tab_name"] or 'extra' 
+        """Check that sheet that contains either 'meta.', tables_info or 'extra' 
         matches the regex and so return True.
         """
-
-        result = retrieve_data.GetSpreadsheetData._regex_exclude_meta(self, text=text)
+        result = utils_extraction.regex_exclude_meta(text)
 
         self.assertEqual(result, regexMatch)
-
 
     def test_get_datatables_list(self):
         """Check that all tables that contains data are correctly retrieved"""
 
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=_read_spreadsheet_mock())
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-        result = getData._get_datatables_list()
+        checked_data = _read_spreadsheet_mock()
+        result = utils_extraction.get_datatables_list(checked_data)
 
         self.assertListEqual(result, ['Table_A', 'Table_B', 'Table_C', 'Table_D'])
 
     def test_get_dbname(self):
         """Check that db_name is correctly retrieved without forbidden character"""
 
-        getData = retrieve_data.GetSpreadsheetData('fakepath/to/spreadsheet/2022_ExampleTemplate_v2_1.xlsx')
+        checked_data = _read_spreadsheet_mock()
+        getData = retrieve_data.GetSpreadsheetData('fakepath/to/spreadsheet/2022_ExampleTemplate_v2_1.xlsx', checked_data)
         expected_result = '2022_ExampleTemplate_v2_1'
         result = getData.db_name
 
@@ -172,17 +169,17 @@ class TestExtraction(unittest.TestCase):
     def test_composite_pk(self):
         """Check that all composite PK are retrieved"""
 
-        retrieve_data.GetSpreadsheetData._read_spreadsheet = MagicMock(return_value=_read_spreadsheet_mock())
+        checked_data = _read_spreadsheet_mock()
         expected_data = [
             ['Table_B', ['Attribute_B1', 'Attribute_B2']]
         ]
         expected_result = pd.DataFrame(
-            columns=['Table', 'pk_fields'],
+            columns=['table', 'pk_fields'],
             data=expected_data
         )
 
-        getData = retrieve_data.GetSpreadsheetData('fakepath')
-        result = getData._get_composite_pk()
+        getData = retrieve_data.GetSpreadsheetData('fakepath', checked_data)
+        result = getData.compositePK_df
 
         self.assertEqual(expected_result.equals(result), True)
 
