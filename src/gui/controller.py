@@ -27,6 +27,8 @@ class Controller:
         
         #delete previous content if exist
         self.view.rm_widget("selected_file")
+        self.view.rm_widget("error_frame")
+        self.view.rm_widget("conversion_frame")
 
         # display selected file in view input_frame
         selected_file = ctk.CTkLabel(
@@ -410,6 +412,10 @@ class Controller:
             self.model.convert()
         
         self.view.show_success(msg="Your spreadsheet has been converted succesfully !")
+        self.view.rm_widget("selected_file")
+        self.view.rm_widget("spreadsheet_frame")
+        self.view.rm_widget("error_frame")
+        self.view.rm_widget("conversion_frame")
 
     def display_pdf_from_sqlite(self):
         """Display a Generate PDF from sqlite button"""
@@ -443,6 +449,7 @@ class Controller:
             )
         else:
             self.view.show_success(msg="Your pdf has been generated successfully !")
+            self.view.get
 
     def add_widget(self, widget, widget_name, widget_grid:dict):
         """Add widget to view"""

@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 
 from conf.config import *
-from create_metadata import *
+from src.extraction.create_metadata import *
 from src.utils.utils import check_uniqueness
 from src.utils.utils_extraction import get_datatables_list
 

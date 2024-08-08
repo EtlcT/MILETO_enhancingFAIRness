@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.ERROR,
                               logging.StreamHandler()])
 
 from src.extraction.retrieve_data import GetSpreadsheetData
-from src.extraction.check import CheckSpreadsheet,
+from src.extraction.check import CheckSpreadsheet
 from src.dbcreate.dbcreate import sqliteCreate
 from src.doccreate.pdf_create import docCreate, sqlite2pdf
 
@@ -68,7 +68,6 @@ def main_cli():
         # check data in spreadsheet is valid
         checker = CheckSpreadsheet(input_path)
         checker.validate_spreadsheet()
-
 
         data = GetSpreadsheetData(
                     filepath=input_path,
