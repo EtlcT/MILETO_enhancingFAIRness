@@ -28,6 +28,8 @@ class Controller:
         #delete previous content if exist
         self.view.rm_widget("selected_file")
         self.view.rm_widget("error_frame")
+        self.view.rm_widget("spreadsheet_frame")
+        self.view.rm_widget("check_btn")
         self.view.rm_widget("conversion_frame")
 
         # display selected file in view input_frame
@@ -161,6 +163,7 @@ class Controller:
 
         # remove previous errors
         self.view.rm_widget("error_frame")
+        self.view.rm_widget("conversion_frame")
 
         try:
             self.model.verify_spreadsheet()
@@ -416,6 +419,7 @@ class Controller:
         self.view.rm_widget("spreadsheet_frame")
         self.view.rm_widget("error_frame")
         self.view.rm_widget("conversion_frame")
+        self.view.rm_widget("check_btn")
 
     def display_pdf_from_sqlite(self):
         """Display a Generate PDF from sqlite button"""
@@ -453,6 +457,7 @@ class Controller:
             self.view.rm_widget("spreadsheet_frame")
             self.view.rm_widget("error_frame")
             self.view.rm_widget("conversion_frame")
+            self.view.rm_widget("check_btn")
 
     def add_widget(self, widget, widget_name, widget_grid:dict):
         """Add widget to view"""
