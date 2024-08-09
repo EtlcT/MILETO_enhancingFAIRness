@@ -449,7 +449,10 @@ class Controller:
             )
         else:
             self.view.show_success(msg="Your pdf has been generated successfully !")
-            self.view.get
+            self.view.rm_widget("selected_file")
+            self.view.rm_widget("spreadsheet_frame")
+            self.view.rm_widget("error_frame")
+            self.view.rm_widget("conversion_frame")
 
     def add_widget(self, widget, widget_name, widget_grid:dict):
         """Add widget to view"""
