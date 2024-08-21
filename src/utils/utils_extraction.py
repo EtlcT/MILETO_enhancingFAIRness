@@ -9,8 +9,8 @@ def regex_exclude_meta(text) -> bool:
     no_info = re.search(r"(?i)tables_info", text)
     no_meta = re.search(r"(?i)meta\_", text)
     no_DDict = re.search(r"(?i)DDict\_", text)
-    no_extra = re.search(r"(?i)^extra\.", text)
-    return any([no_DDict, no_meta, no_extra, no_info])
+
+    return any([no_DDict, no_meta, no_info])
 
 
 def get_datatables_list(sheets_dict) -> list:
@@ -24,3 +24,12 @@ def get_datatables_list(sheets_dict) -> list:
         if(regex_exclude_meta(sheet_name) == False):
             datatable_list.append(sheet_name)
     return datatable_list
+
+def rm_extra_tables(sheets_dict) -> dict:
+    """Remove tables that start with 'extra' from the database"""
+
+    extra_tables = [key for key in sheets_dict if re.match(r"extra", key)]
+    for key in extra_tables:
+        del sheets_dict[key]
+    
+    return sheets_dict
