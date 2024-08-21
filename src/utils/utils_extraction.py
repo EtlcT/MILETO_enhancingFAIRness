@@ -9,7 +9,7 @@ def regex_exclude_meta(text) -> bool:
     no_info = re.search(r"(?i)tables_info", text)
     no_meta = re.search(r"(?i)meta\_", text)
     no_DDict = re.search(r"(?i)DDict\_", text)
-    no_extra = re.search(r"(?i)extra_sheet\.", text)
+    no_extra = re.search(r"(?i)^extra\.", text)
     return any([no_DDict, no_meta, no_extra, no_info])
 
 
