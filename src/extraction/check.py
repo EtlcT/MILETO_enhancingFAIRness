@@ -4,7 +4,7 @@ import pandas as pd
 from conf.config import *
 from src.extraction.create_metadata import *
 from src.utils.utils import check_uniqueness
-from src.utils.utils_extraction import get_datatables_list, rm_extra_tables
+from src.utils.utils_extraction import get_datatables_list
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -20,10 +20,10 @@ class CheckSpreadsheet:
     def __init__(self, spreadsheet):
         ## GUI: spreadsheet has already been loaded and is stored as dict
         if isinstance(spreadsheet, dict):
-            self.sheets_dict = rm_extra_tables(spreadsheet)
+            self.sheets_dict = spreadsheet
         ## CLI: spreadsheet is read for the first time
         else:
-            self.sheets_dict = rm_extra_tables(pd.read_excel(spreadsheet, sheet_name=None))
+            self.sheets_dict = pd.read_excel(spreadsheet, sheet_name=None)
         self.tables_info = self._get_tables_info()
         self.metadata_tables = [METAREF, INFO, DDICT_T, DDICT_A]
 

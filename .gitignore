@@ -8,4 +8,3 @@ logs
 tests/conf.json
 data/output/
 tree.txt
-*.bas
