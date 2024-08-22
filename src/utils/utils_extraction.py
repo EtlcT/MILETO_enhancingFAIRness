@@ -49,7 +49,6 @@ def img2Blob(path: str, file_dir=None) -> bytes:
         img_path = os.path.abspath(path)
     else:
         img_path = os.path.abspath(os.path.join(file_dir, "images" , path))
-        print(img_path)
     try:
         with open(img_path, 'rb') as file:
             binary = file.read()

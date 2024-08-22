@@ -153,5 +153,5 @@ class GetSpreadsheetData:
         converted to blob
         """
 
-        table[:] = table.applymap(lambda x: img2Blob(x, self.file_dir) if self.is_image(x) else x)
+        table[:] = table.map(lambda x: img2Blob(x, self.file_dir) if self.is_image(x) else x)
         return
