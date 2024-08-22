@@ -10,13 +10,13 @@ import pandas as pd
 import re
 import sys
 import os
+from PIL import Image
 
 # Add the root directory of the project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from conf.config import *
-from src.utils.utils_extraction import get_datatables_list
-from src.utils.utils import file2Blob, bytes_in_df_col
+from src.utils.utils_extraction import get_datatables_list, bytes_in_df_col, img2Blob
 
 class GetSpreadsheetData:
     """
@@ -25,9 +25,10 @@ class GetSpreadsheetData:
     """
 
     def __init__(self, filepath, checked_data) -> None:
+        self.db_name = os.path.splitext(os.path.basename(filepath))[0]
+        self.file_dir = os.path.dirname(filepath)
         self.datatables_list = get_datatables_list(checked_data)
         self.sheets_dict = self._process_data(checked_data)
-        self.db_name = os.path.splitext(os.path.basename(filepath))[0]
         self.tables_info = self._get_tables_info()
         self.compositePK_df = self._get_composite_pk()
         
@@ -39,7 +40,7 @@ class GetSpreadsheetData:
         """
 
         for table_name in checked_data.keys():
-            if table_name not in self.datatables_list:
+            if table_name in self.datatables_list:
                 # process_df convert any absolute filepath into 
                 # blob of relative file
                 self.process_df(checked_data[table_name])
@@ -127,18 +128,30 @@ class GetSpreadsheetData:
                         )
    
         return tables_info
+    
+    def is_image(self, var):
+        """Return True if var if an existing path to an image False if not"""
 
-    # TODO CHECK
-    @staticmethod
-    def process_df(table: pd.DataFrame) -> None:
+        try:
+            if os.path.isfile(os.path.abspath(var)):
+                file_path = os.path.abspath(var)
+            elif os.path.isfile(os.path.abspath(os.path.join(self.file_dir, "images", var))):
+                file_path = os.path.abspath(os.path.join(self.file_dir, "images", var))
+            
+            if re.search(".svg$", file_path):
+                return True
+            else:
+                im = Image.open(file_path)
+                # if no exception is raised, it's a valid image
+                return True
+        except Exception as e:
+            return False
+
+    def process_df(self, table: pd.DataFrame) -> None:
         """
         if a column contain filepath, relative file is accessed and
         converted to blob
         """
 
-        for col in table.columns:
-            table[col] = table[col].apply(
-                lambda x: file2Blob(x) if os.path.isabs(str(x).replace('\\','\\')) else x
-            )
-
+        table[:] = table.applymap(lambda x: img2Blob(x, self.file_dir) if self.is_image(x) else x)
         return

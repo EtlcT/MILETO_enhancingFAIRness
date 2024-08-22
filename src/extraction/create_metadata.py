@@ -1,5 +1,7 @@
 import pandas as pd
+import re
 from conf.config import *
+from src.utils.utils_extraction import bytes_in_df_col
 
 class GenerateMeta:
     """
@@ -60,12 +62,25 @@ class GenerateMeta:
             for column in table.columns:
                 data["table"].append(table_name)
                 data["attribute"].append(column)
+                data["type"].append(self.infer_sqlite_type(table[column]))
                 data["isPK"].append(str())
                 data["isFK"].append(str())
                 data["referenceTable"].append(str())
         tables_infos = pd.DataFrame(data)
         self.sheets_dict[INFO] = tables_infos
         return tables_infos
+    
+    @staticmethod
+    def infer_sqlite_type(column: pd.Series):
+        """Infer attributes type based on dataframe content"""
+        col_type = column.dtype
+        if re.search('int', str(col_type)) != None:
+            return 'INTEGER'
+        elif re.search('float', str(col_type)) != None:
+            return "FLOAT"
+        else:
+            return "TEXT"
+
 
     def generate_meta_ref(self):
         """Generate meta_references metadata table which contains

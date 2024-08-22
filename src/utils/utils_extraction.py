@@ -1,4 +1,7 @@
+import os
 import re
+import pandas as pd
+import logging
 
 def regex_exclude_meta(text) -> bool:
     """
@@ -33,3 +36,31 @@ def rm_extra_tables(sheets_dict) -> dict:
         del sheets_dict[key]
     
     return sheets_dict
+
+def img2Blob(path: str, file_dir=None) -> bytes:
+    """Take a filepath to an image, read relative file
+    convert content to blob
+
+    if the file does not exists or can't be accessed,
+    the path remains as it was and an error is raised
+
+    """
+    if os.path.isfile(path):
+        img_path = os.path.abspath(path)
+    else:
+        img_path = os.path.abspath(os.path.join(file_dir, "images" , path))
+        print(img_path)
+    try:
+        with open(img_path, 'rb') as file:
+            binary = file.read()
+        return binary
+    
+    except FileNotFoundError:
+        logging.error("An error occurred ", exc_info=True)
+        return path
+
+def bytes_in_df_col(column: pd.Series) -> bool:
+    """Return True if column contains bytes"""
+    is_bytes = pd.Series()
+    is_bytes = column.apply(lambda x: isinstance(x, bytes))
+    return is_bytes.any()

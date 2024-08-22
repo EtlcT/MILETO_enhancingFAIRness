@@ -70,30 +70,6 @@ def resource_path(relative_path):
 
     return os.path.normpath(os.path.join(base_path, relative_path))
 
-def file2Blob(absolute_path: str) -> bytes:
-    """Take an absolute filepath, read relative file
-    convert content to blob
-
-    if the file does not exists orcan't be accessed,
-    let the absolute_path as it was and print error
-
-    """
-
-    try:
-        with open(absolute_path, 'rb') as file:
-            binary = file.read()
-
-        return binary
-    
-    except FileNotFoundError:
-        logging.error("An error occurred ", exc_info=True)
-        return absolute_path
-    
-def bytes_in_df_col(column: pd.Series) -> bool:
-    is_bytes = pd.Series()
-    is_bytes = column.apply(lambda x: isinstance(x, bytes))
-    return is_bytes.any()
-
 def img_base64(img_path):
         
         with open(img_path, "rb") as image_file:
