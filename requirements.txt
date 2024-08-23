@@ -5,3 +5,4 @@ graphviz
 pdfkit
 customtkinter
 CTkMessagebox
+odfpy # required to save spreadsheet as ods

@@ -1,7 +1,9 @@
 import pandas as pd
 import re
+import os
+
 from conf.config import *
-from src.utils.utils_extraction import bytes_in_df_col
+from src.utils.utils import json2dict
 
 class GenerateMeta:
     """
@@ -22,11 +24,11 @@ class GenerateMeta:
         information relative to table content
         """
         
-        data = {"table": [], "caption": []}
+        data = {DDICT_T_ATT["table"]: [], DDICT_T_ATT["desc"]: []}
 
         for table_name in self.sheets_dict:
-            data["table"].append(table_name)
-            data["caption"].append(str())
+            data[DDICT_T_ATT["table"]].append(table_name)
+            data[DDICT_T_ATT["desc"]].append(str())
 
         ddict_tables = pd.DataFrame(data)
         self.sheets_dict[DDICT_T] = ddict_tables
@@ -37,15 +39,15 @@ class GenerateMeta:
         """Generate DDict_attributes metadata table which contains
         attributes description
         """
-        data = {"attribute": [], "unit": [], "caption": []}
+        data = {DDICT_A_ATT["attribute"]: [], DDICT_A_ATT["unit"]: [], DDICT_T_ATT["desc"]: []}
         attribute_list = set()
         for table_name, table in self.sheets_dict.items():
             attribute_list.update(table.columns)
 
-        data["attribute"] = list(attribute_list)
+        data[DDICT_A_ATT["attribute"]] = list(attribute_list)
         for i in range(len(attribute_list)):
-            data["unit"].append(str())
-            data["caption"].append(str())
+            data[DDICT_A_ATT["unit"]].append(str())
+            data[DDICT_T_ATT["desc"]].append(str())
 
         ddict_attr = pd.DataFrame(data)
         self.sheets_dict[DDICT_A] = ddict_attr
@@ -57,15 +59,15 @@ class GenerateMeta:
         information schema data, ie. Primary Key and Foreign Key
         constraints, reference_table
         """
-        data = {"table": [], "attribute": [], "isPK": [], "isFK": [], "referenceTable": []}
+        data = {INFO_ATT["table"]: [], INFO_ATT["attribute"]: [], INFO_ATT["type"]: [], INFO_ATT["isPK"]: [], INFO_ATT["isFK"]: [], INFO_ATT["refTable"]: []}
         for table_name, table in self.sheets_dict.items():
             for column in table.columns:
-                data["table"].append(table_name)
-                data["attribute"].append(column)
-                data["type"].append(self.infer_sqlite_type(table[column]))
-                data["isPK"].append(str())
-                data["isFK"].append(str())
-                data["referenceTable"].append(str())
+                data[INFO_ATT["table"]].append(table_name)
+                data[INFO_ATT["attribute"]].append(column)
+                data[INFO_ATT["type"]].append(self.infer_sqlite_type(table[column]))
+                data[INFO_ATT["isPK"]].append(str())
+                data[INFO_ATT["isFK"]].append(str())
+                data[INFO_ATT["refTable"]].append(str())
         tables_infos = pd.DataFrame(data)
         self.sheets_dict[INFO] = tables_infos
         return tables_infos
@@ -86,16 +88,11 @@ class GenerateMeta:
         """Generate meta_references metadata table which contains
         Datacite schema metadata terms
         """
-        data = {
-            "Identifier": str(),
-            "Creators": str(),
-            "Titles": str(),
-            "Subjects": str(),
-            "Publisher": str(),
-            "Contributors": str(),
-            "PublicationYear": str(),
-            "ResourceType": str()
-        }
+
+        metaterms = json2dict("conf/metadata_properties.json")
+        data_prop = pd.Series([keys for keys in metaterms["mandatory"].keys()])
+        data_value = pd.Series([str() for _ in range(len(data_prop))])
+        data = {METAREF_ATT["property"]: data_prop, METAREF_ATT["value"]: data_value}
 
         metaref = pd.DataFrame(data)
         self.sheets_dict[METAREF] = metaref
@@ -105,11 +102,25 @@ class GenerateMeta:
         """Generate meta_extra metadata table which contains abstract
         and description fiels for rich metadata
         """
-        data = {"abstract": str(), "description": str()}
+
+        data_prop = pd.Series([key for key in METAEXTRA_PROP.keys()])
+        data_value = pd.Series([str() for _ in range(len(data_prop))])
+        data = {METAEXTRA_ATT["property"]: data_prop, METAEXTRA_ATT["value"]: data_value}
 
         meta_extra = pd.DataFrame(data)
         self.sheets_dict[METAEXTRA] = meta_extra
         return meta_extra
+    
+    def save_meta(self, filepath,  format):
+        """Save modified spreadsheet with metadata table into xlsx file"""
+        if format== "ods":
+            engine = "odf"
+        else:
+            engine = "openpyxl"
+        with pd.ExcelWriter(filepath, engine=engine) as doc:
+            for table_name, table in self.sheets_dict.items():
+                table.to_excel(doc, sheet_name=table_name, index=False)
+
 
 def update_metatable(self):
     """Update metadata tables,

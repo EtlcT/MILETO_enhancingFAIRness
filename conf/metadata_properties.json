@@ -1,0 +1,75 @@
+{
+    "mandatory":{
+        "Identifier":{
+            "id":1,
+            "help": "Unique string that identifies the resource",
+            "sub":{
+                "identifierType":{
+                    "id": "1.a",
+                    "help": "Digital Object Identifier"
+                }
+            }
+        },
+        "Creator":{
+            "id":2,
+            "help": "Main researchers involved / author of publication in priority order",
+            "sub": {
+                "creatorName":{
+                    "id": "2.1",
+                    "help": "Full name of the creator"
+                },
+                "OPT_nameIdentifier":{
+                    "id": "2.4",
+                    "help": "Uniquely identifies an individual or legal entity",
+                    "sub":{
+                        "nameIdentifierScheme":{
+                            "id":"2.4.a",
+                            "help": "Name of the identifier scheme: ORCID, ISNI, ROR, ..."
+                        }
+                    }
+                }
+            }
+        },
+        "Title":{
+            "id":3,
+            "help": "name or title by which resource is known ; name of software or instrument as instance"
+        },
+        "Publisher":{
+            "id": 4,
+            "help": "The name of the entity that holds, archives, publishes, prints, distributes, releases, issues, or produces the resource. "
+        },
+        "PublicationYear":{
+            "id": 5,
+            "help": "YYYY"
+        },
+        "ResourceType":{
+            "id":10,
+            "help": "Brief description of the resource. see: https://datacite-metadata-schema.readthedocs.io/_/downloads/en/4.5/pdf/#47",
+            "sub":{
+                "resourceTypeGeneral":{
+                    "id":"10.a",
+                    "help": "The general type of the resource."
+                }
+            }
+        }
+    },
+    "recommended":{
+        "Subject":{
+            "id":6,
+            "help":"Subject, keyword, classification code, or key phrase describing the resource",
+            "sub":{
+                "OPT_subjectScheme":{
+                    "id": "6.a",
+                    "help": "The name of the subject scheme or classification code or authority if one is used. Example: ANZSRC Fields of Research"
+                },
+                "OPT_classificationCode":{
+                    "id": "6.d",
+                    "help": "The classification code used for the subject term in the subject scheme."
+                }
+            }
+        }
+    },
+    "optionnal":{
+
+    }
+}

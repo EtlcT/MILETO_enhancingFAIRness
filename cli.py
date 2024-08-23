@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.ERROR,
                               logging.StreamHandler()])
 
 from src.extraction.retrieve_data import GetSpreadsheetData
+from src.extraction.create_metadata import GenerateMeta
 from src.extraction.check import CheckSpreadsheet
 from src.dbcreate.dbcreate import sqliteCreate
 from src.doccreate.pdf_create import docCreate, sqlite2pdf
@@ -16,85 +17,85 @@ from src.doccreate.pdf_create import docCreate, sqlite2pdf
 
 def main_cli():
 
-    parser = argparse.ArgumentParser(description="Convert spreadsheets into documented sqlite databases with rich and standardized metadata.")
-
-    parser.add_argument(
-        "input", 
-        help="Absolute path to the spreadsheet to convert"
-    )
-
-    parser.add_argument(
-        "output",
-        help="Absolute path to the output directory of your choice"
-    )
-
-    parser.add_argument(
-        "--filename",
-        type=str,
-        help="basename of outputs, default behavior will be using input name"
-    )
-
-    parser.add_argument(
-        "-ow",
-        "--overwrite",
-        action="store_true",
-        help="overwritte previously generated output"
-    )
-
-    parser.add_argument(
-        "--from-sqlite",
-        action="store_true",
-        help="Generate PDF from sqlite file"
-    )
-
-    parser
-
-    args = parser.parse_args()
+    args = getArgs()
 
     input_path = os.path.normpath(args.input)
-    output_path = os.path.normpath(args.output)
-    
-    if args.from_sqlite == True:
-        doc = sqlite2pdf(input_path, output_path)
-        doc.createPDF()
-    else:
-        # check data in spreadsheet is valid
-        checker = CheckSpreadsheet(input_path)
-        checker.validate_spreadsheet()
 
-        data = GetSpreadsheetData(
-                    filepath=input_path,
-                    checked_data=checker.sheets_dict
-                )
-        
-        spreadsheet_name = os.path.splitext(os.path.basename(input_path))[0]
-    
-        if args.overwrite == True and args.filename:
-            # overwrite the specified filename if exists
-            rm_if_exists(os.path.join(output_path, args.filename + ".sqlite"))
-            data.db_name = args.filename
-        elif args.overwrite == True and args.filename is None:
-            # user overwrite file with default filename if exits
-            rm_if_exists(os.path.join(output_path, spreadsheet_name + ".sqlite"))
-        elif args.overwrite == False and args.filename:
-            # user specified filename but donesn't want to overwrite
-            fileExistsHandler(os.path.join(output_path, args.filename + ".sqlite"))
-            data.db_name = args.filename
+    if os.path.isfile(input_path) == False:
+        logging.error(f"{FileNotFoundError}: {input_path} not found")
+        raise FileNotFoundError(
+            f"{input_path} not found"
+        )
+
+    if args.create_metadata:
         if args.overwrite == False and args.filename is None:
-            # user haven't specified filename
-            fileExistsHandler(os.path.join(output_path, spreadsheet_name + ".sqlite"))
-                
-        # create sqlite and erd_schema
-        sqlite_db = sqliteCreate(data, output_dir=output_path)
-        sqlite_db.create_db()
-        sqlite_db.insert_data()
-        sqlite_db.ddict_schema_create()
-        sqlite_db.meta_tables_create()
+            # user doesn't want to ow actual spreadsheet but doesn't specify filename
+            raise fileExistsHandler(input_path)
+        else:
+            meta = GenerateMeta(input_path)
+            meta.generate_ddict_tables()
+            meta.generate_ddict_attr()
+            meta.generate_meta_extra()
+            meta.generate_meta_ref()
+            meta.generate_tables_info()
+            file_format = os.path.splitext(input_path)[1]
+            if args.filename:
+                filename = os.path.join(os.path.dirname(input_path), args.filename + file_format)
+            else:
+                filename = input_path
+            
+            meta.save_meta(
+                filepath=filename,
+                format=file_format
+            )
 
-        # create pdf
-        doc = docCreate(sqlite_db)
+    elif args.update_metadata:
+        pass
+    else:
+        output_path = os.path.normpath(args.output)
+        
+        if args.from_sqlite == True:
+            doc = sqlite2pdf(input_path, output_path)
+            doc.createPDF()
+        else:
+            # check data in spreadsheet is valid
+            checker = CheckSpreadsheet(input_path)
+            checker.validate_spreadsheet()
 
-        doc.createPDF()
+            data = GetSpreadsheetData(
+                        filepath=input_path,
+                        checked_data=checker.sheets_dict
+                    )
+            
+            spreadsheet_name = os.path.splitext(os.path.basename(input_path))[0]
+            
+            if args.overwrite == False and args.filename is None:
+                # user haven't specified filename
+                fileExistsHandler(os.path.join(output_path, spreadsheet_name + ".sqlite"))
+            elif args.overwrite == True and args.filename:
+                # overwrite the specified filename if exists
+                rm_if_exists(os.path.join(output_path, args.filename + ".sqlite"))
+                data.db_name = args.filename
+            elif args.overwrite == True and args.filename is None:
+                # user overwrite file with default filename if exits
+                rm_if_exists(os.path.join(output_path, spreadsheet_name + ".sqlite"))
+            elif args.overwrite == False and args.filename:
+                # user specified filename but donesn't want to overwrite
+                fileExistsHandler(os.path.join(output_path, args.filename + ".sqlite"))
+                data.db_name = args.filename
+            
+                    
+            # create sqlite and erd_schema
+            sqlite_db = sqliteCreate(data, output_dir=output_path)
+            sqlite_db.create_db()
+            sqlite_db.insert_data()
+            sqlite_db.ddict_schema_create()
+            sqlite_db.meta_tables_create()
+
+            # create pdf
+            doc = docCreate(sqlite_db)
+
+            doc.createPDF()
 
     
 def rm_if_exists(filepath):
@@ -117,3 +118,54 @@ def fileExistsHandler(filepath):
             f"{filename} already exists in output directory\n"
             "Overwrite it with -ow --overwritte flag OR specify another filename using --filename"
         )
+
+def getArgs():
+    """Define and return command-line arguments"""
+
+    parser = argparse.ArgumentParser(description="Convert spreadsheets into documented sqlite databases with rich and standardized metadata.")
+
+    group = parser.add_argument_group("Processing", "Choose between pre-processing of spreadsheet, ie: generate metadata table or conversion of files already compliant with the template")
+
+    exclusive_group = group.add_mutually_exclusive_group(required=True)
+
+    parser.add_argument(
+        "input", 
+        help="Absolute path to the spreadsheet to convert"
+    )
+
+    exclusive_group.add_argument(
+        "-o",
+        "--output",
+        help="Absolute path to the output directory of your choice"
+    )
+    exclusive_group.add_argument(
+        "--create-metadata",
+        action="store_true",
+        help="Generate metadata tables that should then be filled before running"
+    )
+    exclusive_group.add_argument(
+        "--update-metadata",
+        action="store_true",
+        help="Update metadata tables, keeping intact non altered values"
+    )
+
+    parser.add_argument(
+        "--filename",
+        type=str,
+        help="basename of outputs, default behavior will be using input name"
+    )
+
+    parser.add_argument(
+        "-ow",
+        "--overwrite",
+        action="store_true",
+        help="overwritte previously generated output"
+    )
+
+    parser.add_argument(
+        "--from-sqlite",
+        action="store_true",
+        help="Generate PDF from sqlite file"
+    )
+
+    return parser.parse_args()

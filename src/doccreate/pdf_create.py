@@ -129,7 +129,7 @@ class docCreate():
             ddict_table_content += (
                 "<tr>"
                 f"<td>{row[DDICT_T_ATT['table']]}</td>"
-                f"<td>{row[DDICT_T_ATT['caption']]}</td>"
+                f"<td>{row[DDICT_T_ATT['desc']]}</td>"
                 "</tr>"
             )
 
@@ -140,7 +140,7 @@ class docCreate():
                 f"<td>{row[DDICT_A_ATT['attribute']]}</td>"
                 f"<td>{row[DDICT_A_ATT['attType']]}</td>"
                 f"<td>{row[DDICT_A_ATT['unit']]}</td>"
-                f"<td>{row[DDICT_A_ATT['caption']]}</td>"
+                f"<td>{row[DDICT_A_ATT['desc']]}</td>"
                 "</tr>"
             )
         
@@ -271,7 +271,7 @@ class sqlite2pdf():
             ddict_table_content += (
                 "<tr>"
                 f"<td>{row[DDICT_T_ATT['table']]}</td>"
-                f"<td>{row[DDICT_T_ATT['caption']]}</td>"
+                f"<td>{row[DDICT_T_ATT['desc']]}</td>"
                 "</tr>"
             )
 
@@ -282,7 +282,7 @@ class sqlite2pdf():
                 f"<td>{row[DDICT_A_ATT['attribute']]}</td>"
                 f"<td>{row[DDICT_A_ATT['attType']]}</td>"
                 f"<td>{row[DDICT_A_ATT['unit']]}</td>"
-                f"<td>{row[DDICT_A_ATT['caption']]}</td>"
+                f"<td>{row[DDICT_A_ATT['desc']]}</td>"
                 "</tr>"
             )
         
