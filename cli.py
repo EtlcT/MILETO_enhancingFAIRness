@@ -16,45 +16,38 @@ from src.doccreate.pdf_create import docCreate, sqlite2pdf
 
 def main_cli():
 
-    parser = argparse.ArgumentParser(description="Welcome into Ss2db. Let's convert spreadsheets into sqlite databases")
+    parser = argparse.ArgumentParser(description="Convert spreadsheets into documented sqlite databases with rich and standardized metadata.")
 
     parser.add_argument(
-        "-i",
-        "--input", 
-        help="Absolute path to the spreadsheet to convert",
-        required=True
+        "input", 
+        help="Absolute path to the spreadsheet to convert"
     )
 
     parser.add_argument(
-        "-o",
-        "--output",
-        help="Absolute path to the output directory of your choice",
-        required=True
+        "output",
+        help="Absolute path to the output directory of your choice"
+    )
+
+    parser.add_argument(
+        "--filename",
+        type=str,
+        help="basename of outputs, default behavior will be using input name"
     )
 
     parser.add_argument(
         "-ow",
         "--overwrite",
-        nargs="?",
-        const=False,
-        type=bool,
-        help="default False, set on True to overwritte previously generated output"
-    )
-
-    parser.add_argument(
-        "--filename",
-        nargs="?",
-        const=str,
-        help="basename of output, default behavior will be using spreadsheet name"
+        action="store_true",
+        help="overwritte previously generated output"
     )
 
     parser.add_argument(
         "--from-sqlite",
-        nargs="?",
-        const=False,
-        type=bool,
-        help="default False, set on True if you provide path to sqlite file and want a PDF creation from it only"
+        action="store_true",
+        help="Generate PDF from sqlite file"
     )
+
+    parser
 
     args = parser.parse_args()
 
@@ -76,19 +69,19 @@ def main_cli():
         
         spreadsheet_name = os.path.splitext(os.path.basename(input_path))[0]
     
-        if args.overwrite != None and args.filename:
+        if args.overwrite == True and args.filename:
             # overwrite the specified filename if exists
             rm_if_exists(os.path.join(output_path, args.filename + ".sqlite"))
             data.db_name = args.filename
-        elif args.overwrite != None and args.filename is None:
+        elif args.overwrite == True and args.filename is None:
             # user overwrite file with default filename if exits
             rm_if_exists(os.path.join(output_path, spreadsheet_name + ".sqlite"))
-        elif args.overwrite is None and args.filename:
+        elif args.overwrite == False and args.filename:
             # user specified filename but donesn't want to overwrite
             fileExistsHandler(os.path.join(output_path, args.filename + ".sqlite"))
             data.db_name = args.filename
-        if args.overwrite is None and args.filename is None:
-            # user haven't specified 
+        if args.overwrite == False and args.filename is None:
+            # user haven't specified filename
             fileExistsHandler(os.path.join(output_path, spreadsheet_name + ".sqlite"))
                 
         # create sqlite and erd_schema
@@ -121,6 +114,6 @@ def fileExistsHandler(filepath):
             "Overwrite it with -ow --overwritte flag OR specify anothe name using --filename"
         )
         raise FileExistsError(
-            f"{filename} already exists in output directory"
+            f"{filename} already exists in output directory\n"
             "Overwrite it with -ow --overwritte flag OR specify another filename using --filename"
         )
