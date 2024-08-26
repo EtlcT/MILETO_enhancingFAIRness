@@ -113,14 +113,12 @@ class View(ctk.CTk):
 
             if self.get_var("from_sqlite") == "off" or self.get_var("from_sqlite") == "":
 
-                output_sqlite = os.path.normpath(os.path.join(
-                    self.output_dir,
+                output_basename = os.path.normpath(
                     os.path.splitext(os.path.basename(self.filepath))[0]
-                    + ".sqlite"
-                    ))
+                )
 
                 # TODO rename following function
-                self.controller.display_convert_option(output_sqlite)
+                self.controller.display_convert_option(output_basename)
             
             else:
                 self.controller.display_pdf_from_sqlite()

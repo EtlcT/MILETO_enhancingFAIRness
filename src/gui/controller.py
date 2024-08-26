@@ -7,7 +7,7 @@ from PIL import Image
 from src.gui.view import View
 from src.gui.model import Model
 from src.extraction.check import InvalidData
-from src.utils.utils import resource_path
+from src.utils.utils import resource_path, output_exist
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -226,7 +226,7 @@ class Controller:
         (generate all, only sqlite and erd)
         """
 
-        # TODO : ADD radiobuttons and code action
+
         # create conversion_frame
         conversion_frame = ctk.CTkFrame(master=self.view)
         conversion_frame.grid_columnconfigure(0, weight=1)
@@ -272,7 +272,7 @@ class Controller:
             widget_grid=outdir_btn_gridoptions
         )
 
-    def display_convert_option(self, output_sqlite):
+    def display_convert_option(self, output_basename):
         """Check if file exists in output directory"""
 
         convert_btn = ctk.CTkButton(
@@ -293,13 +293,13 @@ class Controller:
             widget_grid=convert_btn_gridoptions
         )
 
-        if os.path.isfile(output_sqlite):
+        if output_exist(self.view.output_dir, output_basename):
             # an output already exists for this spreadsheet
 
             # Add warning message to error_frame ask user how to handle existing files
             file_exists_warning_msg = ( 
-                f"WARNING: An sqlite file already exist in output directory for this spreadsheet"
-                "\nCheck the overwrite checkbox to delete existing file"
+                f"WARNING: Output(s) already exist in output directory for this spreadsheet"
+                "\nCheck the overwrite checkbox to delete existing file(s)"
                 " or provide another filename: "
             )
             file_exists_warning = ctk.CTkLabel(
@@ -316,78 +316,77 @@ class Controller:
                 widget_grid=file_exists_warning_grid
             )
 
-            def callback_entry(*args):
-                """Enable convert button if output name doesn't already exist"""
-                ow_state = self.view.get_var("check_ow")
-                if (not os.path.isfile(os.path.normpath(os.path.join(
-                        self.view.output_dir,
-                        filename_var.get() + ".sqlite"
-                    )
-                )) and filename_var.get() != "") or ow_state == True:
-                    # fie does not exists yet
-                    self.view.get_widget("convert_btn").configure(state="normal")
-                    self.add_variable("filename_var", filename_var.get())
-                else:
-                    self.view.get_widget("convert_btn").configure(state="disabled")
-                    # if invalid filename remove it from
-                    if "filename_var" in self.view.variables:
-                        del self.view.variables["filename_var"] 
-                    
-
-            # Add Entry widget to allow user to chose
-            # another name for generated outputs
-            filename_var = ctk.StringVar()
-            filename_var.trace_add("write", callback_entry)
-
-            filename_entry = ctk.CTkEntry(
-                master=self.view.get_widget("conversion_frame"),
-                textvariable=filename_var
-            )
-            filename_entry_gridoptions = {
-                "row":1,
-                "column":1
-            }
-            self.add_widget(
-                widget=filename_entry,
-                widget_name="filename_entry",
-                widget_grid=filename_entry_gridoptions
-            )
-
-            def callback_cb(file):
-                """callback on checkbox state change"""
-                if check_ow.get() == "on":
-                    self.view.get_widget("convert_btn").configure(state="normal")
-                    self.add_variable("check_ow", True)
-                elif check_ow.get() == "off" and (file.get() == "" or os.path.isfile(os.path.normpath(os.path.join(
-                        self.view.output_dir,
-                        filename_var.get() + ".sqlite"
-                    ))
-                )):
-                    self.view.get_widget("convert_btn").configure(state="disabled")
-                    self.view.variables["check_ow"] = False
-
-            # Add checkbox for overwrite previous output option
-            check_ow = ctk.StringVar()
-            overwrite_cb = ctk.CTkCheckBox(
-                master=self.view.get_widget("conversion_frame"),
-                text="Overwrite existing file in output directory",
-                variable=check_ow,
-                command=lambda: callback_cb(filename_var),
-                onvalue="on",
-                offvalue="off"
-            )
-            overwrite_cb_gridoptions = {
-                "row":1,
-                "column":3
-            }
-            self.add_widget(
-                widget=overwrite_cb,
-                widget_name="overwrite_cb",
-                widget_grid=overwrite_cb_gridoptions
-            )
-
         else:
             self.view.get_widget("convert_btn").configure(state="normal")
+
+        def callback_entry(*args):
+            """Enable convert button if output name doesn't already exist"""
+            ow_state = self.view.get_var("check_ow")
+            if (output_exist(self.view.output_dir, filename_var.get()) == False
+                and filename_var.get() != "") or ow_state == True:
+                # fie does not exists yet
+                self.view.get_widget("convert_btn").configure(state="normal")
+                self.add_variable("filename_var", filename_var.get())
+            else:
+                self.view.get_widget("convert_btn").configure(state="disabled")
+                # if invalid filename remove it from
+                if "filename_var" in self.view.variables:
+                    del self.view.variables["filename_var"] 
+                
+
+        # Add Entry widget to allow user to chose
+        # another name for generated outputs
+        filename_var = ctk.StringVar(
+            master=self.view.get_widget("conversion_frame"),
+            value=output_basename
+        )
+        filename_var.trace_add("write", callback_entry)
+
+        filename_entry = ctk.CTkEntry(
+            master=self.view.get_widget("conversion_frame"),
+            textvariable=filename_var,
+
+        )
+        filename_entry_gridoptions = {
+            "row":1,
+            "column":1
+        }
+        self.add_widget(
+            widget=filename_entry,
+            widget_name="filename_entry",
+            widget_grid=filename_entry_gridoptions
+        )
+
+        def callback_cb(file):
+            """callback on checkbox state change"""
+            if check_ow.get() == "on":
+                self.view.get_widget("convert_btn").configure(state="normal")
+                self.add_variable("check_ow", True)
+            elif check_ow.get() == "off":
+                self.view.variables["check_ow"] = False
+                if (file == "" or output_exist(self.view.output_dir, file)):
+                    self.view.get_widget("convert_btn").configure(state="disabled")
+
+        # Add checkbox for overwrite previous output option
+        check_ow = ctk.StringVar()
+        overwrite_cb = ctk.CTkCheckBox(
+            master=self.view.get_widget("conversion_frame"),
+            text="Overwrite existing file in output directory",
+            variable=check_ow,
+            command=lambda: callback_cb(filename_var.get()),
+            onvalue="on",
+            offvalue="off"
+        )
+        overwrite_cb_gridoptions = {
+            "row":1,
+            "column":3
+        }
+        self.add_widget(
+            widget=overwrite_cb,
+            widget_name="overwrite_cb",
+            widget_grid=overwrite_cb_gridoptions
+        )
+
     
     def convert(self):
         """Run conversion process based on user selection,

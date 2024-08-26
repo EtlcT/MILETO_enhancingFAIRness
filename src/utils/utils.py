@@ -100,4 +100,24 @@ def rotate_image(image_path):
 def file_exists(file_path):
     """Return true if file exists, False if not"""
 
-    return os.path.exists(file_path)
+    return os.path.isfile(file_path)
+
+def output_exist(output_dir, output_basename):
+        """For all potential generated output, check if one already exists
+        return True if output already exist else False
+        """
+        outputs = [
+            os.path.join(output_dir, output_basename + ".sqlite"),
+            os.path.join(output_dir, output_basename + ".pdf"),
+            os.path.join(output_dir, "ERD_" + output_basename + ".svg"),
+            os.path.join(output_dir, "ERD_" + output_basename + ".png")
+            ]
+        exists = []
+
+        for o in outputs:
+            if os.path.isfile(o):
+                exists.append(True)
+            else:
+                exists.append(False)
+        
+        return any(exists)
