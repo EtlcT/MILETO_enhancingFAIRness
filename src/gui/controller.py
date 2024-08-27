@@ -8,6 +8,7 @@ from src.gui.view import View
 from src.gui.model import Model
 from src.extraction.check import InvalidData
 from src.utils.utils import resource_path, output_exist
+from conf.config import META_TABLES
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -24,136 +25,84 @@ class Controller:
         """Display path to selected spreadsheet and load it
         Display button to check data validity
         """
-        
-        #delete previous content if exist
-        self.view.rm_widget("selected_file")
-        self.view.rm_widget("error_frame")
-        self.view.rm_widget("spreadsheet_frame")
-        self.view.rm_widget("check_btn")
-        self.view.rm_widget("conversion_frame")
-
-        # display selected file in view input_frame
-        selected_file = ctk.CTkLabel(
-            master=self.view.input_frame,
-            text=spreadsheet_path
-        )
-        selected_file_gridoptions = {
-            "row":1,
-            "column":0,
-            "columnspan":3,
-            "padx":10,
-            "pady":(10, 0),
-            "sticky": "w"
-        }
-        self.add_widget(
-            widget=selected_file,
-            widget_name="selected_file",
-            widget_grid=selected_file_gridoptions
-        )
 
         # load excel
         tmp_data = self.load_spreadsheet(spreadsheet_path)
 
         # display spreadsheet and dropmenu for sheet selection
-        self.display_spreadsheet()
-        self.display_sheet_selector(tmp_data)
+        self.view.display_spreadsheet_frame()
+        # create logs to track changes in spreadsheet
+        self.model.create_logs()
+        # display dropmenu
+        self.view.display_sheet_selector(tmp_data)
 
-        # Add check button to check data consistency 
-        check_btn = ctk.CTkButton(
-            master=self.view.input_frame,
-            text="Check Spreadsheet data",
-            command=self.verify_spreadsheet
-        )
-        check_btn_gridoptions = {
-            "row":3,
-            "column":0,
-            "padx":10,
-            "pady":10
-        }
-        self.add_widget(
-            widget=check_btn,
-            widget_name="check_btn",
-            widget_grid=check_btn_gridoptions
-        )
+        # display option on spreadsheet (create, update, check)
+        self.view.display_spreadsheet_option()
 
     def load_spreadsheet(self, spreadsheet_path):
         """Load spreadsheet data"""
         self.model.input_path = spreadsheet_path
         tmp_data = self.model.load_spreadsheet(spreadsheet_path)
         return tmp_data
-    
-    def display_spreadsheet(self):
-        """Add frame with treeview widget to display spreadsheet"""
-
-        # create new frame in view to contain spreadsheet
-        spreadsheet_frame = ctk.CTkFrame(
-            master=self.view.input_frame
-        )
-        spreadsheet_frame.grid_columnconfigure(0, weight=1)
-        spreadsheet_frame_gridoptions= {
-            "row":2,
-            "column":0,
-            "sticky":"nsew"
-        }
-        self.add_widget(
-            widget=spreadsheet_frame,
-            widget_name="spreadsheet_frame",
-            widget_grid=spreadsheet_frame_gridoptions
-        )
-
-        # create treeview widget in spreadsheet_frame to display sheet
-        sheet = ttk.Treeview(
-            master=self.view.additional_widgets.get("spreadsheet_frame")
-        )
-        sheet_gridoptions = {
-            "row": 1,
-            "column":0,
-            "sticky":"nsew"
-        }
-        self.add_widget(
-            widget=sheet,
-            widget_name="sheet",
-            widget_grid=sheet_gridoptions
-        )
-    
-    def display_sheet(self, tmp_data, selected_sheet):
-        """Called on sheet_selector's changes
-        Update treeview widget to display selected sheet
-        """
-
-        sheet = self.view.additional_widgets.get("sheet")
-        sheet["column"] = list(tmp_data[selected_sheet].columns)
-        sheet["show"] = "headings"
-        for column in sheet["columns"]:
-            sheet.heading(column, text=column)
+ 
+    def on_header_click(self, event, selected_sheet):
+        """Allow modifying headers value on click"""
+        region = self.view.sheet.identify("region", event.x, event.y)
+        if region == "heading":
+            # user click on some header
+            column_id = self.view.sheet.identify_column(event.x)
+            # Get the current heading text
+            current_heading = self.view.sheet.heading(column_id)['text']
         
-        df_rows = tmp_data[selected_sheet].head(20).to_numpy().tolist()
-        for row in df_rows:
-            sheet.insert("", "end", values=row)
+            # open dialog to ask for new heading value
+            new_heading = ctk.CTkInputDialog(text=f"Enter new heading for '{current_heading}':")
+        
+            # If a new heading was provided, update the column heading
+            if new_heading:
+                self.view.sheet.heading(column_id, text=new_heading.get_input())
+                self.view.upt_metatable_btn.configure(state="normal")
+                self.model.upt_change_log(selected_sheet, current_heading, new_heading)
 
-    def display_sheet_selector(self, tmp_data):
-        """Add dropmenu for sheet selection to view"""
+    def on_cell_click(self, event, selected_sheet):
+        """allow modifying"""
+        global entry
+        region = self.view.sheet.identify("region", event.x, event.y)
+        if region == "cell":
+            # user click on some cell
+            selected_item = self.view.sheet.identify_row(event.y)
+            selected_column = self.view.sheet.identify_column(event.x)
+            column_index = int(selected_column[1:]) - 1
+            cell_value = self.view.sheet.item(selected_item)['values'][column_index]
 
-        # add dropmenu for sheet selection
-        def sheet_selection_callback(choice, tmp_data):
-            self.view.delete_elmt("sheet")
-            self.display_sheet(tmp_data, choice)
-            
-        sheet_selection = ctk.CTkComboBox(
-            master=self.view.get_widget("spreadsheet_frame"),
-            values=list(tmp_data.keys()),
-            command=lambda choice : sheet_selection_callback(choice, tmp_data)
-        )
-        sheet_selection_gridoptions = {
-            "row":0,
-            "column":0,
-            "sticky":"w"
-        }
-        self.add_widget(
-            widget=sheet_selection,
-            widget_name="sheet_selection",
-            widget_grid=sheet_selection_gridoptions
-        )
+            bbox = self.view.sheet.bbox(selected_item, selected_column)
+            x=bbox[0]
+            y=bbox[1]
+        
+            # Create an Entry widget and place it at the cell position
+            self.view.display_upt_cell(cell_value,x,y)
+            self.view.cell_entry.bind(
+                '<Return>',
+                lambda event: self.update_cell_value(
+                    event,
+                    selected_sheet,
+                    selected_item,
+                    column_index
+                )
+            )
+
+    def update_cell_value(self, event, table, item, col):
+        """Update treeview and dataframe"""
+        # update treeview
+        new_value = self.view.cell_entry.get()
+        self.view.sheet.set(item, col, new_value)
+
+        # delete existing entry
+        self.view.cell_entry.destroy()
+
+        # update dataframe
+        row = self.view.sheet.index(item)
+        self.model.upt_cell(table, row, col, new_value)
+
 
     def verify_spreadsheet(self):
         """Control spreadsheet is conform
@@ -250,6 +199,7 @@ class Controller:
             "row":0,
             "column":0
         }
+
         self.add_widget(
             widget=outdir_label,
             widget_name="outdir_label",
@@ -337,7 +287,6 @@ class Controller:
         # Add Entry widget to allow user to chose
         # another name for generated outputs
         filename_var = ctk.StringVar(
-            master=self.view.get_widget("conversion_frame"),
             value=output_basename
         )
         filename_var.trace_add("write", callback_entry)
@@ -414,11 +363,7 @@ class Controller:
             self.model.convert()
         
         self.view.show_success(msg="Your spreadsheet has been converted succesfully !")
-        self.view.rm_widget("selected_file")
-        self.view.rm_widget("spreadsheet_frame")
-        self.view.rm_widget("error_frame")
-        self.view.rm_widget("conversion_frame")
-        self.view.rm_widget("check_btn")
+        self.view.clean_frame(mode="all")
 
     def display_pdf_from_sqlite(self):
         """Display a Generate PDF from sqlite button"""
@@ -466,3 +411,16 @@ class Controller:
     def add_variable(self, var_name, value):
         """Add variable value to view for future access"""
         self.view.variables[var_name] = value
+
+    def create_metatable(self):
+        """Check if metadata tables are missing"""
+        missing_table = self.model.create_metatable()
+        if missing_table:
+            # metadata table has been added, refresh treeview
+            self.view.spreadsheet_frame.destroy()
+            self.view.display_spreadsheet_frame()
+            self.view.display_sheet_selector(self.model.tmp_data)
+            self.view.check_btn.configure(state="normal")
+    #TODO
+    def upt_metatable(self):
+        pass

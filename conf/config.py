@@ -20,3 +20,5 @@ DDICT_S_ATT = TEMP_CONF["DDict_schema"]["tab_attr"]
 METAEXTRA = TEMP_CONF["meta_extra"]["tab_name"]
 METAEXTRA_ATT = TEMP_CONF["meta_extra"]["tab_attr"]
 METAEXTRA_PROP = TEMP_CONF["meta_extra"]["properties"]
+
+META_TABLES = [METAREF, INFO, DDICT_T, DDICT_A, DDICT_S, METAEXTRA]

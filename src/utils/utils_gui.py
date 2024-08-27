@@ -1,7 +1,7 @@
 import tkinter as tk
 
 def get_zoomed_geometry():
-        """Return geometry for tkinter view to set fullscreen mode"""
+        """Return geometry for tkinter view to set fullscreen mode on linux"""
         root = tk.Tk()
         root.update_idletasks()
         root.attributes('-zoomed', True)

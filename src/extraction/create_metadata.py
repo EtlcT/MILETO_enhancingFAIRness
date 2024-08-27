@@ -3,6 +3,7 @@ import re
 import os
 
 from conf.config import *
+from src.utils.utils_extraction import regex_exclude_meta
 from src.utils.utils import json2dict
 
 class GenerateMeta:
@@ -61,13 +62,14 @@ class GenerateMeta:
         """
         data = {INFO_ATT["table"]: [], INFO_ATT["attribute"]: [], INFO_ATT["type"]: [], INFO_ATT["isPK"]: [], INFO_ATT["isFK"]: [], INFO_ATT["refTable"]: []}
         for table_name, table in self.sheets_dict.items():
-            for column in table.columns:
-                data[INFO_ATT["table"]].append(table_name)
-                data[INFO_ATT["attribute"]].append(column)
-                data[INFO_ATT["type"]].append(self.infer_sqlite_type(table[column]))
-                data[INFO_ATT["isPK"]].append(str())
-                data[INFO_ATT["isFK"]].append(str())
-                data[INFO_ATT["refTable"]].append(str())
+            if regex_exclude_meta(table_name)==False:
+                for column in table.columns:
+                    data[INFO_ATT["table"]].append(table_name)
+                    data[INFO_ATT["attribute"]].append(column)
+                    data[INFO_ATT["type"]].append(self.infer_sqlite_type(table[column]))
+                    data[INFO_ATT["isPK"]].append(str())
+                    data[INFO_ATT["isFK"]].append(str())
+                    data[INFO_ATT["refTable"]].append(str())
         tables_infos = pd.DataFrame(data)
         self.sheets_dict[INFO] = tables_infos
         return tables_infos
@@ -123,10 +125,32 @@ class GenerateMeta:
 
 
 def update_metatable(self):
-    """Update metadata tables,
-    keep state of actual data in metadata tables,
-    remove attribute that does not exist,
-    add new attributes,
-    keep unchanged others
+    """Update metadata tables:
+    - remove attributes that does not exist anymore,
+    - add new attributes,
+    - keep unchanged others
     """
+
     pass
+
+
+def get_diff(self, former_info) -> pd.DataFrame:
+    """Return a dataframe of comparison between former 
+    and actual tables_infos like below
+
+    ```Markdown table.
+    |  table   | attribute  |   state      |
+    | :------- | :--------  | :---------:  |
+    | table_A  |  A_col_1   | both         |
+    | table_A  |  A_col_2   | left_only    |
+    | table_B  |  B_col_1   | right_only   |
+    ```
+
+    state both means that the attribute still exist
+    state left_only means the attribute has been removed
+    state right_only means the attribute has been added
+    """
+
+    comparison_df = former_info.merge()
+    pass
+    
