@@ -7,31 +7,33 @@
     <link rel="stylesheet" href="doc.css">
 </head>
 <body>
-    <h1 class="center">{title}</h1>
-    <div>
-        <p class="center">{authors_id_links}</p>
-        <p class="center">{creation_date}</p>
-    </div>
-    <h2 class="center">Abstract</h2>
-    <div class="description">
-        <p>This paper documents the structure and contents of the "{db_name}" database. 
-            The database and this documentation are accessible through accessible through : {DOI_a_tag}.
-            and have been produced using spreads2sqlite software. This software is available through
-            Gitlab repository {gitlab_repo_a_tag}.
-        </p>
-    </div>
-    <hr>
-    <div>
-        <p><b>Database keywords</b>: {keywords}</p>
+    <div class="intro-container">
+        <h1 class="center">{title}</h1>
+        <div>
+            <p class="center">{authors_id_links}</p>
+            <p class="center">{creation_date}</p>
+        </div>
+        <h2 class="center" id="abstract">Abstract</h2>
+        <div class="extra">
+            <p>This paper documents the structure and contents of the "{db_name}" database. 
+                The database and this documentation are accessible through accessible through : {DOI_a_tag}.
+                and have been produced using spreads2sqlite software. This software is available through
+                Gitlab repository {gitlab_repo_a_tag}.
+            </p>
+        </div>
+        <hr>
+        <div>
+            <p><b>Database keywords</b>: {keywords}</p>
+        </div>
     </div>
     <div class="page-break"></div>
     <h2>Synthesis</h2>
-    <div class="description">
-        <p class="description">{extra_synthesis}</p>
+    <div class="extra">
+        <pre id="extra-synthesis">{extra_synthesis}</pre>
     </div>
     <h2>Description</h2>
-    <div>
-        <p class="description">{extra_description}</p>
+    <div class="extra">
+        <pre id="extra-desc">{extra_description}</pre>
     </div>
     <h2 class="page-break">Entity Relationship Diagram</h2>
     {img_tag_erd}
