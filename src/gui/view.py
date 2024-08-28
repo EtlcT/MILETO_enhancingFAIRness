@@ -216,7 +216,7 @@ class View(ctk.CTk):
         self.create_metatable_btn = ctk.CTkButton(
             master=self.ss_option_frame,
             text="Create metadata table\n(if not exist)",
-            command=self.controller.create_metatable
+            command=self.controller.create_missing_metatable
         )
         self.create_metatable_btn.grid(
             row=1,
@@ -278,7 +278,7 @@ class View(ctk.CTk):
             master=self.input_frame,
             text="Create metadata table",
             state="normal",
-            command=self.controller.create_metatable
+            command=self.controller.create_missing_metatable
         )
         create_meta_btn.grid(
 

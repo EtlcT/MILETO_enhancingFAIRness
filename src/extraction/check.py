@@ -18,14 +18,17 @@ class CheckSpreadsheet:
     """
 
     def __init__(self, spreadsheet):
-        ## GUI: spreadsheet has already been loaded and is stored as dict
         if isinstance(spreadsheet, dict):
+        ## GUI: spreadsheet has already been loaded and is stored as dict
             self.sheets_dict = rm_extra_tables(spreadsheet)
-        ## CLI: spreadsheet is read for the first time
         else:
+        ## CLI: spreadsheet is read for the first time
             self.sheets_dict = rm_extra_tables(pd.read_excel(spreadsheet, sheet_name=None))
-        self.tables_info = self._get_tables_info()
         self.metadata_tables = [METAREF, INFO, DDICT_T, DDICT_A]
+        # check template is respected before all
+        self.validate_template()
+        self.tables_info = self._get_tables_info()
+        
 
     def validate_template(self):
         """Raise error if spreasheet is not compliant with template"""
@@ -33,7 +36,7 @@ class CheckSpreadsheet:
         errors = []
         check_tasks = [
             self.check_metadata_exists,
-            self.check_metadata_not_empty,
+            self.check_metadata_not_empty, #TODO
             self.check_infos,
             self.check_attributes,
             self.check_tables,
@@ -101,7 +104,7 @@ class CheckSpreadsheet:
         """
         missing_attribute = []
         merged_df = self.sheets_dict[INFO].merge(
-            GenerateMeta(self.sheets_dict).generate_tables_info(),
+            GenerateMeta(self.sheets_dict).generate_tables_info(inplace=False),
             how="outer",
             on=["table", "attribute"],
             indicator=True
@@ -250,12 +253,11 @@ class CheckSpreadsheet:
             raise AttributesDuplicateError(duplicates.to_string(index=False))
     
     def _get_tables_info(self):
-
         datatables_list = get_datatables_list(self.sheets_dict)
 
         tables_info = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
                                         .isin(datatables_list)] \
-                                        .iloc[:,:5]
+                                        .iloc[:,:6]
         return tables_info
 
 class CheckSpreadsheetError(Exception):

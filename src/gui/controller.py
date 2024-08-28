@@ -414,7 +414,7 @@ class Controller:
 
     def create_metatable(self):
         """Check if metadata tables are missing"""
-        missing_table = self.model.create_metatable()
+        missing_table = self.model.create_missing_metatable()
         if missing_table:
             # metadata table has been added, refresh treeview
             self.view.spreadsheet_frame.destroy()

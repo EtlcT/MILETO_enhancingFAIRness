@@ -19,7 +19,51 @@ class GenerateMeta:
         ## CLI: spreadsheet is read for the first time
         else:
             self.sheets_dict = pd.read_excel(spreadsheet, sheet_name=None)
+    
+    def create_metatable(self):
+        """Create metadata tables if not exist"""
+
+        missing_tables = []
+        for metatable in META_TABLES:
+            if metatable not in list(self.sheets_dict.keys()):
+                missing_tables.append(metatable)
+                if metatable == METAREF:
+                    self.generate_meta_ref()
+                elif metatable == INFO:
+                    self.generate_tables_info()
+                elif metatable == DDICT_T:
+                    self.generate_ddict_tables()
+                elif metatable == DDICT_A:
+                    self.generate_ddict_attr()
+                elif metatable == METAEXTRA:
+                    self.generate_meta_extra()
+            else:
+                if metatable == INFO:
+                    # metadata table tables_info already exists
+                    # infer sqlite type
+                    self.upt_attribute_type()
+        return missing_tables
+
+    def upt_attribute_type(self):
+        """Infer sqlite type and store it in tables_info type column
+        This function only executes when tables_infos already exists
+        """
+
+        for table_name, table in self.sheets_dict.items():
+            if regex_exclude_meta(table_name)==False:
+                for column_name in table.columns:
+                    attr_type = self.infer_sqlite_type(
+                        column=column_name, 
+                        table=self.sheets_dict[table_name]
+                    )
+                    self.sheets_dict[INFO].loc[
+                        (self.sheets_dict[INFO][INFO_ATT]["table"]==table_name) &
+                        (self.sheets_dict[INFO][INFO_ATT]["attribute"]==column_name),
+                        "type"
+                    ] = attr_type
         
+        return
+                        
     def generate_ddict_tables(self):
         """Generate DDict_tables metadata table which contains
         information relative to table content
@@ -55,7 +99,7 @@ class GenerateMeta:
         
         return ddict_attr
 
-    def generate_tables_info(self):
+    def generate_tables_info(self, inplace=True):
         """Generate tables_infos metadata table which contains
         information schema data, ie. Primary Key and Foreign Key
         constraints, reference_table
@@ -66,18 +110,22 @@ class GenerateMeta:
                 for column in table.columns:
                     data[INFO_ATT["table"]].append(table_name)
                     data[INFO_ATT["attribute"]].append(column)
-                    data[INFO_ATT["type"]].append(self.infer_sqlite_type(table[column]))
+                    data[INFO_ATT["type"]].append(self.infer_sqlite_type(column, table[column]))
                     data[INFO_ATT["isPK"]].append(str())
                     data[INFO_ATT["isFK"]].append(str())
                     data[INFO_ATT["refTable"]].append(str())
         tables_infos = pd.DataFrame(data)
-        self.sheets_dict[INFO] = tables_infos
+        if inplace == True:
+            self.sheets_dict[INFO] = tables_infos
         return tables_infos
     
     @staticmethod
-    def infer_sqlite_type(column: pd.Series):
+    def infer_sqlite_type(column_name: str, column: pd.Series):
         """Infer attributes type based on dataframe content"""
         col_type = column.dtype
+        for regex in IMG_COL_REGEX:
+            if re.search(regex, column_name):
+                return "BLOB"
         if re.search('int', str(col_type)) != None:
             return 'INTEGER'
         elif re.search('float', str(col_type)) != None:
@@ -113,6 +161,7 @@ class GenerateMeta:
         self.sheets_dict[METAEXTRA] = meta_extra
         return meta_extra
     
+    #TODO move to utils.utils
     def save_meta(self, filepath,  format):
         """Save modified spreadsheet with metadata table into xlsx file"""
         if format== "ods":

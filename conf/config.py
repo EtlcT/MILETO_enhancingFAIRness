@@ -22,3 +22,6 @@ METAEXTRA_ATT = TEMP_CONF["meta_extra"]["tab_attr"]
 METAEXTRA_PROP = TEMP_CONF["meta_extra"]["properties"]
 
 META_TABLES = [METAREF, INFO, DDICT_T, DDICT_A, DDICT_S, METAEXTRA]
+
+# accepted regex for columm that contains image path to convert to blob
+IMG_COL_REGEX = ["img_"]

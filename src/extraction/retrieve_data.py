@@ -28,23 +28,28 @@ class GetSpreadsheetData:
         self.db_name = os.path.splitext(os.path.basename(filepath))[0]
         self.file_dir = os.path.dirname(filepath)
         self.datatables_list = get_datatables_list(checked_data)
-        self.sheets_dict = self._process_data(checked_data)
+        self.sheets_dict = self.process_img_column(checked_data)
         self.tables_info = self._get_tables_info()
         self.compositePK_df = self._get_composite_pk()
         
+    def process_img_column(self, checked_data):
+        """Return checked data after convert image path to blob
+        if some column match the IMG_COL_REGEX see conf/config
 
-    def _process_data(self, checked_data) -> dict:
+        If provided file path does not exist or is not accessible
+        initial entry is cleared
         """
-        return a dictionnary containing as many dataframes as sheets in the original file
-        and convert path_file into blob of the file
-        """
-
         for table_name in checked_data.keys():
             if table_name in self.datatables_list:
-                # process_df convert any absolute filepath into 
-                # blob of relative file
-                self.process_df(checked_data[table_name])
-
+                # iterate through data tables
+                for col in checked_data[table_name].columns:
+                    # for each column
+                    for regex in IMG_COL_REGEX:
+                        if re.search(regex, col):
+                            # column match regex
+                            checked_data[table_name][col] = checked_data[table_name][col].map(
+                                lambda x: img2Blob(x, self.file_dir) if self.is_image(x) else ""
+                            )
         return checked_data
 
     #! may be deprecated in the future if spreadsheet template is modified
@@ -146,12 +151,3 @@ class GetSpreadsheetData:
                 return True
         except Exception as e:
             return False
-
-    def process_df(self, table: pd.DataFrame) -> None:
-        """
-        if a column contain filepath, relative file is accessed and
-        converted to blob
-        """
-
-        table[:] = table.map(lambda x: img2Blob(x, self.file_dir) if self.is_image(x) else x)
-        return

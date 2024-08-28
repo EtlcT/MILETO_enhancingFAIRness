@@ -39,24 +39,12 @@ class Model:
 
         return
     
-    def create_metatable(self):
-        """Create metadata tables if not exist"""
+    def create_missing_metatable(self):
+        """Create metadata tables if not exist return list of
+        missing metadata table"""
 
         meta_generator = GenerateMeta(self.tmp_data)
-        missing_tables = []
-        for metatable in META_TABLES:
-            if metatable not in list(self.tmp_data.keys()):
-                missing_tables.append(metatable)
-                if metatable == METAREF:
-                    meta_generator.generate_meta_ref()
-                elif metatable == INFO:
-                    meta_generator.generate_tables_info()
-                elif metatable == DDICT_T:
-                    meta_generator.generate_ddict_tables()
-                elif metatable == DDICT_A:
-                    meta_generator.generate_ddict_attr()
-                elif metatable == METAEXTRA:
-                    meta_generator.generate_meta_extra()
+        missing_tables = meta_generator.create_metatable()
         return missing_tables
 
 

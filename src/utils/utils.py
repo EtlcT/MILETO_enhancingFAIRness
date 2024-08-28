@@ -119,5 +119,5 @@ def output_exist(output_dir, output_basename):
                 exists.append(True)
             else:
                 exists.append(False)
-        
-        return any(exists)
+        #TODO give info about the file that already exists
+        return any(exists) 
