@@ -171,4 +171,4 @@ def create_missing_metatable(spreadsheet):
 
     meta_generator = GenerateMeta(spreadsheet)
     missing_tables = meta_generator.create_metatable()
-    return meta_generator.sheets_dict, missing_tables
+    return meta_generator, missing_tables

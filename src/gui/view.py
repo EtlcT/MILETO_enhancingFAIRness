@@ -2,7 +2,6 @@ import os
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
-from CTkMessagebox import CTkMessagebox
 from conf.config import META_TABLES
 
 class View(ctk.CTk):

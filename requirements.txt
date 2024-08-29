@@ -2,7 +2,7 @@ pandas
 openpyxl # required to read excel
 parameterized
 graphviz
+pillow
 pdfkit
 customtkinter
-CTkMessagebox
 odfpy # required to save spreadsheet as ods

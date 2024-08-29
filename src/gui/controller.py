@@ -8,7 +8,7 @@ from src.gui.view import View
 from src.gui.model import Model
 from src.extraction.check import InvalidData
 from src.utils.utils import resource_path, output_exist
-from conf.config import META_TABLES
+from conf.config import *
 
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -74,21 +74,38 @@ class Controller:
             column_index = int(selected_column[1:]) - 1
             cell_value = self.view.sheet.item(selected_item)['values'][column_index]
 
-            bbox = self.view.sheet.bbox(selected_item, selected_column)
-            x=bbox[0]
-            y=bbox[1]
-        
-            # Create an Entry widget and place it at the cell position
-            self.view.display_upt_cell(cell_value,x,y)
-            self.view.cell_entry.bind(
-                '<Return>',
-                lambda event: self.update_cell_value(
-                    event,
-                    selected_sheet,
-                    selected_item,
-                    column_index
+            if self.is_change_allowed_in_col(selected_sheet, column_index) == True:
+
+                bbox = self.view.sheet.bbox(selected_item, selected_column)
+                x=bbox[0]
+                y=bbox[1]
+            
+                # Create an Entry widget and place it at the cell position
+                self.view.display_upt_cell(cell_value,x,y)
+                self.view.cell_entry.bind(
+                    '<Return>',
+                    lambda event: self.update_cell_value(
+                        event,
+                        selected_sheet,
+                        selected_item,
+                        column_index
+                    )
                 )
-            )
+    
+    def is_change_allowed_in_col(self, selected_sheet, col_idx):
+        """Check if the user is allowed to modify value in the column
+        he/she try to select in metadata tables
+
+        This function prevent the user to modify unwanted value like
+        Datacite metadata properties name for instance
+        """
+
+        if col_idx == 0 or (col_idx in [1,2] and selected_sheet==INFO):
+            auth = False
+        else:
+            auth = True
+            
+        return auth
 
     def update_cell_value(self, event, table, item, col):
         """Update treeview and dataframe"""
@@ -412,7 +429,7 @@ class Controller:
         """Add variable value to view for future access"""
         self.view.variables[var_name] = value
 
-    def create_metatable(self):
+    def create_missing_metatable(self):
         """Check if metadata tables are missing"""
         missing_table = self.model.create_missing_metatable()
         if missing_table:
