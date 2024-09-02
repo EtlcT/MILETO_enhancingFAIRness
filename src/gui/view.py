@@ -3,7 +3,10 @@ import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
+from PIL import Image
+
 from conf.config import META_TABLES
+from src.utils.utils import resource_path, output_exist
 
 class View(ctk.CTk):
     def __init__(self):
@@ -11,6 +14,7 @@ class View(ctk.CTk):
         self.title("Ss2db")
         self.controller = None
         self.createWidgets()
+        self.additional_frames = {}
         self.additional_widgets = {}
         self.variables = {}
 
@@ -24,7 +28,6 @@ class View(ctk.CTk):
             pady=(10, 0),
             sticky="nsew"
         )
-
         self.input_frame.grid_columnconfigure(0, weight=1)
 
         # display instruction to user: chose spreadsheet
@@ -91,7 +94,7 @@ class View(ctk.CTk):
                 #delete previous content if exist
                 self.clean_frame(mode="all")
                 # display selected file in view input_frame
-                self.selected_file()
+                self.display_selected_file()
 
                 self.controller.spreadsheet_loader(self.filepath)
         
@@ -106,12 +109,13 @@ class View(ctk.CTk):
                 self.clean_frame(mode="all")
                 self.controller.display_conversion_frame()
     
-    def selected_file(self):
-        selected_file = ctk.CTkLabel(
+    def display_selected_file(self):
+
+        self.selected_file = ctk.CTkLabel(
             master=self.input_frame,
             text=self.filepath
         )
-        selected_file.grid(
+        self.selected_file.grid(
             row=1,
             column=0,
             columnspan=3,
@@ -119,6 +123,7 @@ class View(ctk.CTk):
             pady=(10, 0),
             sticky="w"
         )
+        self.add_widget("selected_file", self.selected_file)
 
     def display_spreadsheet_frame(self):
         """Create frame to display selected spreadsheet"""
@@ -132,6 +137,8 @@ class View(ctk.CTk):
             column=0,
             sticky="nsew"
         )
+
+        self.add_frame("spreadsheet_frame", self.spreadsheet_frame)
 
         # create treeview widget in spreadsheet_frame to display sheet
         self.sheet = ttk.Treeview(
@@ -205,38 +212,13 @@ class View(ctk.CTk):
             row=3,
             columnspan=2
         )
-        # self.display_create_metatable()
-        self.display_update_metatable()
+        self.add_frame("ss_option_frame", self.ss_option_frame)
+
         self.display_check_spreadsheet()
 
 
     #TODO: add control on metadata table content ?
-    #! deprecated
-    # def display_create_metatable(self):
-    #     """Display Create metadata table if not exist button"""
-    #     self.create_metatable_btn = ctk.CTkButton(
-    #         master=self.ss_option_frame,
-    #         text="Create metadata table\n(if not exist)",
-    #         command=self.controller.create_missing_metatable
-    #     )
-    #     self.create_metatable_btn.grid(
-    #         row=1,
-    #         column=0
-    #     )
-    #!
-    
-    def display_update_metatable(self):
-        """Display update metadata table button"""
-        self.upt_metatable_btn = ctk.CTkButton(
-            master=self.ss_option_frame,
-            text="Update metadata tables",
-            command=self.controller.upt_metatable,
-            # state="disabled"
-        )
-        self.upt_metatable_btn.grid(
-            row=1,
-            column=2
-        )
+
     
     def display_check_spreadsheet(self):
         """Display check spreadsheet data button to check
@@ -245,12 +227,84 @@ class View(ctk.CTk):
         self.check_btn = ctk.CTkButton(
             master=self.ss_option_frame,
             text="Check Spreadsheet data",
-            command=self.controller.verify_spreadsheet,
-            # state="disabled"
+            command=self.controller.verify_spreadsheet
         )
         self.check_btn.grid(
             row=1,
-            column=3
+            column=1
+        )
+        self.add_widget("check_btn", self.check_btn)
+
+    def display_errors(self, error_msg):
+        """Display frame to show error find during spreadsheet check"""
+
+        self.error_frame = ctk.CTkFrame(master=self.input_frame)
+        self.error_frame.grid(
+            row=4
+        )
+
+        self.add_frame("error_frame", self.error_frame)
+
+        self.error_icon_img = ctk.CTkImage(
+            light_image= Image.open(os.path.normpath(resource_path("src/gui/assets/error.png"))),
+            size=(40,40)
+        )
+        self.error_icon = ctk.CTkLabel(
+            master=self.error_frame,
+            image=self.error_icon_img,
+            text=""
+        )
+        self.error_icon.grid(
+            row=0,
+            column=0
+        )
+        self.errors = ctk.CTkLabel(
+            master=self.error_frame,
+            text=error_msg,
+            justify="left"
+        )
+        self.errors.grid(
+            row=0,
+            column=1,
+            padx=10,
+            pady=5
+        )
+
+    #TODO radio button only sqlite and erd OR all
+    def display_conversion_frame(self):
+        """Add a conversion frame to view with:
+        - browse folder button for output directory selection
+        - conversion option radio buttons
+        (generate all, only sqlite and erd)
+        """
+
+        self.conversion_frame = ctk.CTkFrame(master=self)
+        self.conversion_frame.grid_columnconfigure(0, weight=1)
+        self.conversion_frame.grid(
+            row=2,
+            column=0,
+            sticky="we"
+        )
+
+        self.add_frame("conversion_frame", self.conversion_frame)
+
+        self.outdir_label = ctk.CTkLabel(
+            master=self.conversion_frame,
+            text="Select a directory to store outputs"
+        )
+        self.outdir_label.grid(
+            row=0,
+            column=0
+        )
+
+        self.outdir_btn = ctk.CTkButton(
+            master=self.conversion_frame,
+            command=self.browse_outdir,
+            text="Browse Folder"
+        )
+        self.outdir_btn.grid(
+            row=0,
+            column=1
         )
 
     def browse_outdir(self):
@@ -263,32 +317,132 @@ class View(ctk.CTk):
         )
 
         if self.output_dir:
-
-            if self.get_var("from_sqlite") == "off" or self.get_var("from_sqlite") == "":
-
+            if self.get_var("from_sqlite") == "on":
+                self.sqlite2pdf_btn()
+            else:
                 output_basename = os.path.normpath(
                     os.path.splitext(os.path.basename(self.filepath))[0]
                 )
 
-                # TODO rename following function
-                self.controller.display_convert_option(output_basename)
-            
-            else:
-                self.controller.display_pdf_from_sqlite()
+                self.display_convert_btn()
 
-    def opt_metadata(self):
-        """Display button for creating/updating metadata"""
+                if output_exist(self.output_dir, output_basename):
+                    # an output already exists for this spreadsheet
+                    # Add warning message to conversion_frame ask user how to handle existing files
+                    self.display_file_exist_warning()
+                else:
+                    self.convert_btn.configure(state="normal")
+                self.filename_entry(output_basename)
+                self.ow_checkbox()
+
         
-        create_meta_btn = ctk.CTkButton(
-            master=self.input_frame,
-            text="Create metadata table",
-            state="normal",
-            command=self.controller.create_missing_metatable
-        )
-        create_meta_btn.grid(
+    def filename_entry(self, output_basename):
+        """Add Entry widget to allow user to chose
+        another name for generated outputs
+        """
+        def callback_entry(*args):
+            """Enable convert button if output name doesn't already exist
+            or if overwrite option is checked
+            """
+            ow_state = self.get_var("check_ow")
+            if (output_exist(self.output_dir, self.filename_var.get()) == False
+                and self.filename_var.get() != "") or ow_state == True:
+                # fie does not exists yet
+                self.convert_btn.configure(state="normal")
+                self.add_variable("filename_var", self.filename_var.get())
+            else:
+                self.convert_btn.configure(state="disabled")
+                # if invalid filename remove it from
+                self.rm_filename_var()
 
+        self.filename_var = ctk.StringVar(
+            value=output_basename
         )
-        pass
+        self.filename_var.trace_add("write", callback_entry)
+
+        filename_entry = ctk.CTkEntry(
+            master=self.conversion_frame,
+            textvariable=self.filename_var
+        )
+        filename_entry.grid(
+            row=1,
+            column=1
+        )
+    
+    def ow_checkbox(self):
+        """Add checkbox for overwrite previous output option"""
+
+        def callback_cb(file):
+            """callback on checkbox state change"""
+            if self.check_ow.get() == "on":
+                self.convert_btn.configure(state="normal")
+                self.add_variable("check_ow", True)
+            elif self.check_ow.get() == "off":
+                self.variables["check_ow"] = False
+                if (file == "" or output_exist(self.output_dir, file)):
+                    self.convert_btn.configure(state="disabled")
+
+        self.check_ow = ctk.StringVar()
+        self.overwrite_cb = ctk.CTkCheckBox(
+            master=self.conversion_frame,
+            text="Overwrite existing file in output directory",
+            variable=self.check_ow,
+            command=lambda: callback_cb(self.filename_var.get()),
+            onvalue="on",
+            offvalue="off"
+        )
+        self.overwrite_cb.grid(
+            row=1,
+            column=3
+        )
+    
+
+    def display_convert_btn(self):
+        """Display convert button to run sqlite, erd and pdf creation"""
+
+        self.convert_btn = ctk.CTkButton(
+            master=self.conversion_frame,
+            text="Convert spreadsheet",
+            command=self.controller.convert,
+            state="disabled"
+        )
+        self.convert_btn.grid(
+            row=2,
+            column=0,
+            sticky="nsew",
+            columnspan=2
+        )
+
+    def display_file_exist_warning(self):
+        """Display warning if file(s) already exist"""
+
+        self.file_exists_warning_msg = ( 
+            f"WARNING: Output(s) already exist in output directory for this spreadsheet"
+            "\nCheck the overwrite checkbox to delete existing file(s)"
+            " or provide another filename: "
+        )
+        self.file_exists_warning = ctk.CTkLabel(
+            master=self.conversion_frame,
+            text=self.file_exists_warning_msg
+        )
+        self.file_exists_warning.grid(
+            row=1,
+            column=0
+        )
+
+    def sqlite2pdf_btn(self):
+        """Display a Generate PDF from sqlite button"""
+
+        self.generate_btn = ctk.CTkButton(
+            master=self.conversion_frame,
+            text="Generate PDF",
+            command=self.controller.sqlite2pdf,
+        )
+        self.generate_btn.grid(
+            row=1,
+            column=0,
+            sticky="nsew"
+        )
 
     def show_success(self, msg):
         """ Open Window with success message"""
@@ -300,29 +454,38 @@ class View(ctk.CTk):
             option_1="OK"
         )
 
-    def add_widget(self, widget, widget_name, **grid_option):
-        """Add widget with provided grid option to view"""
-        widget.grid(**grid_option)
-        # add new widget to additional_widgets for future retrieving
+    def add_frame(self, frame_name, frame):
+        """Add new widget to additional_frames for future retrieving"""
+        self.additional_frames[frame_name] = frame
+    
+    def add_widget(self, widget_name, widget):
+        """Add new widget to additional_frames for future retrieving"""
         self.additional_widgets[widget_name] = widget
     
+    def rm_frame(self, frame_name):
+        """Remove frame from view if exist"""
+        if frame_name in self.additional_frames:
+            frame = self.get_frame(frame_name)
+            frame.destroy()
+    
     def rm_widget(self, widget_name):
-        """Remove widget from view and delete it from additional_widgets dict"""
-        if widget_name in self.additional_widgets:
-            self.additional_widgets.get(widget_name).destroy()
-            del self.additional_widgets[widget_name]
+        """Remove frame from view if exist"""
 
+        if widget_name in self.additional_frames:
+            widget = self.get_frame(widget_name)
+            widget.destroy()
+
+    def get_frame(self, frame_name):
+        """Retrieve widget created from controller"""
+        return self.additional_frames.get(frame_name)
+    
     def get_widget(self, widget_name):
         """Retrieve widget created from controller"""
         return self.additional_widgets.get(widget_name)
-
-    #! deprecated
-    # def delete_elmt(self, widget_name):
-    #     """Delete widget/frame and childrens"""
-
-    #     to_del_obj = self.additional_widgets.get(widget_name)
-    #     to_del_obj.delete(*to_del_obj.get_children())
-    #!
+    
+    def add_variable(self, var_name, value):
+        """Add variable value to view for future access"""
+        self.variables[var_name] = value
 
     def get_var(self, var_name):
         """Return variable value from dict
