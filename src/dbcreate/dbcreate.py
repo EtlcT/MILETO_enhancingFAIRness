@@ -82,14 +82,13 @@ class sqliteCreate():
                     f"    {attr_statement}"
                 )
 
-            isFK_condition = ~table_info[INFO_ATT['isFK']].isna()
+            isFK_condition = table_info[INFO_ATT['isFK']] != ""
             group_by_table_ref = (
                 table_info[isFK_condition]
                 .groupby(INFO_ATT['refTable'])
             )
 
             for ref_table_name, ref_info in group_by_table_ref[[INFO_ATT['attribute'],INFO_ATT['refTable']]]:
-
                 fk_statement = self._add_FK_constraint(
                     ref_table_name=ref_table_name,
                     fk_attribute=ref_info[INFO_ATT['attribute']].tolist()

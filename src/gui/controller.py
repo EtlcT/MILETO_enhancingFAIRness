@@ -31,13 +31,18 @@ class Controller:
 
         # display spreadsheet and dropmenu for sheet selection
         self.view.display_spreadsheet_frame()
+        #! deprecated
         # create logs to track changes in spreadsheet
-        self.model.create_logs()
+        # self.model.create_logs()
+        #!
         # display dropmenu
         self.view.display_sheet_selector(tmp_data)
-
-        # display option on spreadsheet (create, update, check)
+        
+        # display option on spreadsheet (update, check)
         self.view.display_spreadsheet_option()
+
+        # create metadata tables if not exist
+        self.create_missing_metatable()
 
     def load_spreadsheet(self, spreadsheet_path):
         """Load spreadsheet data"""
@@ -46,7 +51,7 @@ class Controller:
         return tmp_data
  
     def on_header_click(self, event, selected_sheet):
-        """Allow modifying headers value on click"""
+        """Allow modifying headers/column value on click"""
         region = self.view.sheet.identify("region", event.x, event.y)
         if region == "heading":
             # user click on some header
@@ -55,17 +60,24 @@ class Controller:
             current_heading = self.view.sheet.heading(column_id)['text']
         
             # open dialog to ask for new heading value
-            new_heading = ctk.CTkInputDialog(text=f"Enter new heading for '{current_heading}':")
-        
+            new_heading = ctk.CTkInputDialog(
+                text=f"Enter new heading for '{current_heading}':",
+                title="Edit column name"
+            )
+
             # If a new heading was provided, update the column heading
             if new_heading:
-                self.view.sheet.heading(column_id, text=new_heading.get_input())
+                new_value = new_heading.get_input()
+                self.view.sheet.heading(column_id, text=new_value)
                 self.view.upt_metatable_btn.configure(state="normal")
-                self.model.upt_change_log(selected_sheet, current_heading, new_heading)
+                #self.model.upt_change_log(selected_sheet, current_heading, new_value)
+                self.model.header_change(selected_sheet, current_heading, new_value)
 
     def on_cell_click(self, event, selected_sheet):
-        """allow modifying"""
-        global entry
+        """allow editing metadata tables fields that need to be filled
+        by the researcher
+        """
+
         region = self.view.sheet.identify("region", event.x, event.y)
         if region == "cell":
             # user click on some cell
@@ -74,8 +86,8 @@ class Controller:
             column_index = int(selected_column[1:]) - 1
             cell_value = self.view.sheet.item(selected_item)['values'][column_index]
 
-            if self.is_change_allowed_in_col(selected_sheet, column_index) == True:
-
+            if self.is_editable_col(selected_sheet, column_index) == True:
+                # user has permission to edit this field
                 bbox = self.view.sheet.bbox(selected_item, selected_column)
                 x=bbox[0]
                 y=bbox[1]
@@ -92,7 +104,7 @@ class Controller:
                     )
                 )
     
-    def is_change_allowed_in_col(self, selected_sheet, col_idx):
+    def is_editable_col(self, selected_sheet, col_idx):
         """Check if the user is allowed to modify value in the column
         he/she try to select in metadata tables
 
@@ -104,7 +116,7 @@ class Controller:
             auth = False
         else:
             auth = True
-            
+
         return auth
 
     def update_cell_value(self, event, table, item, col):
@@ -287,7 +299,9 @@ class Controller:
             self.view.get_widget("convert_btn").configure(state="normal")
 
         def callback_entry(*args):
-            """Enable convert button if output name doesn't already exist"""
+            """Enable convert button if output name doesn't already exist
+            or if overwrite option is checked
+            """
             ow_state = self.view.get_var("check_ow")
             if (output_exist(self.view.output_dir, filename_var.get()) == False
                 and filename_var.get() != "") or ow_state == True:
@@ -297,8 +311,7 @@ class Controller:
             else:
                 self.view.get_widget("convert_btn").configure(state="disabled")
                 # if invalid filename remove it from
-                if "filename_var" in self.view.variables:
-                    del self.view.variables["filename_var"] 
+                self.view.rm_filename_var()
                 
 
         # Add Entry widget to allow user to chose

@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
 from conf.config import META_TABLES
 
 class View(ctk.CTk):
@@ -204,23 +205,25 @@ class View(ctk.CTk):
             row=3,
             columnspan=2
         )
-        self.display_create_metatable()
+        # self.display_create_metatable()
         self.display_update_metatable()
         self.display_check_spreadsheet()
 
 
     #TODO: add control on metadata table content ?
-    def display_create_metatable(self):
-        """Display Create metadata table if not exist button"""
-        self.create_metatable_btn = ctk.CTkButton(
-            master=self.ss_option_frame,
-            text="Create metadata table\n(if not exist)",
-            command=self.controller.create_missing_metatable
-        )
-        self.create_metatable_btn.grid(
-            row=1,
-            column=0
-        )
+    #! deprecated
+    # def display_create_metatable(self):
+    #     """Display Create metadata table if not exist button"""
+    #     self.create_metatable_btn = ctk.CTkButton(
+    #         master=self.ss_option_frame,
+    #         text="Create metadata table\n(if not exist)",
+    #         command=self.controller.create_missing_metatable
+    #     )
+    #     self.create_metatable_btn.grid(
+    #         row=1,
+    #         column=0
+    #     )
+    #!
     
     def display_update_metatable(self):
         """Display update metadata table button"""
@@ -228,7 +231,7 @@ class View(ctk.CTk):
             master=self.ss_option_frame,
             text="Update metadata tables",
             command=self.controller.upt_metatable,
-            state="disabled"
+            # state="disabled"
         )
         self.upt_metatable_btn.grid(
             row=1,
@@ -243,7 +246,7 @@ class View(ctk.CTk):
             master=self.ss_option_frame,
             text="Check Spreadsheet data",
             command=self.controller.verify_spreadsheet,
-            state="disabled"
+            # state="disabled"
         )
         self.check_btn.grid(
             row=1,
@@ -252,6 +255,9 @@ class View(ctk.CTk):
 
     def browse_outdir(self):
         """Open file dialog window to select output directory"""
+
+        self.rm_filename_var()
+
         self.output_dir = ctk.filedialog.askdirectory(
             initialdir=os.path.expanduser("~")
         )
@@ -310,11 +316,13 @@ class View(ctk.CTk):
         """Retrieve widget created from controller"""
         return self.additional_widgets.get(widget_name)
 
+    #! deprecated
     # def delete_elmt(self, widget_name):
     #     """Delete widget/frame and childrens"""
 
     #     to_del_obj = self.additional_widgets.get(widget_name)
     #     to_del_obj.delete(*to_del_obj.get_children())
+    #!
 
     def get_var(self, var_name):
         """Return variable value from dict
@@ -332,3 +340,10 @@ class View(ctk.CTk):
             self.rm_widget("conversion_frame")
         else:
             pass
+    
+    def rm_filename_var(self):
+        """Remove previous filename variable if exist"""
+        if "filename_var" in self.variables:
+            del self.variables["filename_var"]
+    
+    

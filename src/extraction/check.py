@@ -230,8 +230,8 @@ class CheckSpreadsheet:
         isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
         fk_constraint = self.tables_info[isFK_condition]
 
-        if fk_constraint[INFO_ATT['refTable']].isna().any() != False:
-            fk_without_ref = fk_constraint[fk_constraint[INFO_ATT['refTable']].isna()==True]
+        if (fk_constraint[INFO_ATT['refTable']] == "").any() != False:
+            fk_without_ref = fk_constraint[(fk_constraint[INFO_ATT['refTable']] == "")==True]
             raise ReferenceUndefinedError(fk_without_ref.to_string(index=False))
         
         return
@@ -243,7 +243,7 @@ class CheckSpreadsheet:
         it could be normal to share the same name as their reference)
         """
 
-        notFK_condition = self.tables_info[INFO_ATT['isFK']].isna()
+        notFK_condition = self.tables_info[INFO_ATT['isFK']] == ""
         attr_no_FK = self.tables_info[notFK_condition]
 
         group_by_attribute = attr_no_FK.groupby(INFO_ATT['attribute'])

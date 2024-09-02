@@ -42,6 +42,18 @@ class GenerateMeta:
                     # metadata table tables_info already exists
                     # infer sqlite type
                     self.upt_attribute_type()
+                    # reorgarnize column
+                    self.sheets_dict[INFO] = self.sheets_dict[INFO].reindex(
+                        [
+                            INFO_ATT["table"],
+                            INFO_ATT["attribute"],
+                            INFO_ATT["type"],
+                            INFO_ATT["isPK"],
+                            INFO_ATT["isFK"],
+                            INFO_ATT["refTable"]
+                        ],
+                        axis="columns"
+                    )
         return missing_tables
 
     def upt_attribute_type(self):
@@ -53,12 +65,12 @@ class GenerateMeta:
             if regex_exclude_meta(table_name)==False:
                 for column_name in table.columns:
                     attr_type = self.infer_sqlite_type(
-                        column=column_name, 
-                        table=self.sheets_dict[table_name]
+                        column_name=column_name, 
+                        column=self.sheets_dict[table_name][column_name]
                     )
                     self.sheets_dict[INFO].loc[
-                        (self.sheets_dict[INFO][INFO_ATT]["table"]==table_name) &
-                        (self.sheets_dict[INFO][INFO_ATT]["attribute"]==column_name),
+                        (self.sheets_dict[INFO][INFO_ATT["table"]]==table_name) &
+                        (self.sheets_dict[INFO][INFO_ATT["attribute"]]==column_name),
                         "type"
                     ] = attr_type
         
@@ -87,7 +99,8 @@ class GenerateMeta:
         data = {DDICT_A_ATT["attribute"]: [], DDICT_A_ATT["unit"]: [], DDICT_T_ATT["desc"]: []}
         attribute_list = set()
         for table_name, table in self.sheets_dict.items():
-            attribute_list.update(table.columns)
+            if regex_exclude_meta(table_name)==False:
+                attribute_list.update(table.columns)
 
         data[DDICT_A_ATT["attribute"]] = list(attribute_list)
         for i in range(len(attribute_list)):
