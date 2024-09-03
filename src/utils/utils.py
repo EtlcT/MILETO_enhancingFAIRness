@@ -77,17 +77,6 @@ def img_base64(img_path):
         
         return img_base64_encoded.decode('utf-8')
 
-def html_formatted_sql(raw_sql: str) -> str:
-        """Return readable sql statement from sqlite_master statement"""
-
-        formatted_sql = (
-            raw_sql
-            .replace('    ', '&emsp;')
-            .replace('\n', '<br>')
-        )
-
-        return formatted_sql
-
 def rotate_image(image_path):
     """Rotate image from 90°"""
     

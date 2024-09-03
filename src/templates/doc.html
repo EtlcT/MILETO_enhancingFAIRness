@@ -10,8 +10,8 @@
     <div class="intro-container">
         <h1 class="center">{title}</h1>
         <div>
-            <p class="center">{authors_id_links}</p>
-            <p class="center">{creation_date}</p>
+            <p class="center" id="authors">{authors_id_links}</p>
+            <p class="center" id="date">{creation_date}</p>
         </div>
         <h2 class="center" id="abstract">Abstract</h2>
         <div class="extra">
@@ -22,37 +22,39 @@
             </p>
         </div>
         <hr>
-        <div>
-            <p><b>Database keywords</b>: {keywords}</p>
+        <p><b>Database keywords</b>: {keywords}</p>
+    </div>
+    <div class="page-break">
+        <h2>Synthesis</h2>
+        <div class="extra">
+             <p id="extra-synthesis">{extra_synthesis}</p>
         </div>
-    </div>
-    <div class="page-break"></div>
-    <h2>Synthesis</h2>
-    <div class="extra">
-        <pre id="extra-synthesis">{extra_synthesis}</pre>
-    </div>
-    <h2>Description</h2>
-    <div class="extra">
-        <pre id="extra-desc">{extra_description}</pre>
+        <h2>Description</h2>
+        <div class="extra">
+            <p id="extra-desc">{extra_description}</p>
+        </div>
     </div>
     <h2 class="page-break">Entity Relationship Diagram</h2>
     {img_tag_erd}
+
     <h2 class="page-break">Data Dictionnary tables</h2>
         <table>
-            <tr>
+            <caption>Table 1: Data dictionnary</caption>
+            <thead>
                 <th>table</th>
                 <th>caption</th>
-            </tr>
+            </thead>
             {DDict_table_content}
         </table>
     <h2 class="page-break">Data Dictionnary attributes</h2>
         <table>
-            <tr>
+            <caption>Table 2: Data dictionnary attributes</caption>
+            <thead>
                 <th>attribute</th>
                 <th>attType</th>
                 <th>unit</th>
                 <th>caption</th>
-            </tr>
+            </thead>
             {DDict_attr_content}
         </table>
     <h2 class="page-break">SQL dump of the database</h2>

@@ -10,7 +10,15 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from conf.config import *
 from src.dbcreate.dbcreate import sqliteCreate
-from src.utils.utils import resource_path, html_formatted_sql
+from src.utils.utils import resource_path
+from src.utils.utils_pdf import format_as_pre, html_formatted_sql
+
+options = {
+    "enable-local-file-access": "",
+    "footer-right": "[page] of [toPage]",
+    "footer-font-name": "Liberation Sans",
+    "footer-font-size": "8"
+}
 
 class docCreate():
     """
@@ -30,6 +38,7 @@ class docCreate():
         self.template = resource_path(html_template)
 
     def createPDF(self) -> None:
+
         with open(self.template, 'r') as file:
             html_template = file.read()
         
@@ -50,7 +59,7 @@ class docCreate():
             pdfkit.from_string(
                 html_content,
                 self.output_pdf,
-                options={"enable-local-file-access": ""},
+                options=options,
                 css=css_template, configuration=config
             )
 
@@ -60,7 +69,7 @@ class docCreate():
             pdfkit.from_string(
                 html_content,
                 self.output_pdf,
-                options={"enable-local-file-access": ""},
+                options=options,
                 css=css_template
             )
 
@@ -119,8 +128,10 @@ class docCreate():
             ][METAEXTRA_ATT['value']].iloc[0]
 
         img_tag_erd = (
-            f"<img src='{self.erd_path}' class='full-page-image'"
-            " alt='Entity Relationship Diagram'>"
+            "<figure>"
+                f"<img src='{self.erd_path}' class='full-page-image' alt='Entity Relationship Diagram'>"
+                f"<figcaption>Figure 1: {self.data.db_name} database schema ERD like</figcaption>"
+            "</figure>"
         )
         
         ddict_table_content = ""
@@ -152,8 +163,8 @@ class docCreate():
             'DOI_a_tag': "incoming",
             'gitlab_repo_a_tag': doi_a_tag,
             'keywords': keywords,
-            'extra_synthesis': extra_synthesis ,
-            'extra_description': extra_desc,
+            'extra_synthesis': format_as_pre(extra_synthesis),
+            'extra_description': format_as_pre(extra_desc),
             'img_tag_erd': img_tag_erd,
             'DDict_table_content': ddict_table_content,
             'DDict_attr_content': ddict_attr_content,
@@ -202,7 +213,7 @@ class sqlite2pdf():
         pdfkit.from_string(
             html_content,
             self.output_pdf,
-            options={"enable-local-file-access": ""},
+            options=options,
             css=css_template
         )
 
@@ -261,8 +272,10 @@ class sqlite2pdf():
             ][METAEXTRA_ATT['value']].iloc[0]
 
         img_tag_erd = (
-            f"<img src='{self.erd_path}' class='full-page-image'"
-            " alt='Entity Relationship Diagram'>"
+            "<figure>"
+                f"<img src='{self.erd_path}' class='full-page-image' alt='Entity Relationship Diagram'>"
+                f"<figcaption>Figure 1: {self.db_name} database schema ERD like</figcaption>"
+            "</figure>"
         )
         
         ddict_table_content = ""
