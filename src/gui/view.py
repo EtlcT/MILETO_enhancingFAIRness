@@ -13,6 +13,7 @@ from conf.view_config import *
 class View(ctk.CTk):
     def __init__(self):
         super().__init__()
+        #ctk.set_appearance_mode("light")
         self.title("Ss2db")
         self.controller = None
         self.createWidgets()
@@ -154,27 +155,13 @@ class View(ctk.CTk):
         #* Style treeview table 
         style = ttk.Style()
         style.theme_use("default")
-    
-        style.configure(
-            "Treeview",
-            background="#2a2d2e",
-            foreground="white",
-            rowheight=25,
-            fieldbackground="#343638",
-            bordercolor="#343638",
-            borderwidth=0
-        )
-        style.map('Treeview', background=[('selected', '#22559b')])
-
-        style.configure("Treeview.Heading",
-                        background="#565b5e",
-                        foreground="white",
-                        relief="flat",
-                        font=(15)
-        )
-        style.map("Treeview.Heading",
-                  background=[('active', '#3484F0')]
-        )
+        if ctk.get_appearance_mode() == "Dark":
+            style.configure("Treeview",**DARK_TV_CONFIG)
+            style.map('Treeview', background=[('selected', '#22559b')])
+            style.configure("Treeview.Heading", **DARK_TVH_CONFIG)
+            style.map("Treeview.Heading",
+                    background=[('active', '#3484F0')]
+            )
 
         self.spreadsheet_frame = ctk.CTkFrame(
             master=self.input_frame

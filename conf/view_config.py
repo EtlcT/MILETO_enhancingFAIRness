@@ -25,3 +25,21 @@ LABEL_GRID = {
     "pady":10,
     "sticky":"w"
 }
+
+## Dark mode specific
+DARK_TV_CONFIG = {
+    "background":"#2a2d2e",
+    "foreground":"white",
+    "rowheight":25,
+    "fieldbackground":"#343638",
+    "bordercolor":"#343638",
+    "borderwidth":0
+}
+
+DARK_TVH_CONFIG = {
+    "background":"#565b5e",
+    "foreground":"white",
+    "relief":"flat",
+    "font":(15)
+}
+## Light mode specific
