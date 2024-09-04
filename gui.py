@@ -16,6 +16,7 @@ def main_gui():
         view = View()
         view._state_before_windows_set_titlebar_color = 'zoomed'
 
+    view.after(201, lambda: view.iconbitmap("assets/logo(1).ico"))
     controller = Controller(model, view)
     view.set_controller(controller)
     # root element have width 100%

@@ -22,24 +22,6 @@ class Model:
         self.tmp_data = None
         self.checked_data = None
         self.data = None
-        #self.change_log = None
-    
-    #! deprecated
-    ## could retrieve data from tables_infos
-    # if changes are allowed only after first metadata check
-    # def create_logs(self):
-    #     """Create a dataframe to store changes about headers (field)"""
-    #     data = {"table": [], "former_attr": [], "curr_attr": []}
-    #     for table_name, table in self.tmp_data.items():
-    #         for column in table.columns:
-    #             data["table"].append(table_name)
-    #             data["former_attr"].append(column)
-    #             data["curr_attr"].append(column)
-        
-    #     self.change_log = pd.DataFrame(data)
-
-    #     return
-    #!
     
     def create_missing_metatable(self):
         """Create metadata tables if not exist return list of
@@ -48,18 +30,6 @@ class Model:
         meta_generator = GenerateMeta(self.tmp_data)
         missing_tables = meta_generator.create_metatable()
         return missing_tables
-
-    #! deprecated
-    # def upt_change_log(self, table, old_value, new_value) -> None:
-    #     """update change_log to keep track of fields name changes"""
-    #     self.change_log.loc[
-    #         (self.change_log["table"] == table) &
-    #         (self.change_log["curr_attr"] == old_value ),
-    #         ["former_attr", "curr_attr"]
-    #     ] = [old_value, new_value]
-
-    #     return
-    #!
     
     def header_change(self, table, old_value, new_value):
         """On changes in header/attribute, report change everywhere else

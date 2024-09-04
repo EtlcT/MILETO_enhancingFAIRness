@@ -162,7 +162,10 @@ class Controller:
                 pass
             self.model.convert(output_name=user_defined_filename)
         elif ow_state == True and user_defined_filename is None:
-            os.remove(os.path.join(self.view.output_dir, spreadsheet_name + ".sqlite"))
+            try:
+                os.remove(os.path.join(self.view.output_dir, spreadsheet_name + ".sqlite"))
+            except FileNotFoundError:
+                pass
             self.model.convert()
         elif ow_state != True and user_defined_filename:
             # create with specified filename without overwrite
