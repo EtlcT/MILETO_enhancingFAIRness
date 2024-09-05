@@ -5,7 +5,7 @@ import customtkinter as ctk
 
 from src.gui.view import View
 from src.gui.model import Model
-from src.extraction.check import InvalidData
+from src.extraction.check import InvalidData, InvalidTemplate
 from src.utils.utils import output_exist
 from conf.config import *
 
@@ -139,8 +139,10 @@ class Controller:
         try:
             self.model.verify_spreadsheet()
         except InvalidData as e:
-            self.view.display_errors(str(e).replace("str: ", ""))
-        # TODO catch other type of exception
+            print(str(e))
+            self.view.display_errors(str(e), error_type="data")
+        except InvalidTemplate as e:
+            self.view.display_errors(str(e), error_type="template")
         else:
             self.view.show_success("Valid spreadsheet provided")
             self.view.display_conversion_frame()

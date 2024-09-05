@@ -36,17 +36,18 @@ class CheckSpreadsheet:
         errors = []
         check_tasks = [
             self.check_metadata_exists,
-            self.check_metadata_not_empty, #TODO
+            #self.check_metadata_not_empty,
             self.check_infos,
-            self.check_attributes,
-            self.check_tables,
+            self.check_attributes, #TODO
+            self.check_tables, #TODO
+            # self.check_dc_terms, #TODO
         ]
         for check in check_tasks:
             try:
                 check()
             except CheckSpreadsheetError as e:
-                logging.error(f"{e.__class__.__name__}: {str(e)}")
-                errors.append(f"{e.__class__.__name__}: {e}")
+                logging.error(f"{e.__class__.__name__}: {str(e)}\n")
+                errors.append(f"{e.__class__.__name__}: {e}\n")
             except KeyError as e:
                 pass
         
@@ -90,21 +91,21 @@ class CheckSpreadsheet:
         
         return
 
-    ## TODO
+    #?
     def check_metadata_not_empty(self):
         """
-            Raise error if mandatory fields are not completed
+            Raise error if metadata are not completed (description)
         """
         pass
 
-    ## TODO
     def check_infos(self):
         """
-            Raise error for missing fields in tables_infos
+            Raise error for unknown or missing fields in tables_infos
         """
-        missing_attribute = []
-        merged_df = self.sheets_dict[INFO].merge(
-            GenerateMeta(self.sheets_dict).generate_tables_info(inplace=False),
+        errors = []
+        attr_oi = [INFO_ATT["table"], INFO_ATT["attribute"]]
+        merged_df = self.sheets_dict[INFO][attr_oi].merge(
+            GenerateMeta(self.sheets_dict).generate_tables_info(inplace=False)[attr_oi],
             how="outer",
             on=["table", "attribute"],
             indicator=True
@@ -112,20 +113,65 @@ class CheckSpreadsheet:
         left_only = merged_df[merged_df["_merge"]=="left_only"]
         right_only = merged_df[merged_df["_merge"]=="right_only"]
 
-        pass
+        if not left_only.empty:
+            errors.append(AttributeNotFoundError(
+                left_only.drop("_merge", axis=1).to_string(index=False)
+            ))
+        if not right_only.empty:
+            errors.append(AttributeMissingError(
+                right_only.drop("_merge", axis=1).to_string(index=False)
+            ))
+
+        if errors:
+            raise InvalidInformationSchema(errors)
 
     ## TODO
     def check_attributes(self):
         """
             Raise error for missing attributes in DDict_Attributes
         """
-        pass
+        errors = []
+        attr_oi = DDICT_A_ATT["attribute"]
+        left = self.sheets_dict[DDICT_A][attr_oi].tolist()      # what datadict_attribute contains
+        right = (
+            GenerateMeta(self.sheets_dict)
+            .generate_ddict_attr(inplace=False)[attr_oi]
+            .tolist()
+        )                                                       # what datadict_attribute should contain
+        left_only = [x for x in left if x not in right]         # attribute not found
+        right_only = [x for x in right if x not in left]        # attribute missing
+
+        if left_only:
+            errors.append(AttributeNotFoundError(left_only))
+        if right_only:
+            errors.append(AttributeMissingError(right_only))
+
+        if errors:
+            raise InvalidDataDictAttribute(errors)
     
     ## TODO
     def check_tables(self):
         """
             Raise error for missing tables in DDict_tables
         """
+        errors = []
+        attr_oi = DDICT_T_ATT["table"]
+        left = self.sheets_dict[DDICT_T][attr_oi].tolist()      # what datadict_table contains
+        right = (
+            GenerateMeta(self.sheets_dict)
+            .generate_ddict_tables(inplace=False)[attr_oi]
+            .tolist()
+        )                                                       # what datadict_table should contain
+        left_only = [x for x in left if x not in right]         # table not found
+        right_only = [x for x in right if x not in left]        # table missing
+
+        if left_only:
+            errors.append(TableNotFoundError(left_only))
+        if right_only:
+            errors.append(TableMissingError(right_only))
+
+        if errors:
+            raise InvalidDataDictTable(errors)
         pass
             
     def check_pk_uniqueness(self) -> None:
@@ -331,7 +377,7 @@ class AttributesDuplicateError(CheckSpreadsheetError):
     def __init__(self, duplicates) -> None:
         super().__init__(
             "Except for Foreign keys, different attributes should not"
-            "have the same names\nSee duplicates infos:\n"
+            " have the same names\nSee duplicates infos:\n"
             f"{duplicates}"
         )
 
@@ -346,9 +392,74 @@ class MissingMetadataError(CheckSpreadsheetError):
         )
 
 class InvalidInformationSchema(CheckSpreadsheetError):
-    """Raised if invalid fields are detected in tables_infos
-    metadata table ie: missing field or unknown field
+    """Custom Exception group, raised if invalid fields are detected 
+    in tables_infos metadata table ie: missing or unknown field
     """
 
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
+    def __init__(self, errors) -> None:
+        self.error_msg = "\n\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
+        super().__init__(
+            f"{INFO} contains errors:\n{self.error_msg}"
+        )
+
+class InvalidDataDictAttribute(CheckSpreadsheetError):
+    """Custom Exception group, raised if invalid fields are detected 
+    in datadict_attribute metadata table ie: missing or unknown field
+    """
+
+    def __init__(self, errors) -> None:
+        self.error_msg = "\n\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
+        super().__init__(
+            f"{DDICT_A} contains errors:\n{self.error_msg}"
+        )
+
+class InvalidDataDictTable(CheckSpreadsheetError):
+    """Custom Exception group, raised if invalid fields are detected 
+    in datadict_table metadata table ie: missing or unknown field
+    """
+
+    def __init__(self, errors) -> None:
+        self.error_msg = "\n\n".join(f"{type(e).__name__}: {str(e)}" for e in errors)
+        super().__init__(
+            f"{DDICT_T} contains errors:\n{self.error_msg}"
+        )
+
+class AttributeNotFoundError(CheckSpreadsheetError):
+    """Raised if attributes in metadata table do not exist in database"""
+    def __init__(self, unknown_attributes) -> None:
+        self.unknown_attributes = unknown_attributes
+        super().__init__(
+            "The following attributes are not found in spreadsheet:\n"
+            f"{self.unknown_attributes}\n"
+            "Please check your spreadsheet"
+        )
+
+class AttributeMissingError(CheckSpreadsheetError):
+    """Raised if attributes in database are not present in metadata table"""
+    def __init__(self, missing_attributes) -> None:
+        self.missing_attributes = missing_attributes
+        super().__init__(
+            f"The following attributes are not found in metadata table:\n"
+            f"{self.missing_attributes}\n"
+            "Please check your spreadsheet"
+        )
+
+class TableNotFoundError(CheckSpreadsheetError):
+    """Raised if tables in metadata table do not exist in database"""
+    def __init__(self, unknown_tables) -> None:
+        self.unknown_tables = unknown_tables
+        super().__init__(
+            "The following tables are not found in spreadsheet:\n"
+            f"{self.unknown_tables}\n"
+            "Please check your spreadsheet"
+        )
+
+class TableMissingError(CheckSpreadsheetError):
+    """Raised if tables in database are not present in metadata table"""
+    def __init__(self, missing_table) -> None:
+        self.missing_table = missing_table
+        super().__init__(
+            f"The following tables are not found in metadata table:\n"
+            f"{self.missing_table}\n"
+            "Please check your spreadsheet"
+        )

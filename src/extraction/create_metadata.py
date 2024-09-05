@@ -76,7 +76,7 @@ class GenerateMeta:
         
         return
                         
-    def generate_ddict_tables(self):
+    def generate_ddict_tables(self, inplace=True):
         """Generate DDict_tables metadata table which contains
         information relative to table content
         """
@@ -84,15 +84,17 @@ class GenerateMeta:
         data = {DDICT_T_ATT["table"]: [], DDICT_T_ATT["desc"]: []}
 
         for table_name in self.sheets_dict:
-            data[DDICT_T_ATT["table"]].append(table_name)
-            data[DDICT_T_ATT["desc"]].append(str())
+            if regex_exclude_meta(table_name)==False:
+                data[DDICT_T_ATT["table"]].append(table_name)
+                data[DDICT_T_ATT["desc"]].append(str())
 
         ddict_tables = pd.DataFrame(data)
-        self.sheets_dict[DDICT_T] = ddict_tables
+        if inplace == True:
+            self.sheets_dict[DDICT_T] = ddict_tables
 
         return ddict_tables
 
-    def generate_ddict_attr(self):
+    def generate_ddict_attr(self, inplace=True):
         """Generate DDict_attributes metadata table which contains
         attributes description
         """
@@ -108,7 +110,8 @@ class GenerateMeta:
             data[DDICT_T_ATT["desc"]].append(str())
 
         ddict_attr = pd.DataFrame(data)
-        self.sheets_dict[DDICT_A] = ddict_attr
+        if inplace == True:
+            self.sheets_dict[DDICT_A] = ddict_attr
         
         return ddict_attr
 

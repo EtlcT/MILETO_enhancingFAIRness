@@ -294,43 +294,56 @@ class View(ctk.CTk):
         )
         self.add_widget("check_btn", self.check_btn)
 
-    def display_errors(self, error_msg):
+    def display_errors(self, error_msg, error_type):
         """Display frame to show error find during spreadsheet check"""
 
-        self.error_frame = ctk.CTkFrame(master=self.input_frame)
-        self.error_frame.grid(
-            row=4,
-            column=0,
-            columnspan=2
-        )
+        if self.get_frame("error_frame") is None:
+            # create frame if not already exists
+            self.error_frame = ctk.CTkFrame(master=self.input_frame)
+            self.error_frame.grid(
+                row=4,
+                column=0,
+                sticky="nsew",
+                columnspan=2
+            )
+            self.error_frame.grid_columnconfigure(1, weight=1)
 
-        self.add_frame("error_frame", self.error_frame)
+            self.add_frame("error_frame", self.error_frame)
 
-        self.error_icon_img = ctk.CTkImage(
-            light_image= Image.open(os.path.normpath(resource_path("src/gui/assets/error.png"))),
-            size=(40,40)
-        )
-        self.error_icon = ctk.CTkLabel(
-            master=self.error_frame,
-            image=self.error_icon_img,
-            text=""
-        )
-        self.error_icon.grid(
-            row=0,
-            column=0
-        )
-        self.errors = ctk.CTkLabel(
-            master=self.error_frame,
-            text=error_msg,
-            justify="left",
-            font=TEXT_FONT
-        )
-        self.errors.grid(
-            row=0,
-            column=1,
-            padx=10,
-            pady=5
-        )
+            self.error_icon_img = ctk.CTkImage(
+                light_image= Image.open(os.path.normpath(resource_path("src/gui/assets/error.png"))),
+                size=(40,40)
+            )
+            self.error_icon = ctk.CTkLabel(
+                master=self.error_frame,
+                image=self.error_icon_img,
+                text=""
+            )
+            self.error_icon.grid(
+                row=0,
+                column=0
+            )
+            # self.errors = tk.Text(
+            #     master=self.error_frame
+            # )
+            self.errors = ctk.CTkTextbox(
+                master=self.error_frame,
+                font=TEXT_FONT,
+                wrap="word"
+            )
+            self.errors.grid(
+                row=0,
+                column=1,
+                sticky="nsew",
+                padx=10,
+                pady=5
+            )
+            self.add_frame("error_frame", self.error_frame)
+
+        if error_type == "data":
+            self.errors.insert(tk.END, error_msg)
+        elif error_type == "template":
+            self.errors.insert(tk.END, error_msg)
 
     #TODO radio button only sqlite and erd OR all
     def display_conversion_frame(self):
@@ -548,6 +561,7 @@ class View(ctk.CTk):
         """Remove frame from view if exist"""
         if frame_name in self.additional_frames:
             frame = self.get_frame(frame_name)
+            del self.additional_frames[frame_name]
             frame.destroy()
     
     def rm_widget(self, widget_name):
@@ -555,6 +569,7 @@ class View(ctk.CTk):
 
         if widget_name in self.additional_widgets:
             widget = self.get_widget(widget_name)
+            del self.additional_widgets[widget_name]
             widget.destroy()
 
     def get_frame(self, frame_name):
