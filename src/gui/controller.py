@@ -28,17 +28,18 @@ class Controller:
         # load excel
         tmp_data = self.load_spreadsheet(spreadsheet_path)
 
-        # display spreadsheet and dropmenu for sheet selection
-        self.view.display_spreadsheet_frame()
+        # create metadata tables if not exist
+        missing_table = self.create_missing_metatable()
 
         # display dropmenu
-        self.view.display_sheet_selector(tmp_data)
+        if missing_table:
+            self.view.display_sheet_selector(self.model.tmp_data)
+        else:
+            self.view.display_sheet_selector(tmp_data)
         
         # display option on spreadsheet (update, check)
         self.view.display_spreadsheet_option()
-
-        # create metadata tables if not exist
-        self.create_missing_metatable()
+  
 
     def load_spreadsheet(self, spreadsheet_path):
         """Load spreadsheet data"""
@@ -191,11 +192,7 @@ class Controller:
             )
         else:
             self.view.show_success(msg="Your pdf has been generated successfully !")
-            self.view.rm_widget("selected_file")
-            self.view.rm_frame("spreadsheet_frame")
-            self.view.rm_frame("error_frame")
-            self.view.rm_frame("conversion_frame")
-            self.view.rm_widget("check_btn")
+            self.view.clean_frame()
 
     def add_widget(self, widget, widget_name, widget_grid:dict):
         """Add widget to view"""
@@ -205,12 +202,7 @@ class Controller:
     def create_missing_metatable(self):
         """Check if metadata tables are missing"""
         missing_table = self.model.create_missing_metatable()
-        if missing_table:
-            # metadata table has been added, refresh treeview
-            self.view.spreadsheet_frame.destroy()
-            self.view.display_spreadsheet_frame()
-            self.view.display_sheet_selector(self.model.tmp_data)
-            self.view.check_btn.configure(state="normal")
+        return missing_table
     #TODO
     def upt_metatable(self):
         pass

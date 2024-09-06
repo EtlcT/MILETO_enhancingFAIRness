@@ -23,81 +23,100 @@ class View(ctk.CTk):
 
     def createWidgets(self):
 
+        self.main_frame = ctk.CTkScrollableFrame(
+            self
+        )
+        self.main_frame.pack(
+            expand=True,
+            fill="both"
+        )
 
         self.welcome_label = ctk.CTkLabel(
-            master=self,
+            master=self.main_frame,
             text="Welcome into Spreadsheet to SQLite converter !",
             font=TITLE_FONT
         )
-        self.welcome_label.grid(
-            row=0,
-            column=0,
+        self.welcome_label.pack(
+            side="top",
             pady=(20,20),
-            sticky="nsew"
+            anchor="center"
         )
 
-        self.input_frame = ctk.CTkFrame(master=self)
-        self.input_frame.grid(
-            row=2,
-            column=0,
-            **FRAME_GRID
-        )
-        self.input_frame.grid_columnconfigure(0, weight=1)
         self.input_label = ctk.CTkLabel(
-            master=self,
+            master=self.main_frame,
             text="Input selection",
             font=SUBTITLE_FONT
         )
-        self.input_label.grid(
-            row=1,
-            column=0,
-            **SUBTITLE_GRID
+        self.input_label.pack(
+            side="top",
+            padx=(10,0),
+            pady=(10,0),
+            anchor="w"
         )
-        self.input_frame.grid_columnconfigure(0,weight=1)
+
+        # radio button to chose spreadsheet conversion or sqlite processing
+        self.input_radio_frame = ctk.CTkFrame(
+            master=self.main_frame
+        )
+        self.input_radio_frame.pack(
+            anchor="w"
+        )
+
+        self.input_radio = ctk.IntVar(value=1)
+        self.spreadsheet_radio = ctk.CTkRadioButton(
+            master=self.input_radio_frame,
+            text="spreadsheet file",
+            value=1,
+            variable=self.input_radio
+        )
+
+        self.spreadsheet_radio.pack(
+            side="left"
+        )
+
+        self.sqlite_radio = ctk.CTkRadioButton(
+            master=self.input_radio_frame,
+            text="sqlite file",
+            value=2,
+            variable=self.input_radio
+        )
+        self.sqlite_radio.pack(
+            side="left"
+        )
+
+        self.file_selection_frame = ctk.CTkFrame(master=self.main_frame)
+        self.file_selection_frame.pack(
+            padx=(10,0),
+            pady=(10,0),
+            side="top",
+            fill="both"
+        )
 
         # display instruction to user: chose spreadsheet
         self.browse_file_label = ctk.CTkLabel(
-            master=self.input_frame,
-            text="Select a spreadsheet to convert into sqlite database",
+            master=self.file_selection_frame,
+            text="Select a file to process",
             font=TEXT_FONT
         )
-        self.browse_file_label.grid(
-            row=0,
-            column=0,
-            **LABEL_GRID
+        self.browse_file_label.pack(
+            side="left",
+            padx=(10,0),
+            pady=(10,0)
         )
         
         # browse button open file dialog
         self.browse_file_btn = ctk.CTkButton(
-            self.input_frame,
+            self.file_selection_frame,
             text="Browse",
             command=self.browse_file,
             font=TEXT_FONT
         )
-        self.browse_file_btn.grid(
-            row=0,
-            column=1,
-            sticky="w",
-            **BUTTON_GRID
+        self.browse_file_btn.pack(
+            padx=(10,0),
+            pady=(10,0),
+            side="left",
+            anchor="nw"
         )
-
-        # from sqlite checkbox that enable to select sqlite file
-        self.check_fsqlite = ctk.StringVar()
-        self.from_sqlite_cb = ctk.CTkCheckBox(
-            master = self.input_frame,
-            text="generate pdf from existing sqlite",
-            font=TEXT_FONT,
-            variable=self.check_fsqlite,
-            onvalue="on",
-            offvalue="off"
-        )
-        self.from_sqlite_cb.grid(
-            row=1,
-            column=1,
-            padx=10,
-            pady=5,
-        )
-
 
     def set_controller(self, controller):
         self.controller = controller
@@ -106,8 +125,8 @@ class View(ctk.CTk):
         """Open a file dialog window for spreadsheets files
         then display selected file
         """
-        self.variables["from_sqlite"] = self.check_fsqlite.get()
-        if self.get_var("from_sqlite") == "off" or self.get_var("from_sqlite") == "":
+        self.variables["input_radio"] = self.input_radio.get()
+        if self.get_var("input_radio") == 1:
 
             self.filepath = ctk.filedialog.askopenfilename(
                 title="Select a file",
@@ -132,21 +151,19 @@ class View(ctk.CTk):
             if self.filepath:
                 #delete previous content if exist
                 self.clean_frame(mode="all")
-                self.controller.display_conversion_frame()
+                self.display_conversion_frame()
     
     def display_selected_file(self):
 
         self.selected_file = ctk.CTkLabel(
-            master=self.input_frame,
+            master=self.main_frame,
             text=self.filepath,
             font=TEXT_FONT
         )
-        self.selected_file.grid(
-            row=1,
-            column=0,
-            columnspan=3,
-            **LABEL_GRID
+        self.selected_file.pack(
+            anchor="w"
         )
+
         self.add_widget("selected_file", self.selected_file)
 
     def display_spreadsheet_frame(self):
@@ -164,42 +181,36 @@ class View(ctk.CTk):
             )
 
         self.spreadsheet_frame = ctk.CTkFrame(
-            master=self.input_frame
+            master=self.main_frame
         )
-        self.spreadsheet_frame.grid(
-            row=2,
-            column=0,
-            columnspan=2,
-            sticky="nsew"
+        self.spreadsheet_frame.pack(
+            expand=True,
+            fill="both"
         )
-        self.spreadsheet_frame.grid_columnconfigure(0, weight=1)
+
         self.add_frame("spreadsheet_frame", self.spreadsheet_frame)
 
-        self.xscroll = ttk.Scrollbar(
+        self.sheet_xscroll = ctk.CTkScrollbar(
             self.spreadsheet_frame,
-            orient="horizontal"
-        )
-        self.xscroll.grid(
-            row=2,
-            column=0,
-            sticky="we",
-            columnspan=2
+            orientation="horizontal"
         )
 
         # create treeview widget in spreadsheet_frame to display sheet
         self.sheet = ttk.Treeview(
             master=self.spreadsheet_frame,
-            xscrollcommand=self.xscroll.set
+            xscrollcommand=self.sheet_xscroll.set
         )
-        self.sheet.grid(
-            row=1,
-            column=0,
-            sticky="nsew",
-            padx=(10,0),
-            pady=(0,10),
+        self.sheet.pack(
+            fill="both"
+        )
+        self.sheet_xscroll.pack(
+            anchor="s",
+            fill="x"
         )
 
-        self.xscroll.configure(command=self.sheet.xview)
+        self.sheet_xscroll.configure(command=self.sheet.xview)
+
+        self.add_widget("sheet", self.sheet)
 
     def display_sheet_selector(self, tmp_data):
         """Add dropmenu for sheet selection to view"""
@@ -211,30 +222,33 @@ class View(ctk.CTk):
             """Callback function that display sheet corresponding
             to user selection in drop menu
             """
-            self.sheet.delete(*self.sheet.get_children())
+            if self.get_widget("sheet") is not None:
+                self.spreadsheet_frame.pack_forget()
             if choice != "Select a sheet":
                 self.display_sheet(tmp_data, choice)
 
         self.sheet_selector = ctk.CTkComboBox(
-            master=self.spreadsheet_frame,
+            master=self.main_frame,
             values=table_list,
             command=lambda choice : sheet_selector_callback(choice, tmp_data),
             font=TEXT_FONT,
             width=get_str_max_length(table_list)*8,
 
         )
-        self.sheet_selector.grid(
-            row=0,
-            column=0,
+        self.sheet_selector.pack(
+            anchor="w",
             padx=(10, 0),
-            pady=(20,20),
-            sticky="w",
+            pady=(20,20)
         )
+
+        self.add_widget("sheet_selector", self.sheet_selector)
     
     def display_sheet(self, tmp_data, selected_sheet):
         """Called on sheet_selector's changes
         Update treeview widget to display selected sheet
         """
+
+        self.display_spreadsheet_frame()
 
         self.sheet["column"] = list(tmp_data[selected_sheet].columns)
         self.sheet["show"] = "headings"
@@ -281,16 +295,14 @@ class View(ctk.CTk):
         data consistency regarding template
         """
         self.check_btn = ctk.CTkButton(
-            master=self.input_frame,
+            master=self.main_frame,
             text="Check Spreadsheet data",
             font=TEXT_FONT,
             command=self.controller.verify_spreadsheet
         )
-        self.check_btn.grid(
-            row=3,
-            column=0,
-            columnspan=2,
-            **BUTTON_GRID
+        self.check_btn.pack(
+            padx=(10,0),
+            pady=(10,10)
         )
         self.add_widget("check_btn", self.check_btn)
 
@@ -299,14 +311,11 @@ class View(ctk.CTk):
 
         if self.get_frame("error_frame") is None:
             # create frame if not already exists
-            self.error_frame = ctk.CTkFrame(master=self.input_frame)
-            self.error_frame.grid(
-                row=4,
-                column=0,
-                sticky="nsew",
-                columnspan=2
+            self.error_frame = ctk.CTkFrame(master=self.main_frame)
+            self.error_frame.pack(
+                expand=True,
+                fill="both"
             )
-            self.error_frame.grid_columnconfigure(1, weight=1)
 
             self.add_frame("error_frame", self.error_frame)
 
@@ -319,25 +328,35 @@ class View(ctk.CTk):
                 image=self.error_icon_img,
                 text=""
             )
-            self.error_icon.grid(
-                row=0,
-                column=0
+            self.error_icon.pack(
+                side="left"
             )
-            # self.errors = tk.Text(
-            #     master=self.error_frame
-            # )
-            self.errors = ctk.CTkTextbox(
+
+            self.errors = tk.Text(
                 master=self.error_frame,
-                font=TEXT_FONT,
-                wrap="word"
+                background="#1d1e1e",
+                foreground="white",
+                border=0
             )
-            self.errors.grid(
-                row=0,
-                column=1,
-                sticky="nsew",
+
+            self.errors.pack(
+                side="left",
                 padx=10,
                 pady=5
             )
+
+            self.errors_yscroll = ctk.CTkScrollbar(
+                self.error_frame,
+                orientation="vertical",
+                command=self.errors.yview
+            )
+            self.errors_yscroll.pack(
+                side="left",
+                fill="y"
+            )
+
+            self.errors.configure(yscrollcommand=self.errors_yscroll.set)
+
             self.add_frame("error_frame", self.error_frame)
 
         if error_type == "data":
@@ -354,47 +373,55 @@ class View(ctk.CTk):
         """
 
         self.conversion_frame_label = ctk.CTkLabel(
-            master=self,
+            master=self.main_frame,
             text="Conversion options",
             font=SUBTITLE_FONT
         )
-        self.conversion_frame_label.grid(
-            row=3,
-            column=0,
-            **SUBTITLE_GRID
+        self.conversion_frame_label.pack(
+            padx=(10,0),
+            pady=(20,0),
+            anchor="w"
         )
         self.add_widget("conversion_frame_label", self.conversion_frame_label)
 
-        self.conversion_frame = ctk.CTkFrame(master=self)
-        self.conversion_frame.grid_columnconfigure(0, weight=1)
-        self.conversion_frame.grid(
-            row=4,
-            column=0,
-            **FRAME_GRID
+        self.conversion_frame = ctk.CTkFrame(master=self.main_frame)
+        self.conversion_frame.pack(
+            fill="both",
+            expand=True,
+            padx=(10,10),
+            pady=(10,0)
         )
         self.add_frame("conversion_frame", self.conversion_frame)
 
+        self.outdir_frame = ctk.CTkFrame(
+            master=self.conversion_frame
+        )
+        self.outdir_frame.pack(
+            fill="both",
+            expand=True
+        )
+
         self.outdir_label = ctk.CTkLabel(
-            master=self.conversion_frame,
+            master=self.outdir_frame,
             text="Select a directory to store outputs",
             font=TEXT_FONT
         )
-        self.outdir_label.grid(
-            row=0,
-            column=0,
-            **LABEL_GRID
+        self.outdir_label.pack(
+            padx=10,
+            pady=10,
+            side="left"
         )
 
         self.outdir_btn = ctk.CTkButton(
-            master=self.conversion_frame,
+            master=self.outdir_frame,
             command=self.browse_outdir,
             text="Browse Folder",
             font=TEXT_FONT
         )
-        self.outdir_btn.grid(
-            row=0,
-            column=1,
-            **BUTTON_GRID
+        self.outdir_btn.pack(
+            padx=10,
+            pady=10,
+            side="left"
         )
 
     def browse_outdir(self):
@@ -407,7 +434,7 @@ class View(ctk.CTk):
         )
 
         if self.output_dir:
-            if self.get_var("from_sqlite") == "on":
+            if self.get_var("input_radio") == 2:
                 self.sqlite2pdf_btn()
             else:
                 output_basename = os.path.normpath(
@@ -422,8 +449,22 @@ class View(ctk.CTk):
                     self.display_file_exist_warning()
                 else:
                     self.convert_btn.configure(state="normal")
+
+                self.filename_selection_frame=ctk.CTkFrame(
+                    self.conversion_frame
+                )
+                self.filename_selection_frame.pack(
+                    fill="both",
+                    expand=True,
+                )
+
                 self.filename_entry(output_basename)
                 self.ow_checkbox()
+
+                self.convert_btn.pack(
+                    padx=10,
+                    pady=10
+                )
 
         
     def filename_entry(self, output_basename):
@@ -451,14 +492,13 @@ class View(ctk.CTk):
         self.filename_var.trace_add("write", callback_entry)
 
         filename_entry = ctk.CTkEntry(
-            master=self.conversion_frame,
+            master=self.filename_selection_frame,
             textvariable=self.filename_var,
             font=TEXT_FONT,
-            width=(get_str_max_length(self.filename_var.get()) + 15)*8
+            width=(get_str_max_length(self.filename_var.get()) + 15)*10
         )
-        filename_entry.grid(
-            row=1,
-            column=1,
+        filename_entry.pack(
+            side="left"
         )
     
     def ow_checkbox(self):
@@ -476,16 +516,15 @@ class View(ctk.CTk):
 
         self.check_ow = ctk.StringVar()
         self.overwrite_cb = ctk.CTkCheckBox(
-            master=self.conversion_frame,
+            master=self.filename_selection_frame,
             text="Overwrite existing file in output directory",
             variable=self.check_ow,
             command=lambda: callback_cb(self.filename_var.get()),
             onvalue="on",
             offvalue="off"
         )
-        self.overwrite_cb.grid(
-            row=1,
-            column=3
+        self.overwrite_cb.pack(
+            side="left"
         )
     
 
@@ -498,12 +537,6 @@ class View(ctk.CTk):
             command=self.controller.convert,
             state="disabled",
             font=TEXT_FONT
-        )
-        self.convert_btn.grid(
-            row=2,
-            column=0,
-            columnspan=2,
-            **BUTTON_GRID
         )
 
     def display_file_exist_warning(self):
@@ -520,9 +553,7 @@ class View(ctk.CTk):
             font=TEXT_FONT,
             text_color="#960000"
         )
-        self.file_exists_warning.grid(
-            row=1,
-            column=0
+        self.file_exists_warning.pack(
         )
 
     def sqlite2pdf_btn(self):
@@ -533,16 +564,15 @@ class View(ctk.CTk):
             text="Generate PDF",
             command=self.controller.sqlite2pdf,
         )
-        self.generate_btn.grid(
-            row=1,
-            column=0,
-            **BUTTON_GRID
+        self.generate_btn.pack(
+            padx=10,
+            pady=10
         )
 
     def show_success(self, msg):
         """ Open Window with success message"""
         CTkMessagebox(
-            master=self,
+            master=self.main_frame,
             title="Success",
             message=msg,
             icon="check",
@@ -594,6 +624,7 @@ class View(ctk.CTk):
         """Remove frame/widget from view"""
         if mode=="all":
             self.rm_widget("selected_file")
+            self.rm_widget("sheet_selector")
             self.rm_frame("error_frame")
             self.rm_frame("spreadsheet_frame")
             self.rm_widget("check_btn")

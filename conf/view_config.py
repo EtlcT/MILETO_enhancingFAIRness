@@ -1,16 +1,17 @@
 TITLE_FONT = ("bold", 40)
 
-FRAME_GRID = {
+FRAME_OPT = {
     "padx":(10, 10),
     "pady":(10, 0),
-    "sticky":"nsew"
+    "expand":True,
+    "fill":"both"
 }
 
 SUBTITLE_FONT = ("bold", 20)
-SUBTITLE_GRID = {
+SUBTITLE_OPT = {
     "padx":(10,0),
     "pady":(20, 0),
-    "sticky":"w"
+    "anchor":"nw"
 }
 
 TEXT_FONT = ("normal", 16)
@@ -20,10 +21,10 @@ BUTTON_GRID = {
     "pady":10
 }
 
-LABEL_GRID = {
+LABEL_OPT = {
     "padx":10,
     "pady":10,
-    "sticky":"w"
+    "anchor":"w"
 }
 
 ## Dark mode specific
