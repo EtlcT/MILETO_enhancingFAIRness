@@ -5,15 +5,14 @@ import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
 
-from conf.config import META_TABLES
+from conf.config import *
 from src.utils.utils import resource_path, output_exist
-from src.utils.utils_gui import get_str_max_length
+from src.utils.utils_gui import *
 from conf.view_config import *
 
 class View(ctk.CTk):
     def __init__(self):
         super().__init__()
-        #ctk.set_appearance_mode("light")
         self.title("Ss2db")
         self.controller = None
         self.createWidgets()
@@ -67,18 +66,21 @@ class View(ctk.CTk):
             master=self.input_radio_frame,
             text="spreadsheet file",
             value=1,
-            variable=self.input_radio
+            variable=self.input_radio,
+            font=TEXT_FONT
         )
 
         self.spreadsheet_radio.pack(
-            side="left"
+            side="left",
+            padx=(10,10)
         )
 
         self.sqlite_radio = ctk.CTkRadioButton(
             master=self.input_radio_frame,
             text="sqlite file",
             value=2,
-            variable=self.input_radio
+            variable=self.input_radio,
+            font=TEXT_FONT
         )
         self.sqlite_radio.pack(
             side="left"
@@ -166,7 +168,7 @@ class View(ctk.CTk):
 
         self.add_widget("selected_file", self.selected_file)
 
-    def display_spreadsheet_frame(self):
+    def create_spreadsheet_frame(self):
         """Create frame to display selected spreadsheet"""
 
         #* Style treeview table 
@@ -185,92 +187,187 @@ class View(ctk.CTk):
         )
         self.spreadsheet_frame.pack(
             expand=True,
-            fill="both"
+            fill="both",
         )
-
         self.add_frame("spreadsheet_frame", self.spreadsheet_frame)
 
-        self.sheet_xscroll = ctk.CTkScrollbar(
-            self.spreadsheet_frame,
+        self.spreadsheet_frame_l = ctk.CTkFrame(
+            master=self.spreadsheet_frame,
+            height=400,
+        )
+        self.spreadsheet_frame_l.pack(
+            expand=True,
+            fill="x",
+            side="left",
+            padx=(10,10)
+        )
+        self.spreadsheet_frame_l.pack_propagate(False)
+        self.add_frame("spreadsheet_frame_l", self.spreadsheet_frame_l)
+
+        self.spreadsheet_frame_r = ctk.CTkFrame(
+            master=self.spreadsheet_frame,
+            height=400,
+        )
+        self.spreadsheet_frame_r.pack(
+            expand=True,
+            fill="x",
+            side="right",
+            padx=(10,10)
+        )
+        self.spreadsheet_frame_r.pack_propagate(False)
+        self.add_frame("spreadsheet_frame_r", self.spreadsheet_frame_r)
+    
+    def display_spreadsheet_data(self):
+        """Create treeviews to display data sheet"""
+
+        # create treeview widget in spreadsheet_frame_l
+        self.data_sheet_xscroll = ctk.CTkScrollbar(
+            self.spreadsheet_frame_l,
             orientation="horizontal"
         )
-
-        # create treeview widget in spreadsheet_frame to display sheet
-        self.sheet = ttk.Treeview(
-            master=self.spreadsheet_frame,
-            xscrollcommand=self.sheet_xscroll.set
+        self.data_sheet = ttk.Treeview(
+            master=self.spreadsheet_frame_l,
+            xscrollcommand=self.data_sheet_xscroll.set
         )
-        self.sheet.pack(
+        self.data_sheet.pack(
+            side="top",
+            expand=True,
             fill="both"
         )
-        self.sheet_xscroll.pack(
-            anchor="s",
+        self.data_sheet_xscroll.pack(
+            expand=True,
             fill="x"
         )
+        self.data_sheet_xscroll.configure(command=self.data_sheet.xview)
+        self.add_widget("data_sheet", self.data_sheet)
 
-        self.sheet_xscroll.configure(command=self.sheet.xview)
+    def display_spreadsheet_meta(self):
+        """Create treeviews to display metadata sheet"""
 
-        self.add_widget("sheet", self.sheet)
+        # create treeview widget in spreadsheet_frame_r
+        self.meta_sheet_xscroll = ctk.CTkScrollbar(
+            self.spreadsheet_frame_r,
+            orientation="horizontal"
+        )       
+        self.meta_sheet = ttk.Treeview(
+            master=self.spreadsheet_frame_r,
+            xscrollcommand=self.meta_sheet_xscroll.set
+        )
+        self.meta_sheet.pack(
+            side="top",
+            expand=True,
+            fill="both"
+        )
+        self.meta_sheet_xscroll.pack(
+            expand=True,
+            fill="x"
+        )
+        self.meta_sheet_xscroll.configure(command=self.meta_sheet.xview)
+        self.add_widget("meta_sheet", self.meta_sheet)
 
     def display_sheet_selector(self, tmp_data):
         """Add dropmenu for sheet selection to view"""
-        
-        table_list = list(tmp_data.keys())
+
+        table_list = [_ for _ in tmp_data.keys() if _ not in META_TABLES]
         table_list.insert(0, "Select a sheet")
 
-        def sheet_selector_callback(choice, tmp_data):
+        meta_table_list = [_ for _ in tmp_data.keys() if _ in META_TABLES]
+        meta_table_list.insert(0, "Select a sheet")
+
+        def sheet_selector_l_callback(choice, tmp_data):
             """Callback function that display sheet corresponding
             to user selection in drop menu
             """
-            if self.get_widget("sheet") is not None:
-                self.spreadsheet_frame.pack_forget()
+            if self.get_widget("data_sheet") is not None:
+                self.data_sheet.pack_forget()
+                self.data_sheet_xscroll.pack_forget()
             if choice != "Select a sheet":
-                self.display_sheet(tmp_data, choice)
+                self.display_data_sheet(tmp_data, choice)
+        
+        def sheet_selector_r_callback(choice, tmp_data):
+            """Callback function that display sheet corresponding
+            to user selection in drop menu
+            """
+            if self.get_widget("meta_sheet") is not None:
+                self.meta_sheet.pack_forget()
+                self.meta_sheet_xscroll.pack_forget()
+            if choice != "Select a sheet":
+                self.display_meta_sheet(tmp_data, choice)
 
-        self.sheet_selector = ctk.CTkComboBox(
-            master=self.main_frame,
+        self.data_sheet_selector = ctk.CTkComboBox(
+            master=self.spreadsheet_frame_l,
             values=table_list,
-            command=lambda choice : sheet_selector_callback(choice, tmp_data),
+            command=lambda choice : sheet_selector_l_callback(choice, tmp_data),
             font=TEXT_FONT,
-            width=get_str_max_length(table_list)*8,
-
+            # width=get_str_max_length(table_list)*8,
         )
-        self.sheet_selector.pack(
-            anchor="w",
-            padx=(10, 0),
-            pady=(20,20)
+        self.data_sheet_selector.pack(
+            expand=True,
+            fill="x",
+            anchor="n"
         )
+        self.add_widget("data_sheet_selector", self.data_sheet_selector)
 
-        self.add_widget("sheet_selector", self.sheet_selector)
+        self.meta_sheet_selector = ctk.CTkComboBox(
+            master=self.spreadsheet_frame_r,
+            values=meta_table_list,
+            command=lambda choice : sheet_selector_r_callback(choice, tmp_data),
+            font=TEXT_FONT,
+            # width=get_str_max_length(table_list)*8,
+        )
+        self.meta_sheet_selector.pack(
+            expand=True,
+            fill="x",
+            anchor="n"
+        )
+        self.add_widget("meta_sheet_selector", self.meta_sheet_selector)
     
-    def display_sheet(self, tmp_data, selected_sheet):
+    def display_data_sheet(self, tmp_data, selected_sheet):
         """Called on sheet_selector's changes
-        Update treeview widget to display selected sheet
+        Update treeview widget to display selected data sheet
         """
 
-        self.display_spreadsheet_frame()
+        self.display_spreadsheet_data()
 
-        self.sheet["column"] = list(tmp_data[selected_sheet].columns)
-        self.sheet["show"] = "headings"
-        for column in self.sheet["columns"]:
-            self.sheet.heading(column, text=column)
+        self.data_sheet["column"] = list(tmp_data[selected_sheet].columns)
+        self.data_sheet["show"] = "headings"
+        for column in self.data_sheet["columns"]:
+            self.data_sheet.heading(column, text=column)
         
         df_rows = tmp_data[selected_sheet].to_numpy().tolist()
         for row in df_rows:
-            self.sheet.insert("", "end", values=row)
+            self.data_sheet.insert("", "end", values=row)
         
-        self.sheet.bind("<Button-1>", lambda event: self.controller.on_header_click(event, selected_sheet))
+        self.data_sheet.bind("<Button-1>", lambda event: self.controller.on_header_click(event, selected_sheet))
 
-        if selected_sheet in META_TABLES:
-            self.sheet.bind("<Button-1>", lambda event: self.controller.on_cell_click(event, selected_sheet))
+    def display_meta_sheet(self, tmp_data, selected_sheet):
+        """Called on sheet_selector's changes
+        Update treeview widget to display selected metadata sheet
+        """
+
+        self.display_spreadsheet_meta()
+        self.meta_sheet["column"] = list(tmp_data[selected_sheet].columns)
+        self.meta_sheet["show"] = "headings"
+        for column in self.meta_sheet["columns"]:
+            self.meta_sheet.heading(column, text=column)
+            if column in COLUMN_WIDTH_S:
+                self.meta_sheet.column(column, width=50)
+                
+        
+        df_rows = tmp_data[selected_sheet].to_numpy().tolist()
+        for row in df_rows:
+            self.meta_sheet.insert("", "end", values=row)
+        
+        self.meta_sheet.bind("<Button-1>", lambda event: self.controller.on_cell_click(event, selected_sheet))
 
     def display_upt_cell(self, value, x, y):
         """Display entry widget for changes in metadata table cell"""
-        self.cell_entry = ctk.CTkEntry(self.sheet)
+        self.cell_entry = ctk.CTkEntry(self.data_sheet)
         self.cell_entry.insert(0, value)
         self.cell_entry.place(x=x,y=y)
         self.cell_entry.focus()
     
+    #TODO update df, warning on non exist
     def display_spreadsheet_option(self):
         """Display buttons to create and update metadata tables
         and finally check spreadsheet
@@ -624,10 +721,13 @@ class View(ctk.CTk):
         """Remove frame/widget from view"""
         if mode=="all":
             self.rm_widget("selected_file")
-            self.rm_widget("sheet_selector")
-            self.rm_frame("error_frame")
-            self.rm_frame("spreadsheet_frame")
             self.rm_widget("check_btn")
+            self.rm_frame("spreadsheet_frame")
+            self.rm_frame("spreadsheet_frame_l")
+            self.rm_frame("spreadsheet_frame_r")
+            self.rm_widget("data_sheet_selector")
+            self.rm_widget("meta_sheet_selector")
+            self.rm_frame("error_frame")
             self.rm_widget("conversion_frame_label")
             self.rm_frame("conversion_frame")
         else:

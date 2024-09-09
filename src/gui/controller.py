@@ -31,15 +31,18 @@ class Controller:
         # create metadata tables if not exist
         missing_table = self.create_missing_metatable()
 
+        # display option on spreadsheet (update, check)
+        self.view.display_spreadsheet_option()
+
+        # create spreadsheet frames
+        self.view.create_spreadsheet_frame()
+
         # display dropmenu
         if missing_table:
             self.view.display_sheet_selector(self.model.tmp_data)
         else:
             self.view.display_sheet_selector(tmp_data)
-        
-        # display option on spreadsheet (update, check)
-        self.view.display_spreadsheet_option()
-  
+
 
     def load_spreadsheet(self, spreadsheet_path):
         """Load spreadsheet data"""
@@ -49,12 +52,12 @@ class Controller:
  
     def on_header_click(self, event, selected_sheet):
         """Allow modifying headers/column value on click"""
-        region = self.view.sheet.identify("region", event.x, event.y)
+        region = self.view.data_sheet.identify("region", event.x, event.y)
         if region == "heading":
             # user click on some header
-            column_id = self.view.sheet.identify_column(event.x)
+            column_id = self.view.data_sheet.identify_column(event.x)
             # Get the current heading text
-            current_heading = self.view.sheet.heading(column_id)['text']
+            current_heading = self.view.data_sheet.heading(column_id)['text']
         
             # open dialog to ask for new heading value
             new_heading = ctk.CTkInputDialog(
@@ -65,25 +68,26 @@ class Controller:
             # If a new heading was provided, update the column heading
             if new_heading:
                 new_value = new_heading.get_input()
-                self.view.sheet.heading(column_id, text=new_value)
+                self.view.data_sheet.heading(column_id, text=new_value)
                 self.model.header_change(selected_sheet, current_heading, new_value)
+                self.refresh_meta()
 
     def on_cell_click(self, event, selected_sheet):
         """allow editing metadata tables fields that need to be filled
         by the researcher
         """
 
-        region = self.view.sheet.identify("region", event.x, event.y)
+        region = self.view.meta_sheet.identify("region", event.x, event.y)
         if region == "cell":
             # user click on some cell
-            selected_item = self.view.sheet.identify_row(event.y)
-            selected_column = self.view.sheet.identify_column(event.x)
+            selected_item = self.view.meta_sheet.identify_row(event.y)
+            selected_column = self.view.meta_sheet.identify_column(event.x)
             column_index = int(selected_column[1:]) - 1
-            cell_value = self.view.sheet.item(selected_item)['values'][column_index]
+            cell_value = self.view.meta_sheet.item(selected_item)['values'][column_index]
 
             if self.is_editable_col(selected_sheet, column_index) == True:
                 # user has permission to edit this field
-                bbox = self.view.sheet.bbox(selected_item, selected_column)
+                bbox = self.view.meta_sheet.bbox(selected_item, selected_column)
                 x=bbox[0]
                 y=bbox[1]
             
@@ -99,6 +103,16 @@ class Controller:
                     )
                 )
     
+    def refresh_meta(self):
+        """Update metadata treeview on changes"""
+        
+        selected_meta_sheet = self.view.meta_sheet_selector.get()
+        print(selected_meta_sheet)
+        self.view.meta_sheet.delete(*self.view.meta_sheet.get_children())
+        df_rows = self.model.tmp_data[selected_meta_sheet].to_numpy().tolist()
+        for row in df_rows:
+            self.view.meta_sheet.insert("", "end", values=row)
+
     def is_editable_col(self, selected_sheet, col_idx):
         """Check if the user is allowed to modify value in the column
         he/she try to select in metadata tables
@@ -118,13 +132,13 @@ class Controller:
         """Update treeview and dataframe"""
         # update treeview
         new_value = self.view.cell_entry.get()
-        self.view.sheet.set(item, col, new_value)
+        self.view.data_sheet.set(item, col, new_value)
 
         # delete existing entry
         self.view.cell_entry.destroy()
 
         # update dataframe
-        row = self.view.sheet.index(item)
+        row = self.view.data_sheet.index(item)
         self.model.upt_cell(table, row, col, new_value)
 
     def verify_spreadsheet(self):

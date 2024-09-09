@@ -63,7 +63,10 @@ class Model:
         ] = new_value
 
     def upt_ref(self, table, old_value, new_value):
-        """On changes in header, check if attribute is a reference"""
+        """On changes in header, check if attribute is a reference
+        find potential parent or child table and update modified attribute
+        inside
+        """
 
         # retrieve parent table of the attribute if it has a referenceTable
         parent_tables = self.tmp_data[INFO].loc[

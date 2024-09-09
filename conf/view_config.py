@@ -11,7 +11,6 @@ SUBTITLE_FONT = ("bold", 20)
 SUBTITLE_OPT = {
     "padx":(10,0),
     "pady":(20, 0),
-    "anchor":"nw"
 }
 
 TEXT_FONT = ("normal", 16)
