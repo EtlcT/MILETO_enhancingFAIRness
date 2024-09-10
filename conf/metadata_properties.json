@@ -1,6 +1,7 @@
 {
     "mandatory": {
         "Identifier": {
+            "_comment": "do not appear with this name in JSON",
             "id": "1",
             "occurrences": "1",
             "help": "Unique string that identifies the resource",
@@ -10,7 +11,8 @@
                     "id": "1.a",
                     "occurrences": "1",
                     "help": "Digital Object Identifier",
-                    "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/identifier/#a-identifiertype"
+                    "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/identifier/#a-identifiertype",
+                    "controlled_list":["DOI"]
                 }
             }
         },
