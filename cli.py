@@ -13,6 +13,7 @@ from src.extraction.create_metadata import GenerateMeta
 from src.extraction.check import CheckSpreadsheet
 from src.dbcreate.dbcreate import sqliteCreate
 from src.doccreate.pdf_create import docCreate, sqlite2pdf
+from src.utils.utils import save_spreadsheet
 
 
 def main_cli():
@@ -39,10 +40,8 @@ def main_cli():
             else:
                 filename = input_path
             
-            ss_with_meta.save_meta(
-                filepath=filename,
-                format=file_format
-            )
+            save_spreadsheet(sheets_dict=ss_with_meta.sheets_dict, filepath=filename, format=file_format)
+
 
     elif args.update_metadata:
         pass

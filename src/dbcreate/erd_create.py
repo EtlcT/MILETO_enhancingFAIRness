@@ -43,10 +43,10 @@ class ERD_maker():
 
                 # break line between each attribute
                 html_label+= "<br/>"
-                if row[INFO_ATT['isPK']] is not np.nan:
+                if row[INFO_ATT['isPK']] !="":
                     # if PK attribute is underlined
                     html_label+="<u>"
-                    if row[INFO_ATT['isFK']] is not np.nan:
+                    if row[INFO_ATT['isFK']] != "":
                         # if FK attribute in italic
                         html_label+=f"<i>{row[INFO_ATT['attribute']]}</i></u>"
                         # add relationship between table and reference table
@@ -54,7 +54,7 @@ class ERD_maker():
                     else:
                         # close underline tag
                         html_label+= f"{row[INFO_ATT['attribute']]}</u>"
-                elif row[INFO_ATT['isFK']] is not np.nan:
+                elif row[INFO_ATT['isFK']] != "":
                     html_label+=f"<i>{row[INFO_ATT['attribute']]}</i>"
                     erd.edge(table_name, row[INFO_ATT['refTable']])
                 else:
@@ -86,7 +86,7 @@ class ERD_maker():
         graph.node(
             entity_name,
             label=f"<{html_label}>",
-            shape="rectange",
+            shape="rectangle",
             color="black",
         )
 

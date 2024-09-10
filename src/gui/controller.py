@@ -1,24 +1,24 @@
 import os
 import logging
-from tkinter import ttk
+import tkinter as tk
 import customtkinter as ctk
 
 from src.gui.view import View
 from src.gui.model import Model
 from src.extraction.check import InvalidData, InvalidTemplate
-from src.utils.utils import output_exist
+from src.utils.utils import output_exist, save_spreadsheet
 from conf.config import *
 
-logging.basicConfig(level=logging.ERROR, 
+logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(levelname)s %(message)s',
                     handlers=[logging.FileHandler("Ss2db.log"),
                               logging.StreamHandler()])
+
 
 class Controller:
     def __init__(self, model, view):
         self.model = model
         self.view = view
-
 
     def spreadsheet_loader(self, spreadsheet_path):
         """Display path to selected spreadsheet and load it
@@ -43,13 +43,12 @@ class Controller:
         else:
             self.view.display_sheet_selector(tmp_data)
 
-
     def load_spreadsheet(self, spreadsheet_path):
         """Load spreadsheet data"""
         self.model.input_path = spreadsheet_path
         tmp_data = self.model.load_spreadsheet(spreadsheet_path)
         return tmp_data
- 
+
     def on_header_click(self, event, selected_sheet):
         """Allow modifying headers/column value on click"""
         region = self.view.data_sheet.identify("region", event.x, event.y)
@@ -58,7 +57,7 @@ class Controller:
             column_id = self.view.data_sheet.identify_column(event.x)
             # Get the current heading text
             current_heading = self.view.data_sheet.heading(column_id)['text']
-        
+
             # open dialog to ask for new heading value
             new_heading = ctk.CTkInputDialog(
                 text=f"Enter new heading for '{current_heading}':",
@@ -69,7 +68,8 @@ class Controller:
             if new_heading:
                 new_value = new_heading.get_input()
                 self.view.data_sheet.heading(column_id, text=new_value)
-                self.model.header_change(selected_sheet, current_heading, new_value)
+                self.model.header_change(
+                    selected_sheet, current_heading, new_value)
                 self.refresh_meta()
 
     def on_cell_click(self, event, selected_sheet):
@@ -83,16 +83,18 @@ class Controller:
             selected_item = self.view.meta_sheet.identify_row(event.y)
             selected_column = self.view.meta_sheet.identify_column(event.x)
             column_index = int(selected_column[1:]) - 1
-            cell_value = self.view.meta_sheet.item(selected_item)['values'][column_index]
+            cell_value = self.view.meta_sheet.item(
+                selected_item)['values'][column_index]
 
             if self.is_editable_col(selected_sheet, column_index) == True:
                 # user has permission to edit this field
-                bbox = self.view.meta_sheet.bbox(selected_item, selected_column)
-                x=bbox[0]
-                y=bbox[1]
-            
+                bbox = self.view.meta_sheet.bbox(
+                    selected_item, selected_column)
+                x = bbox[0]
+                y = bbox[1]
+
                 # Create an Entry widget and place it at the cell position
-                self.view.display_upt_cell(cell_value,x,y)
+                self.view.display_upt_cell(cell_value, x, y)
                 self.view.cell_entry.bind(
                     '<Return>',
                     lambda event: self.update_cell_value(
@@ -102,10 +104,10 @@ class Controller:
                         column_index
                     )
                 )
-    
+
     def refresh_meta(self):
         """Update metadata treeview on changes"""
-        
+
         selected_meta_sheet = self.view.meta_sheet_selector.get()
         print(selected_meta_sheet)
         self.view.meta_sheet.delete(*self.view.meta_sheet.get_children())
@@ -121,7 +123,7 @@ class Controller:
         Datacite metadata properties name for instance
         """
 
-        if col_idx == 0 or (col_idx in [1,2] and selected_sheet==INFO):
+        if col_idx == 0 or (col_idx in [1, 2] and selected_sheet == INFO):
             auth = False
         else:
             auth = True
@@ -161,26 +163,42 @@ class Controller:
         else:
             self.view.show_success("Valid spreadsheet provided")
             self.view.display_conversion_frame()
-    
+
+    def save_changes(self):
+        """Open a asksaveasfile filedialog to save changes
+        applied to spreadsheet
+        """
+        file = tk.filedialog.asksaveasfile(
+            filetypes=[("OpenDocument Spreadsheet", "*.ods"),
+                       ("Excel Workbook", "*.xlsx")],
+            defaultextension=".xlsx",
+            confirmoverwrite=True,
+        )
+        file_format = file.name.split('.')[-1] if '.' in file.name else None
+        save_spreadsheet(self.model.tmp_data, file.name, format=file_format)
+
     def convert(self):
         """Run conversion process based on user selection,
         ie: create database, erd and pdf
         """
         self.model.output_path = self.view.output_dir
-        spreadsheet_name = os.path.splitext(os.path.basename(self.view.filepath))[0]
+        spreadsheet_name = os.path.splitext(
+            os.path.basename(self.view.filepath))[0]
         ow_state = self.view.variables.get("check_ow")
         user_defined_filename = self.view.variables.get("filename_var")
 
         if ow_state == True and user_defined_filename:
             # overwrite the specified filename if exists
             try:
-                os.remove(os.path.join(self.view.output_dir, user_defined_filename + ".sqlite"))
+                os.remove(os.path.join(self.view.output_dir,
+                          user_defined_filename + ".sqlite"))
             except FileNotFoundError:
                 pass
             self.model.convert(output_name=user_defined_filename)
         elif ow_state == True and user_defined_filename is None:
             try:
-                os.remove(os.path.join(self.view.output_dir, spreadsheet_name + ".sqlite"))
+                os.remove(os.path.join(self.view.output_dir,
+                          spreadsheet_name + ".sqlite"))
             except FileNotFoundError:
                 pass
             self.model.convert()
@@ -189,8 +207,9 @@ class Controller:
             self.model.convert(output_name=user_defined_filename)
         elif ow_state != True and user_defined_filename is None:
             self.model.convert()
-        
-        self.view.show_success(msg="Your spreadsheet has been converted succesfully !")
+
+        self.view.show_success(
+            msg="Your spreadsheet has been converted succesfully !")
         self.view.clean_frame(mode="all")
 
     def sqlite2pdf(self):
@@ -205,10 +224,11 @@ class Controller:
                 "\nPlease ensure you maintained metadata tables name, attributes and properties"
             )
         else:
-            self.view.show_success(msg="Your pdf has been generated successfully !")
+            self.view.show_success(
+                msg="Your pdf has been generated successfully !")
             self.view.clean_frame()
 
-    def add_widget(self, widget, widget_name, widget_grid:dict):
+    def add_widget(self, widget, widget_name, widget_grid: dict):
         """Add widget to view"""
 
         self.view.add_widget(widget, widget_name, **widget_grid)
@@ -217,6 +237,7 @@ class Controller:
         """Check if metadata tables are missing"""
         missing_table = self.model.create_missing_metatable()
         return missing_table
-    #TODO
+    # TODO
+
     def upt_metatable(self):
         pass

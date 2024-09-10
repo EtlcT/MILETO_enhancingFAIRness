@@ -176,18 +176,6 @@ class GenerateMeta:
         meta_extra = pd.DataFrame(data)
         self.sheets_dict[METAEXTRA] = meta_extra
         return meta_extra
-    
-    #TODO move to utils.utils
-    def save_meta(self, filepath,  format):
-        """Save modified spreadsheet with metadata table into xlsx file"""
-        if format== "ods":
-            engine = "odf"
-        else:
-            engine = "openpyxl"
-        with pd.ExcelWriter(filepath, engine=engine) as doc:
-            for table_name, table in self.sheets_dict.items():
-                table.to_excel(doc, sheet_name=table_name, index=False)
-
 
 def update_metatable(self):
     """Update metadata tables:

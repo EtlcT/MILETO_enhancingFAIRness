@@ -110,3 +110,13 @@ def output_exist(output_dir, output_basename):
                 exists.append(False)
         #TODO give info about the file that already exists
         return any(exists) 
+
+def save_spreadsheet(sheets_dict, filepath, format):
+    """Save changes applied to the spreadsheet"""
+    if format== "ods":
+            engine = "odf"
+    else:
+        engine = "openpyxl"
+    with pd.ExcelWriter(filepath, engine=engine) as doc:
+        for table_name, table in sheets_dict.items():
+            table.to_excel(doc, sheet_name=table_name, index=False)

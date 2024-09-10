@@ -372,15 +372,14 @@ class View(ctk.CTk):
         """Display buttons to create and update metadata tables
         and finally check spreadsheet
         """
-        # self.ss_option_frame = ctk.CTkFrame(
-        #     master=self.input_frame
-        # )
-        # self.ss_option_frame.grid(
-        #     row=3,
-        #     columnspan=2
-        # )
-        # self.add_frame("ss_option_frame", self.ss_option_frame)
+        self.ss_option_frame = ctk.CTkFrame(
+            master=self.main_frame
+        )
+        self.ss_option_frame.pack(
+        )
+        self.add_frame("ss_option_frame", self.ss_option_frame)
 
+        self.display_save_spreadsheet()
         self.display_check_spreadsheet()
 
 
@@ -392,16 +391,35 @@ class View(ctk.CTk):
         data consistency regarding template
         """
         self.check_btn = ctk.CTkButton(
-            master=self.main_frame,
+            master=self.ss_option_frame,
             text="Check Spreadsheet data",
             font=TEXT_FONT,
             command=self.controller.verify_spreadsheet
         )
         self.check_btn.pack(
-            padx=(10,0),
+            side="left",
+            anchor="center",
+            padx=(10,10),
             pady=(10,10)
         )
         self.add_widget("check_btn", self.check_btn)
+    
+    def display_save_spreadsheet(self):
+        """Display save changes button to save changes applied to the
+        spreadsheet
+        """
+        self.save_btn = ctk.CTkButton(
+            master=self.ss_option_frame,
+            text="Save changes",
+            font=TEXT_FONT,
+            command=self.controller.save_changes
+        )
+        self.save_btn.pack(
+            side="left",
+            padx=(10,10),
+            pady=(10,10)
+        )
+        self.add_widget("save_btn", self.save_btn)
 
     def display_errors(self, error_msg, error_type):
         """Display frame to show error find during spreadsheet check"""
@@ -721,7 +739,7 @@ class View(ctk.CTk):
         """Remove frame/widget from view"""
         if mode=="all":
             self.rm_widget("selected_file")
-            self.rm_widget("check_btn")
+            self.rm_frame("ss_option_frame")
             self.rm_frame("spreadsheet_frame")
             self.rm_frame("spreadsheet_frame_l")
             self.rm_frame("spreadsheet_frame_r")
@@ -737,5 +755,4 @@ class View(ctk.CTk):
         """Remove previous filename variable if exist"""
         if "filename_var" in self.variables:
             del self.variables["filename_var"]
-    
     

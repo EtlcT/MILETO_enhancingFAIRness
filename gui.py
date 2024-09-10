@@ -1,10 +1,14 @@
 import sys
+import tkinter as tk
+import tkinter as ctk
+
 from src.gui.view import View
 from src.gui.model import Model
 from src.gui.controller import Controller
 from src.utils.utils_gui import get_zoomed_geometry
 
 def main_gui():
+
     model = Model()
 
     # open in fullscreen mode
@@ -16,12 +20,24 @@ def main_gui():
         view = View()
         view._state_before_windows_set_titlebar_color = 'zoomed'
 
-    view.after(201, lambda: view.iconbitmap("assets/logo(1).ico"))
+    view.after(201, lambda: view.iconbitmap("assets/logo.ico"))
     controller = Controller(model, view)
     view.set_controller(controller)
     # root element have width 100%
     view.columnconfigure(0, weight=1)
+    #view.protocol("WM_DELETE_WINDOW",lambda: on_closing(view))
     view.mainloop()
+
+#TODO
+# def on_closing(root):
+#     file = tk.filedialog.asksaveasfilename(
+#         filetypes=[("Excel files", "*.xlsx", ".ods")],
+#         defaultextension=".xlsx",
+#         confirmoverwrite=True,
+#     )
+#     root.destroy()
+#     return
 
 if __name__ == "__main__":
     main_gui()
+    # os.path.splitext(input_path)[1]
