@@ -10,8 +10,8 @@ def regex_exclude_meta(text) -> bool:
     case insensitive regex to keep only data tables
     """
     no_info = re.search(r"(?i)tables_info", text)
-    no_meta = re.search(r"(?i)meta\_", text)
-    no_DDict = re.search(r"(?i)DDict\_", text)
+    no_meta = re.search(r"(?i)meta\_terms", text)
+    no_DDict = re.search(r"(?i)datadict\_", text)
     no_extra = re.match(r"(?i)extra\_", text)
 
     return any([no_DDict, no_meta, no_info, no_extra])

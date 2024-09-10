@@ -1,6 +1,6 @@
 {
     "meta_references": {
-        "tab_name": "meta_references",
+        "tab_name": "meta_terms_dc",
         "tab_attr": {
             "id": "id",
             "property": "property",
@@ -23,7 +23,7 @@
     },
 
     "DDict_tables": {
-        "tab_name": "DDict_tables",
+        "tab_name": "datadict_tables",
         "tab_attr": {
             "table": "table",
             "desc": "caption"
@@ -31,7 +31,7 @@
     },
 
     "DDict_attributes": {
-        "tab_name": "DDict_attributes",
+        "tab_name": "datadict_attributes",
         "tab_attr": {
             "attribute": "attribute",
             "attType": "attType",
@@ -41,7 +41,7 @@
     },
 
     "DDict_schema": {
-        "tab_name": "DDict_schema",
+        "tab_name": "datadict_schema",
         "tab_attr": {
             "ERD": "ERD",
             "sql": "sql_statement"
@@ -49,7 +49,7 @@
     },
 
     "meta_extra": {
-        "tab_name": "meta_extra",
+        "tab_name": "meta_terms_other",
         "tab_attr": {
             "property": "property",
             "value": "value"
