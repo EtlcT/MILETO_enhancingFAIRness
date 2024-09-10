@@ -219,7 +219,7 @@
                     "id": "6.a",
                     "occurrences": "1",
                     "help": "The name of the subject scheme or classification code or authority if one is used.",
-                    "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/subject/#a-subjectscheme",
+                    "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/subject/#a-subjectscheme"
                 },
                 "schemeURI": {
                     "id": "6.b",
@@ -323,7 +323,7 @@
                                     "id": "7.4.b",
                                     "occurrences": "1",
                                     "help": "The URI of the name identifier scheme.",
-                                    "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#b-schemeuri",
+                                    "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#b-schemeuri"
                                 }
                             }
                         }
@@ -571,13 +571,13 @@
                         "id": "18.1.1",
                         "occurrences": "1",
                         "help": "Longitudinal dimension of point expressed in decimal degrees (positive east).",
-                        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#pointlongitude",
+                        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#pointlongitude"
                     },
                     "pointLatitude": {
                         "id": "18.1.2",
                         "occurrences": "1",
                         "help": "Latitudinal dimension of point expressed in decimal degrees (positive north).",
-                        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#pointlatitude",
+                        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#pointlatitude"
                     }
                 }
             },
@@ -751,7 +751,7 @@
                     "occurrences": "1",
                     "help": "Name of the funding provider.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/fundingreference/#fundername"
-                },
+                }
             },
             "O": {
                 "funderIdentifier": {
