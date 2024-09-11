@@ -60,20 +60,26 @@ class Controller:
             current_heading = self.view.data_sheet.heading(column_id)['text']
 
             # open dialog to ask for new heading value
-            new_heading = ctk.CTkInputDialog(
-                text=f"Enter new heading for '{current_heading}':",
-                title="Edit column name"
-            )
-
+            new_heading_window = self.view.open_edition_window("header", current_heading)
+            new_heading_window.bind("<<ConfirmClick>>", lambda e: on_confirm())
+            new_heading_window.bind("<<CancelClick>>", lambda e: on_cancel())
+            
+            def on_confirm():
             # If a new heading was provided, update the column heading
-            if new_heading:
-                new_value = new_heading.get_input()
-                self.view.data_sheet.heading(column_id, text=new_value)
+                new_heading = new_heading_window.new_value.get()
+                # update treeview
+                self.view.data_sheet.heading(column_id, text=new_heading)
+                # update dataframe
                 self.model.header_change(
-                    selected_sheet, current_heading, new_value)
+                    selected_sheet, current_heading, new_heading)
+                # refresh metadata
                 self.refresh_meta()
                 # store info that a change occurs
                 self.view.variables["change_occurs"] = True
+                new_heading_window.destroy()
+    
+            def on_cancel():
+                new_heading_window.destroy()
 
     def on_cell_click(self, event, selected_sheet):
         """allow editing metadata tables fields that need to be filled
@@ -92,34 +98,30 @@ class Controller:
             if self.is_editable_col(selected_sheet, column_index) == True:
                 # user has permission to edit this field
 
-                # store info that a change occurs
-                self.view.variables["change_occurs"] = True
-                bbox = self.view.meta_sheet.bbox(
-                    selected_item, selected_column)
-                x = bbox[0]
-                y = bbox[1]
+                new_cell_window = self.view.open_edition_window("cell", cell_value)
+                new_cell_window.bind("<<ConfirmClick>>", lambda e: on_confirm())
+                new_cell_window.bind("<<CancelClick>>", lambda e: on_cancel())
 
-                # Create an Entry widget and place it at the cell position
-                self.view.display_upt_cell(cell_value, x, y)
-                self.view.cell_entry.bind(
-                    '<Return>',
-                    lambda event: self.update_cell_value(
-                        event,
-                        selected_sheet,
-                        selected_item,
-                        column_index
-                    )
-                )
+                def on_confirm():
+                    # If a new value was provided, update the cell
+                    # store info that a change occurs
+                    self.view.variables["change_occurs"] = True
+                    new_cell = new_cell_window.new_value.get("0.0", "end")
+                    self.update_cell_value(new_cell, selected_sheet, selected_item, selected_column)
+                    new_cell_window.destroy()
+    
+            def on_cancel():
+                new_cell_window.destroy()
 
     def refresh_meta(self):
         """Update metadata treeview on changes"""
 
         selected_meta_sheet = self.view.meta_sheet_selector.get()
-        print(selected_meta_sheet)
-        self.view.meta_sheet.delete(*self.view.meta_sheet.get_children())
-        df_rows = self.model.tmp_data[selected_meta_sheet].to_numpy().tolist()
-        for row in df_rows:
-            self.view.meta_sheet.insert("", "end", values=row)
+        if selected_meta_sheet != "Select a sheet":
+            self.view.meta_sheet.delete(*self.view.meta_sheet.get_children())
+            df_rows = self.model.tmp_data[selected_meta_sheet].to_numpy().tolist()
+            for row in df_rows:
+                self.view.meta_sheet.insert("", "end", values=row)
 
     def is_editable_col(self, selected_sheet, col_idx):
         """Check if the user is allowed to modify value in the column
@@ -136,17 +138,14 @@ class Controller:
 
         return auth
 
-    def update_cell_value(self, event, table, item, col):
+    def update_cell_value(self, new_value, table, item, col):
         """Update treeview and dataframe"""
         # update treeview
-        new_value = self.view.cell_entry.get()
-        self.view.data_sheet.set(item, col, new_value)
-
-        # delete existing entry
-        self.view.cell_entry.destroy()
+        self.view.meta_sheet.set(item, col, new_value)
 
         # update dataframe
-        row = self.view.data_sheet.index(item)
+        row = self.view.meta_sheet.index(item)
+        print(row, col)
         self.model.upt_cell(table, row, col, new_value)
 
     def verify_spreadsheet(self):
@@ -162,7 +161,6 @@ class Controller:
         try:
             self.model.verify_spreadsheet()
         except InvalidData as e:
-            print(str(e))
             self.view.display_errors(str(e), error_type="data")
         except InvalidTemplate as e:
             self.view.display_errors(str(e), error_type="template")

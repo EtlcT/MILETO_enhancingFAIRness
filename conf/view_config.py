@@ -15,7 +15,7 @@ SUBTITLE_OPT = {
 
 TEXT_FONT = ("normal", 16)
 
-BUTTON_GRID = {
+BUTTON_OPT = {
     "padx":10,
     "pady":10
 }

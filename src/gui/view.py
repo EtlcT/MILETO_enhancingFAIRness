@@ -10,6 +10,82 @@ from src.utils.utils import resource_path, output_exist
 from src.utils.utils_gui import *
 from conf.view_config import *
 
+
+class ToplevelWindow(ctk.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("Modify content")
+        self.after(10, self.lift) # force focus on toplevel window
+    
+    def edit_head_and_cell(self, *args):
+        """top level window that allow user to modify header and cell content"""
+
+        self.label = ctk.CTkLabel(
+            master=self,
+            text=f"Enter new {args[0]} value: ",
+            font=TEXT_FONT
+        )
+        self.label.pack(
+            **LABEL_OPT
+        )
+
+        if args[0] == "header":
+            self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
+            self.txt_var = ctk.StringVar(value=args[1])
+            self.new_value = ctk.CTkEntry(
+                master=self,
+                textvariable=self.txt_var,
+                font=TEXT_FONT
+            )
+            self.new_value.pack(
+                **LABEL_OPT
+            )
+        else:
+            self.geometry(CenterWindowToDisplay(self, 500, 350, self._get_window_scaling()))
+            self.new_value = ctk.CTkTextbox(
+                master=self,
+                wrap="word"
+            )
+            self.new_value.insert("0.0", args[1])
+            self.new_value.pack(
+                anchor="center",
+                padx=10,
+                pady=10,
+                fill="both"
+            )
+        self.btn_frame = ctk.CTkFrame(
+            master=self
+        )
+        self.btn_frame.pack()
+        self.valid_btn = ctk.CTkButton(
+            master=self.btn_frame,
+            text="Confirm change",
+            command=self.on_confirm,
+            font=TEXT_FONT
+        )
+        self.valid_btn.pack(
+            side="left",
+            anchor="center",
+            **BUTTON_OPT
+        )
+        self.cancel_btn = ctk.CTkButton(
+            master=self.btn_frame,
+            text="Cancel change",
+            command=self.on_cancel,
+            font=TEXT_FONT
+        )
+        self.cancel_btn.pack(
+            side="left",
+            anchor="center",
+            **BUTTON_OPT
+        )
+        
+    def on_confirm(self):
+        self.event_generate("<<ConfirmClick>>")
+    
+    def on_cancel(self):
+        self.event_generate("<<CancelClick>>")
+
 class View(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -30,6 +106,8 @@ class View(ctk.CTk):
             expand=True,
             fill="both"
         )
+
+        self.toplevel_window = None
 
         self.welcome_label = ctk.CTkLabel(
             master=self.main_frame,
@@ -352,9 +430,9 @@ class View(ctk.CTk):
             self.meta_sheet.heading(column, text=column)
             if column in COLUMN_WIDTH_S:
                 self.meta_sheet.column(column, width=50)
-                
         
         df_rows = tmp_data[selected_sheet].to_numpy().tolist()
+
         for row in df_rows:
             self.meta_sheet.insert("", "end", values=row)
         
@@ -642,6 +720,14 @@ class View(ctk.CTk):
             side="left"
         )
     
+    def open_edition_window(self, *args):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ToplevelWindow(self)
+            self.toplevel_window.edit_head_and_cell(*args)
+        else:
+            self.toplevel_window.focus()  # if window exists focus it
+        
+        return self.toplevel_window
 
     def display_convert_btn(self):
         """Display convert button to run sqlite, erd and pdf creation"""
