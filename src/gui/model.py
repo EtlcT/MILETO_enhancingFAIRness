@@ -100,6 +100,7 @@ class Model:
         return
 
     def load_spreadsheet(self, filepath):
+        """Load data from spreadsheet into pandas dataframe"""
         try:
             self.tmp_data = pd.read_excel(filepath, sheet_name=None, keep_default_na=False)
         except Exception as e:
@@ -156,3 +157,4 @@ class Model:
     def sqlite2pdf(self):
         doc = sqlite2pdf(self.input_path, self.output_path)
         doc.createPDF()
+    

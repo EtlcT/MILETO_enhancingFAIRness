@@ -23,21 +23,7 @@ def main_gui():
     view.after(201, lambda: view.iconbitmap("assets/logo.ico"))
     controller = Controller(model, view)
     view.set_controller(controller)
-    # root element have width 100%
-    view.columnconfigure(0, weight=1)
-    #view.protocol("WM_DELETE_WINDOW",lambda: on_closing(view))
     view.mainloop()
-
-#TODO
-# def on_closing(root):
-#     file = tk.filedialog.asksaveasfilename(
-#         filetypes=[("Excel files", "*.xlsx", ".ods")],
-#         defaultextension=".xlsx",
-#         confirmoverwrite=True,
-#     )
-#     root.destroy()
-#     return
 
 if __name__ == "__main__":
     main_gui()
-    # os.path.splitext(input_path)[1]

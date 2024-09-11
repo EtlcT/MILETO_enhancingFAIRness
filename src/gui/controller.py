@@ -2,6 +2,7 @@ import os
 import logging
 import tkinter as tk
 import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
 
 from src.gui.view import View
 from src.gui.model import Model
@@ -71,6 +72,8 @@ class Controller:
                 self.model.header_change(
                     selected_sheet, current_heading, new_value)
                 self.refresh_meta()
+                # store info that a change occurs
+                self.view.variables["change_occurs"] = True
 
     def on_cell_click(self, event, selected_sheet):
         """allow editing metadata tables fields that need to be filled
@@ -88,6 +91,9 @@ class Controller:
 
             if self.is_editable_col(selected_sheet, column_index) == True:
                 # user has permission to edit this field
+
+                # store info that a change occurs
+                self.view.variables["change_occurs"] = True
                 bbox = self.view.meta_sheet.bbox(
                     selected_item, selected_column)
                 x = bbox[0]
@@ -174,8 +180,11 @@ class Controller:
             defaultextension=".xlsx",
             confirmoverwrite=True,
         )
-        file_format = file.name.split('.')[-1] if '.' in file.name else None
-        save_spreadsheet(self.model.tmp_data, file.name, format=file_format)
+        if file:
+            file_format = file.name.split('.')[-1] if '.' in file.name else None
+            save_spreadsheet(self.model.tmp_data, file.name, format=file_format)
+            # store saved spreadsheet filename to check for pending changes later
+            self.view.variables["saved_spreadsheet"] = file.name
 
     def convert(self):
         """Run conversion process based on user selection,
@@ -228,16 +237,27 @@ class Controller:
                 msg="Your pdf has been generated successfully !")
             self.view.clean_frame()
 
-    def add_widget(self, widget, widget_name, widget_grid: dict):
-        """Add widget to view"""
-
-        self.view.add_widget(widget, widget_name, **widget_grid)
-
     def create_missing_metatable(self):
         """Check if metadata tables are missing"""
         missing_table = self.model.create_missing_metatable()
         return missing_table
+    
     # TODO
-
     def upt_metatable(self):
         pass
+
+    def on_closing(self):
+        """Handle window close event to prevent user from loosing
+        pending changes
+        """
+        if self.view.get_var("change_occurs"):
+            # changes have been detected
+                msg_exit_box = self.view.warning_exit()
+                if msg_exit_box.get() == "Quit without saving":
+                    self.view.destroy()
+                elif msg_exit_box.get() == "Yes, save spreadsheet":
+                    self.save_changes()
+        else:
+            self.view.destroy()
+
+        return

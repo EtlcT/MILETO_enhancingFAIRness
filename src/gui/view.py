@@ -19,6 +19,7 @@ class View(ctk.CTk):
         self.additional_frames = {}
         self.additional_widgets = {}
         self.variables = {}
+        self.protocol("WM_DELETE_WINDOW",lambda: self.controller.on_closing())
 
     def createWidgets(self):
 
@@ -137,11 +138,10 @@ class View(ctk.CTk):
             )
 
             if self.filepath:
-                #delete previous content if exist
-                self.clean_frame(mode="all")
+                # delete previous content if exist
+                self.clean_stage(mode="all")
                 # display selected file in view input_frame
                 self.display_selected_file()
-
                 self.controller.spreadsheet_loader(self.filepath)
         
         else:
@@ -152,7 +152,7 @@ class View(ctk.CTk):
             
             if self.filepath:
                 #delete previous content if exist
-                self.clean_frame(mode="all")
+                self.clean_stage(mode="all")
                 self.display_conversion_frame()
     
     def display_selected_file(self):
@@ -693,6 +693,16 @@ class View(ctk.CTk):
             icon="check",
             option_1="OK"
         )
+    
+    def warning_exit(self):
+        """Open window to ask if user want to quit without saving"""
+        msg_box = CTkMessagebox(
+                    title="Pending Changes !",
+                    message="Warning there are pending changes that haven't be saved yet!\nDo you want to save them ?",
+                    option_1="Yes, save spreadsheet",
+                    option_2="Quit without saving"
+                )
+        return msg_box
 
     def add_frame(self, frame_name, frame):
         """Add new widget to additional_frames for future retrieving"""
@@ -734,20 +744,25 @@ class View(ctk.CTk):
         if key doesn't exist, return None
         """
         return self.variables.get(var_name, None)
+    
+    def erase_var_dict(self):
+        """Delete every variable in self.variables dict"""
+        self.variables = {}
 
-    def clean_frame(self, mode="all"):
-        """Remove frame/widget from view"""
+    def clean_stage(self, mode="all"):
+        """Remove frames and widgets from view, delete variables"""
         if mode=="all":
             self.rm_widget("selected_file")
             self.rm_frame("ss_option_frame")
             self.rm_frame("spreadsheet_frame")
-            self.rm_frame("spreadsheet_frame_l")
-            self.rm_frame("spreadsheet_frame_r")
+            # self.rm_frame("spreadsheet_frame_l")
+            # self.rm_frame("spreadsheet_frame_r")
             self.rm_widget("data_sheet_selector")
             self.rm_widget("meta_sheet_selector")
             self.rm_frame("error_frame")
             self.rm_widget("conversion_frame_label")
             self.rm_frame("conversion_frame")
+            self.erase_var_dict()
         else:
             pass
     
