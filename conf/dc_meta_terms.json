@@ -1,0 +1,425 @@
+{
+    "1": {
+        "name": "Identifier",
+        "required": 1,
+        "has_r": [
+            "1.a"
+        ],
+        "occurrences": "1",
+        "help": "Unique string that identifies the resource",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/identifier/"
+    },
+    "1.a": {
+        "name": "identifierType",
+        "required": 0,
+        "occurrences": "1",
+        "help": "Digital Object Identifier",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/identifier/#a-identifiertype",
+        "controlled_list": [
+            "DOI"
+        ]
+    },
+    "2.1": {
+        "name": "creatorName",
+        "required": 1,
+        "has_o": [
+            "2.1.a"
+        ],
+        "occurrences": "1",
+        "help": "Full name of the creator - family, given",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#creatorname"
+    },
+    "2.1.a": {
+        "name": "nameType",
+        "required": 0,
+        "occurrences": "1",
+        "help": "Type of name",
+        "controlled_list": [
+            "Organizational",
+            "Personal"
+        ],
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#a-nametype"
+    },
+    "2.2": {
+        "name": "givenName",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The personal or first name of the creator",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#givenname"
+    },
+    "2.3": {
+        "name": "familyName",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The surname or last name of the creator",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#familyname"
+    },
+    "2.4": {
+        "name": "nameIdentifier",
+        "required": 0,
+        "has_r": [
+            "2.4.a"
+        ],
+        "occurrences": "1-n",
+        "help": "Uniquely nameentifies an indivnameual or legal entity, according to various schemes.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#namenameentifier"
+    },
+    "2.4.a": {
+        "name": "nameIdentifierScheme",
+        "required": 0,
+        "has_o": [
+            "2.4.b"
+        ],
+        "occurrences": "1",
+        "help": "The name of the name identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#a-nameidentifierscheme",
+    },
+    "2.4.b": {
+        "name": "schemeURI",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The URI of the name identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#b-schemeuri"
+    },
+    "2.5": {
+        "name": "affiliation",
+        "required": 0,
+        "has_o": [
+            "2.5.a"
+        ],
+        "occurrences": "1-n",
+        "help": "The organizational or institutional affiliation of the creator.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#affiliation"
+    },
+    "2.5.a": {
+        "name": "affiliationIdentifier",
+        "required": 0,
+        "has_r": [
+            "2.5.b"
+        ],
+        "has_o": [
+            "2.5.c"
+        ],
+        "occurrences": "1",
+        "help": "Uniquely identifies the organizational affiliation of the creator.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#a-affiliationidentifier",
+    },
+    "2.5.b": {
+        "name": "affiliationIdentifierScheme",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The name of the affiliation identifier scheme",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#b-affiliationidentifierscheme"
+    },
+    "2.5.c": {
+        "name": "schemeURI",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The URI of the affiliation identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#c-schemeuri"
+    },
+    "3": {
+        "name": "Title",
+        "required": 1,
+        "has_o": [
+            "3.a"
+        ],
+        "occurrences": "1-n",
+        "help": "name or title by which resource is known - title of a dataset, name of software or instrument",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/title/"
+    },
+    "3.a": {
+        "name": "titleType",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The type of Title (other than the Main Title)",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/title/#a-titletype",
+        "controlled_list": [
+            "AlternativeTitle",
+            "Subtitle",
+            "TranslatedTitle",
+            "Other"
+        ]
+    },
+    "4": {
+        "name": "Publisher",
+        "required": 1,
+        "has_o": [
+            "4.a"
+        ],
+        "occurrences": "1",
+        "help": "The name of the entity that holds, archives, publishes, prints, distributes, releases, issues, or produces the resource.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/publisher/"
+    },
+    "4.a": {
+        "name": "publisherIdentifier",
+        "required": 0,
+        "has_r": [
+            "4.b"
+        ],
+        "occurrences": "1",
+        "help": "Uniquely identifies the publisher, according to various schemes.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/publisher/#a-publisheridentifier"
+    },
+    "4.b": {
+        "name": "publisherIdentifierScheme",
+        "required": 0,
+        "has_o": [
+            "4.c"
+        ],
+        "occurrences": "1",
+        "help": "The name of the publisher identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/publisher/#b-publisheridentifierscheme"
+    },
+    "4.c": {
+        "name": "schemeURI",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The URI of the publisher identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/publisher/#c-schemeuri"
+    },
+    "5": {
+        "name": "PublicationYear",
+        "occurrences": "1",
+        "help": "The year when the data was or will be made publicly available. - YYYY",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/publicationyear/#publicationyear"
+    },
+    "10": {
+        "name": "ResourceType",
+        "required": 1,
+        "occurrences": "1",
+        "help": "A description of the resource.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/resourcetype/",
+    },
+    "10.a": {
+        "name": "resourceTypeGeneral",
+        "required": 1,
+        "occurrences": "1",
+        "help": "The general type of the resource.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/resourcetype/#a-resourcetypegeneral",
+        "controlled_list": [
+            "Audiovisual",
+            "Book",
+            "BookChapter",
+            "Collection",
+            "ComputationalNotebook",
+            "ConferencePaper",
+            "ConferenceProceeding",
+            "DataPaper",
+            "Dataset",
+            "Dissertation",
+            "Event",
+            "Image",
+            "InteractiveResource",
+            "Instrument",
+            "Journal",
+            "JournalArticle",
+            "Model",
+            "OutputManagementPlan",
+            "PeerReview",
+            "PhysicalObject",
+            "Preprint",
+            "Report",
+            "Service",
+            "Software",
+            "Sound",
+            "Standard",
+            "StudyRegistration",
+            "Text",
+            "Workflow",
+            "Other"
+        ]
+    },
+    "6": {
+        "name": "Subject",
+        "required": 0,
+        "has_o": [
+            "6.a",
+            "6.b",
+            "6.c",
+            "6.d"
+        ],
+        "occurrences": "1-n",
+        "help": "Subject, keyword, classification code, or key phrase describing the resource.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/subject/#subject",
+    },
+    "6.a": {
+        "name": "subjectScheme",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The name of the subject scheme or classification code or authority if one is used.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/subject/#a-subjectscheme"
+    },
+    "6.b": {
+        "name": "schemeURI",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The URI of the subject identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/subject/#b-schemeuri"
+    },
+    "6.c": {
+        "name": "valueURI",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The URI of the subject term.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/subject/#c-valueuri"
+    },
+    "6.d": {
+        "name": "classificationCode",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The classification code used for the subject term in the subject scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/subject/#d-classificationcode"
+    },
+    "7": {
+        "name": "Contributor",
+        "required": 0,
+        "has_r": [
+            "7.a",
+            "7.1"
+        ],
+        "has_o": [
+            "7.2",
+            "7.3",
+            "7.4"
+        ],
+        "occurrences": "1-n",
+        "help": "The institution or person responsible for collecting, managing, distributing, or otherwise contributing to the development of the resource.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/",
+    },
+    "7.a": {
+        "name": "contributorType",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The type of contributor of the resource.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#a-contributortype",
+        "controlled_list": [
+            "ContactPerson",
+            "DataCollector",
+            "DataCurator",
+            "DataManager",
+            "Distributor",
+            "Editor",
+            "HostingInstitution",
+            "Producer",
+            "ProjectLeader",
+            "ProjectManager",
+            "ProjectMember",
+            "RegistrationAgency",
+            "RegistrationAuthority",
+            "RelatedPerson",
+            "Researcher",
+            "ResearcherGroup",
+            "RightsHolder",
+            "Sponsor",
+            "Supervisor",
+            "WorkPackageLeader",
+            "Other"
+        ]
+    },
+    "7.1": {
+        "name": "contributorName",
+        "required": 0,
+        "has_o": [
+            "7.1.a"
+        ],
+        "occurrences": "1",
+        "help": "The full name of the contributor.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#contributorname"
+    },
+    "7.1.a": {
+        "name": "nameType",
+        "help": "The type of name.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#a-nametype",
+        "controlled_list": [
+            "Organizational",
+            "Personal"
+        ]
+    },
+    "7.2": {
+        "name": "givenName",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The personal or first name of the contributor.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#givenname"
+    },
+    "7.3": {
+        "name": "familyName",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The surname or last name of the contributor.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#familyname"
+    },
+    "7.4": {
+        "name": "nameIdentifier",
+        "required": 0,
+        "has_r": [
+            "7.4.a"
+        ],
+        "occurrences": "1-n",
+        "help": "Uniquely identifies an individual or legal entity, according to various schemes.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#nameidentifier",
+    },
+    "7.4.a": {
+        "name": "nameIdentifierScheme",
+        "required": 0,
+        "has_o": [
+            "7.4.b"
+        ],
+        "occurrences": "1",
+        "help": "The name of the name identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#a-nameidentifierscheme"
+    },
+    "7.4.b": {
+        "name": "schemeURI",
+        "required": 0,
+        "occurrences": "1",
+        "help": "The URI of the name identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#b-schemeuri"
+    },
+    "7.5": {
+        "name": "affiliation",
+        "required": 0,
+        "has_o": [
+            "7.5.a"
+        ],
+        "occurrences": "1-n",
+        "help": "The organizational or institutional affiliation of the contributor.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#affiliation",
+    },
+    "7.5.a": {
+        "name": "affiliationIdentifier",
+        "required": 0,
+        "has_r": [
+            "7.5.b"
+        ],
+        "occurrences": "1",
+        "help": "Uniquely identifies the organizational affiliation of the contributor.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#a-affiliationidentifier"
+    },
+    "7.5.b": {
+        "name": "affiliationIdentifierScheme",
+        "required": 0,
+        "has_o": [
+            "7.5.c"
+        ],
+        "occurrences": "1",
+        "help": "The name of the affiliation identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#b-affiliationidentifierscheme"
+    },
+    "7.5.c": {
+        "name": "schemeURI",
+        "required": 0,
+        "occurrences": "1",
+        "help": "URI of the affiliation identifier scheme.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#c-schemeuri"
+    },
+    "8": {
+        "name": "Date",
+        "required": 0,
+        "has_r":["8.a"],
+        "occurrences": "1-n",
+        "help": "Different dates relevant to the work.",
+        "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/date/"
+    }
+}
