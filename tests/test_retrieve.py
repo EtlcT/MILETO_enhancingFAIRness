@@ -27,9 +27,9 @@ def _read_spreadsheet_mock():
 
     fields_C = ['Attribute_C1', 'Attribute_B1', 'Attribute_B2', 'Attribute_D1', 'Attribute_C3']
     values_C = [
-        ['Ref_C1', 'Ref_B1', '11', 'Ref_D2', 12],
-        ['Ref_C2', 'Ref_B2', '7', 'Ref_D3', 42],
-        ['Ref_C3', 'Ref_B2', '23', 'Ref_D1', 200]
+        ['Ref_C1', 'Ref_B1', 11, 'Ref_D2', 12],
+        ['Ref_C2', 'Ref_B2', 7, 'Ref_D3', 42],
+        ['Ref_C3', 'Ref_B2', 23, 'Ref_D1', 200]
     ]
     table_C = pd.DataFrame(data=values_C, columns=fields_C)
 
@@ -41,24 +41,24 @@ def _read_spreadsheet_mock():
     ]
     table_D = pd.DataFrame(data=values_D, columns=fields_D)
 
-    fields_KEYS = list(TEMP_CONF["tables_info"]["tab_attr"].values())
-    values_KEYS = [
-        ['Table_A', 'Attribute_A1', 'Y', np.nan, np.nan],
-        ['Table_A', 'Attribute_A2', np.nan, np.nan, np.nan],
-        ['Table_A', 'Attribute_A3', np.nan, np.nan, np.nan],
-        ['Table_B', 'Attribute_B1', 'Y', np.nan, np.nan],
-        ['Table_B', 'Attribute_B2', 'Y', np.nan, np.nan],
-        ['Table_B', 'Attribute_B3', np.nan, np.nan, np.nan],
-        ['Table_C', 'Attribute_C1', 'Y', np.nan, np.nan],
-        ['Table_C', 'Attribute_B1', np.nan, 'Y', 'Table_B'],
-        ['Table_C', 'Attribute_B2', np.nan, 'Y', 'Table_B'],
-        ['Table_C', 'Attribute_D1', np.nan, 'Y', 'Table_D'],
-        ['Table_C', 'Attribute_C3', np.nan, np.nan, np.nan],
-        ['Table_D', 'Attribute_D1', 'Y', np.nan, np.nan],
-        ['Table_D', 'Attribute_D2', np.nan, np.nan, np.nan],
-        ['Table_D', 'Attribute_A1', np.nan, 'Y','Table_A'],
+    fields_info = list(TEMP_CONF["tables_info"]["tab_attr"].values())
+    values_info = [
+        ['Table_A', 'Attribute_A1', "TEXT", "", 'Y', np.nan, np.nan],
+        ['Table_A', 'Attribute_A2', "TEXT", "", np.nan, np.nan, np.nan],
+        ['Table_A', 'Attribute_A3', "TEXT", "", np.nan, np.nan, np.nan],
+        ['Table_B', 'Attribute_B1', "TEXT", "", 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_B2', "INTEGER", "", 'Y', np.nan, np.nan],
+        ['Table_B', 'Attribute_B3', "TEXT", "", np.nan, np.nan, np.nan],
+        ['Table_C', 'Attribute_C1', "TEXT", "", 'Y', np.nan, np.nan],
+        ['Table_C', 'Attribute_B1', "TEXT", "", np.nan, 'Y', 'Table_B'],
+        ['Table_C', 'Attribute_B2', "INTEGER", "", np.nan, 'Y', 'Table_B'],
+        ['Table_C', 'Attribute_D1', "TEXT", "", np.nan, 'Y', 'Table_D'],
+        ['Table_C', 'Attribute_C3', "INTEGER", "", np.nan, np.nan, np.nan],
+        ['Table_D', 'Attribute_D1', "TEXT", "", 'Y', np.nan, np.nan],
+        ['Table_D', 'Attribute_D2', "TEXT", "", np.nan, np.nan, np.nan],
+        ['Table_D', 'Attribute_A1', "TEXT", "", np.nan, 'Y','Table_A'],
     ]
-    table_KEYS = pd.DataFrame(data=values_KEYS, columns=fields_KEYS)
+    table_info = pd.DataFrame(data=values_info, columns=fields_info)
 
     table_REF = pd.DataFrame(
         columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3], # ['property', 'value']
@@ -73,7 +73,7 @@ def _read_spreadsheet_mock():
         'Table_B': table_B,
         'Table_C': table_C,
         'Table_D': table_D,
-        INFO: table_KEYS,
+        INFO: table_info,
         TEMP_CONF["meta_references"]["tab_name"]: table_REF
     }
 
@@ -141,7 +141,7 @@ class TestExtraction(unittest.TestCase):
     ])
 
     def test_regex_exclude_meta(self, text, regexMatch):
-        """Check that sheet that contains either 'meta.', tables_info or 'extra' 
+        """Check that sheet that contains either 'meta_', tables_info or 'extra' 
         matches the regex and so return True.
         """
         result = utils_extraction.regex_exclude_meta(text)

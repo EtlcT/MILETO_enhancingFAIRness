@@ -63,7 +63,7 @@ class GetSpreadsheetData:
 
         tables_info = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
                                         .isin(self.datatables_list)] \
-                                        .iloc[:,:6]
+                                        .iloc[:,:7]
         # add type info 
         tables_info_wt = self._add_attr_type(tables_info)
 

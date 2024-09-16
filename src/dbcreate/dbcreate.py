@@ -119,7 +119,6 @@ class sqliteCreate():
                 if_exists='append',
                 index=False             
             )
-
         conn.close()
 
         return

@@ -16,6 +16,7 @@
             "table": "table",
             "attribute": "attribute",
             "type": "type",
+            "usr_type": "expected_type",
             "isPK": "isPK",
             "isFK": "isFK",
             "refTable": "referenceTable"
@@ -34,7 +35,6 @@
         "tab_name": "datadict_attributes",
         "tab_attr": {
             "attribute": "attribute",
-            "attType": "attType",
             "unit": "unit",
             "desc": "caption"
         }
