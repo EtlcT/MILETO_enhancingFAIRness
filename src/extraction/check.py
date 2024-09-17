@@ -7,7 +7,7 @@ from src.utils.utils import check_uniqueness
 from src.utils.utils_extraction import get_datatables_list, rm_extra_tables
 
 logging.basicConfig(level=logging.ERROR, 
-                    format='%(asctime)s %(levelname)s %(message)s',
+                    format="%(asctime)s %(levelname)s %(message)s",
                     handlers=[logging.FileHandler("Ss2db.log"),
                               logging.StreamHandler()])
 
@@ -46,7 +46,7 @@ class CheckSpreadsheet:
             try:
                 check()
             except CheckSpreadsheetError as e:
-                logging.error(f"{e.__class__.__name__}: {str(e)}\n")
+                # logging.error(f"{e.__class__.__name__}: {str(e)}\n")
                 errors.append(f"{e.__class__.__name__}: {e}\n")
             except KeyError as e:
                 pass
@@ -70,7 +70,7 @@ class CheckSpreadsheet:
             try:
                 check()
             except CheckSpreadsheetError as e:
-                logging.error(f"{e.__class__.__name__}: {str(e)}")
+                # logging.error(f"{e.__class__.__name__}: {str(e)}")
                 errors.append(f"{e.__class__.__name__}: {e}")
             except KeyError as e:
                 pass
@@ -179,10 +179,10 @@ class CheckSpreadsheet:
         Raise error if fields defined as Primary Key does not
         respect uniqueness criteria
         """
-        pk_constraint = self.tables_info[self.tables_info[INFO_ATT['isPK']] == 'Y'][[INFO_ATT['table'],INFO_ATT['attribute']]]
-        pk_groupedby_table = pk_constraint.groupby(by=INFO_ATT['table'])
+        pk_constraint = self.tables_info[self.tables_info[INFO_ATT["isPK"]] == "Y"][[INFO_ATT["table"],INFO_ATT["attribute"]]]
+        pk_groupedby_table = pk_constraint.groupby(by=INFO_ATT["table"])
         for table_name, pk_info in pk_groupedby_table:
-            pk_info = pk_info[INFO_ATT['attribute']].tolist()
+            pk_info = pk_info[INFO_ATT["attribute"]].tolist()
 
             if check_uniqueness(fields=pk_info,table=self.sheets_dict[table_name]) != True :
                 raise PrimaryKeyNonUniqueError(table_name, pk_info)
@@ -194,14 +194,14 @@ class CheckSpreadsheet:
         Raise error if FK is not present in Reference Table
         """
 
-        isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
+        isFK_condition = self.tables_info[INFO_ATT["isFK"]]=="Y"
         fk_by_table_and_ref = (
             self.tables_info[isFK_condition][[
                 INFO_ATT["table"],
-                INFO_ATT['attribute'],
-                INFO_ATT['refTable']
+                INFO_ATT["attribute"],
+                INFO_ATT["refTable"]
             ]]
-            .groupby(by=[INFO_ATT["table"],INFO_ATT['refTable']])
+            .groupby(by=[INFO_ATT["table"],INFO_ATT["refTable"]])
         )
 
         existence_issues = []
@@ -209,14 +209,14 @@ class CheckSpreadsheet:
         for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
             exist_in_ref = (
                 col in self.sheets_dict[ref_table_name].columns
-                for col in fk_info[INFO_ATT['attribute']]
+                for col in fk_info[INFO_ATT["attribute"]]
             )
             
             # check that the attribute exist in reference table
             if not all(exist_in_ref):
                 existence_issues.append({
                     "table": table_name,
-                    "attribute": fk_info['attribute'].tolist(),
+                    "attribute": fk_info["attribute"].tolist(),
                     "reference_Table": ref_table_name
                 })
             
@@ -231,23 +231,23 @@ class CheckSpreadsheet:
         """
         Raise error if the reference attribute does not respect unicity
         """
-        isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
+        isFK_condition = self.tables_info[INFO_ATT["isFK"]]=="Y"
         fk_by_table_and_ref = (
             self.tables_info[isFK_condition][[
                 INFO_ATT["table"],
-                INFO_ATT['attribute'],
-                INFO_ATT['refTable']
+                INFO_ATT["attribute"],
+                INFO_ATT["refTable"]
             ]]
-            .groupby(by=[INFO_ATT["table"],INFO_ATT['refTable']])
+            .groupby(by=[INFO_ATT["table"],INFO_ATT["refTable"]])
         )
 
         unicity_issues = []
 
         for (table_name, ref_table_name), fk_info in fk_by_table_and_ref:
-            if not check_uniqueness(fields=fk_info['attribute'].tolist(),table=self.sheets_dict[ref_table_name]):
+            if not check_uniqueness(fields=fk_info["attribute"].tolist(),table=self.sheets_dict[ref_table_name]):
                 unicity_issues.append({
                     "table": table_name,
-                    "attribute": fk_info['attribute'].tolist(),
+                    "attribute": fk_info["attribute"].tolist(),
                     "reference_Table": ref_table_name
                 })
             
@@ -261,7 +261,7 @@ class CheckSpreadsheet:
         """Raise AssertionError if a table has no Primary Key defined"""
 
         for table, table_info in self.tables_info.groupby(by=INFO_ATT["table"]):
-            if not ('Y' in table_info[INFO_ATT['isPK']].values) :
+            if not ("Y" in table_info[INFO_ATT["isPK"]].values) :
                 raise PrimaryKeyMissingError(table)
         
         return
@@ -273,11 +273,11 @@ class CheckSpreadsheet:
         but has empty ReferenceTable field
         """
 
-        isFK_condition = self.tables_info[INFO_ATT['isFK']]=='Y'
+        isFK_condition = self.tables_info[INFO_ATT["isFK"]]=="Y"
         fk_constraint = self.tables_info[isFK_condition]
 
-        if (fk_constraint[INFO_ATT['refTable']] == "").any() != False:
-            fk_without_ref = fk_constraint[(fk_constraint[INFO_ATT['refTable']] == "")==True]
+        if (fk_constraint[INFO_ATT["refTable"]] == "").any() != False:
+            fk_without_ref = fk_constraint[(fk_constraint[INFO_ATT["refTable"]] == "")==True]
             raise ReferenceUndefinedError(fk_without_ref.to_string(index=False))
         
         return
@@ -289,10 +289,10 @@ class CheckSpreadsheet:
         it could be normal to share the same name as their reference)
         """
 
-        notFK_condition = self.tables_info[INFO_ATT['isFK']] == ""
+        notFK_condition = self.tables_info[INFO_ATT["isFK"]] != "Y"
         attr_no_FK = self.tables_info[notFK_condition]
 
-        group_by_attribute = attr_no_FK.groupby(INFO_ATT['attribute'])
+        group_by_attribute = attr_no_FK.groupby(INFO_ATT["attribute"])
         duplicates_list =  [group for _, group in group_by_attribute if len(group) > 1]
         if duplicates_list:
             duplicates = pd.concat(duplicates_list)
@@ -303,7 +303,7 @@ class CheckSpreadsheet:
 
         tables_info = self.sheets_dict[INFO][self.sheets_dict[INFO][INFO_ATT["table"]]
                                         .isin(datatables_list)] \
-                                        .iloc[:,:6]
+                                        .iloc[:,:7]
         return tables_info
 
 class CheckSpreadsheetError(Exception):

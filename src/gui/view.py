@@ -17,42 +17,23 @@ class ToplevelWindow(ctk.CTkToplevel):
         self.title("Modify content")
         self.after(10, self.lift) # force focus on toplevel window
     
-    def edit_head_and_cell(self, *args):
+    def edit(self, cell_type, current_value, selected_sheet, col_name, *args):
         """top level window that allow user to modify header and cell content"""
 
         self.label = ctk.CTkLabel(
             master=self,
-            text=f"Enter new {args[0]} value: ",
+            text=f"Enter new value: ",
             font=TEXT_FONT
         )
         self.label.pack(
             **LABEL_OPT
         )
 
-        if args[0] == "header":
-            self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
-            self.txt_var = ctk.StringVar(value=args[1])
-            self.new_value = ctk.CTkEntry(
-                master=self,
-                textvariable=self.txt_var,
-                font=TEXT_FONT
-            )
-            self.new_value.pack(
-                **LABEL_OPT
-            )
+        if cell_type == "header":
+            self.edit_headers(current_value)
         else:
-            self.geometry(CenterWindowToDisplay(self, 500, 350, self._get_window_scaling()))
-            self.new_value = ctk.CTkTextbox(
-                master=self,
-                wrap="word"
-            )
-            self.new_value.insert("0.0", args[1])
-            self.new_value.pack(
-                anchor="center",
-                padx=10,
-                pady=10,
-                fill="both"
-            )
+            self.edit_cell(current_value, selected_sheet, col_name, *args)
+
         self.btn_frame = ctk.CTkFrame(
             master=self
         )
@@ -79,7 +60,101 @@ class ToplevelWindow(ctk.CTkToplevel):
             anchor="center",
             **BUTTON_OPT
         )
-        
+
+    def edit_headers(self, current_value):
+        """Open top level window to modify header value"""
+
+        self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
+        self.txt_var = ctk.StringVar(value=current_value)
+        self.new_value = ctk.CTkEntry(
+            master=self,
+            textvariable=self.txt_var,
+            font=TEXT_FONT
+        )
+        self.new_value.pack(
+            **LABEL_OPT
+        )
+    
+    def edit_cell(self, current_value, selected_sheet=None, col_name=None, *args):
+        """Open appropriate top level window to modify cell value
+        based on column currently edited
+        """
+        match col_name:
+            case "expectedType":
+                self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
+                self.new_value = ctk.CTkComboBox(
+                    master=self,
+                    values=args[0]
+                )
+                self.new_value.pack(
+                    **LABEL_OPT
+                )
+            case "isPK":
+                self.geometry(CenterWindowToDisplay(self, 500, 200, self._get_window_scaling()))
+                self.new_value = ctk.StringVar(value="")
+                self.new_value_radio_y = ctk.CTkRadioButton(
+                    self,
+                    text="is Primary key",
+                    variable=self.new_value,
+                    value="Y"
+                    )
+                self.new_value_radio_n = ctk.CTkRadioButton(
+                    self,
+                    text="is NOT Primary key",
+                    variable=self.new_value,
+                    value=""
+                    )
+                self.new_value_radio_y.pack(
+                    **LABEL_OPT
+                )
+                self.new_value_radio_n.pack(
+                    **LABEL_OPT
+                )
+            case "isFK":
+                self.geometry(CenterWindowToDisplay(self, 500, 200, self._get_window_scaling()))
+                self.new_value = ctk.StringVar(value="")
+                self.new_value_radio_y = ctk.CTkRadioButton(
+                    self,
+                    text="is Foreign key",
+                    variable=self.new_value,
+                    value="Y"
+                    )
+                self.new_value_radio_n = ctk.CTkRadioButton(
+                    self,
+                    text="is NOT Foreign key",
+                    variable=self.new_value,
+                    value=""
+                    )
+                self.new_value_radio_y.pack(
+                    **LABEL_OPT
+                )
+                self.new_value_radio_n.pack(
+                    **LABEL_OPT
+                )
+            case "referenceTable":
+                self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
+                self.new_value = ctk.CTkComboBox(
+                    master=self,
+                    values=args[0]
+                )
+                self.new_value.pack(
+                    **LABEL_OPT
+                )
+            case _:
+                self.geometry(CenterWindowToDisplay(self, 500, 350, self._get_window_scaling()))
+                self.new_value = ctk.CTkTextbox(
+                    master=self,
+                    wrap="word"
+                )
+                self.new_value.insert("0.0", current_value)
+                self.new_value.pack(
+                    anchor="center",
+                    padx=10,
+                    pady=10,
+                    fill="both"
+            )
+
+
     def on_confirm(self):
         self.event_generate("<<ConfirmClick>>")
     
@@ -249,17 +324,6 @@ class View(ctk.CTk):
     def create_spreadsheet_frame(self):
         """Create frame to display selected spreadsheet"""
 
-        #* Style treeview table 
-        style = ttk.Style()
-        style.theme_use("default")
-        if ctk.get_appearance_mode() == "Dark":
-            style.configure("Treeview",**DARK_TV_CONFIG)
-            style.map('Treeview', background=[('selected', '#22559b')])
-            style.configure("Treeview.Heading", **DARK_TVH_CONFIG)
-            style.map("Treeview.Heading",
-                    background=[('active', '#3484F0')]
-            )
-
         self.spreadsheet_frame = ctk.CTkFrame(
             master=self.main_frame
         )
@@ -298,6 +362,17 @@ class View(ctk.CTk):
     def display_spreadsheet_data(self):
         """Create treeviews to display data sheet"""
 
+        #* Style treeview table 
+        style = ttk.Style()
+        style.theme_use("default")
+        if ctk.get_appearance_mode() == "Dark":
+            style.configure("data.Treeview",**DARK_TV_CONFIG)
+            style.map('data.Treeview', background=[('selected', '#22559b')])
+            style.configure("data.Treeview.Heading", **DARK_TVH_CONFIG)
+            style.map("data.Treeview.Heading",
+                    background=[('active', '#3484F0')]
+            )
+
         # create treeview widget in spreadsheet_frame_l
         self.data_sheet_xscroll = ctk.CTkScrollbar(
             self.spreadsheet_frame_l,
@@ -305,7 +380,8 @@ class View(ctk.CTk):
         )
         self.data_sheet = ttk.Treeview(
             master=self.spreadsheet_frame_l,
-            xscrollcommand=self.data_sheet_xscroll.set
+            xscrollcommand=self.data_sheet_xscroll.set,
+            style="data.Treeview"
         )
         self.data_sheet.pack(
             side="top",
@@ -322,6 +398,17 @@ class View(ctk.CTk):
     def display_spreadsheet_meta(self):
         """Create treeviews to display metadata sheet"""
 
+        #* Style treeview table 
+        style = ttk.Style()
+        style.theme_use("default")
+        if ctk.get_appearance_mode() == "Dark":
+            style.configure("meta.Treeview",**DARK_TV_CONFIG)
+            style.map('meta.Treeview', background=[('selected', '#22559b')])
+            style.configure("meta.Treeview.Heading", **DARK_TVH_CONFIG)
+            style.map("meta.Treeview.Heading",
+                    background=[('active', '#565b5e')]
+            )
+        
         # create treeview widget in spreadsheet_frame_r
         self.meta_sheet_xscroll = ctk.CTkScrollbar(
             self.spreadsheet_frame_r,
@@ -329,7 +416,8 @@ class View(ctk.CTk):
         )       
         self.meta_sheet = ttk.Treeview(
             master=self.spreadsheet_frame_r,
-            xscrollcommand=self.meta_sheet_xscroll.set
+            xscrollcommand=self.meta_sheet_xscroll.set,
+            style="meta.Treeview"
         )
         self.meta_sheet.pack(
             side="top",
@@ -711,6 +799,7 @@ class View(ctk.CTk):
         self.overwrite_cb = ctk.CTkCheckBox(
             master=self.filename_selection_frame,
             text="Overwrite existing file in output directory",
+            font=TEXT_FONT,
             variable=self.check_ow,
             command=lambda: callback_cb(self.filename_var.get()),
             onvalue="on",
@@ -720,10 +809,11 @@ class View(ctk.CTk):
             side="left"
         )
     
-    def open_edition_window(self, *args):
+    def open_edition_window(self, cell_type, current_value, selected_sheet, col_name, *args):
+        """Open a top level window to edit content"""
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = ToplevelWindow(self)
-            self.toplevel_window.edit_head_and_cell(*args)
+            self.toplevel_window.edit(cell_type, current_value, selected_sheet, col_name, *args)
         else:
             self.toplevel_window.focus()  # if window exists focus it
         
@@ -763,6 +853,7 @@ class View(ctk.CTk):
         self.generate_btn = ctk.CTkButton(
             master=self.conversion_frame,
             text="Generate PDF",
+            font=TEXT_FONT,
             command=self.controller.sqlite2pdf,
         )
         self.generate_btn.pack(
@@ -841,8 +932,6 @@ class View(ctk.CTk):
             self.rm_widget("selected_file")
             self.rm_frame("ss_option_frame")
             self.rm_frame("spreadsheet_frame")
-            # self.rm_frame("spreadsheet_frame_l")
-            # self.rm_frame("spreadsheet_frame_r")
             self.rm_widget("data_sheet_selector")
             self.rm_widget("meta_sheet_selector")
             self.rm_frame("error_frame")

@@ -8,6 +8,7 @@ from src.gui.view import View
 from src.gui.model import Model
 from src.extraction.check import InvalidData, InvalidTemplate
 from src.utils.utils import output_exist, save_spreadsheet
+from src.utils.utils_gui import get_authorized_type
 from conf.config import *
 
 logging.basicConfig(level=logging.ERROR,
@@ -60,7 +61,7 @@ class Controller:
             current_heading = self.view.data_sheet.heading(column_id)['text']
 
             # open dialog to ask for new heading value
-            new_heading_window = self.view.open_edition_window("header", current_heading)
+            new_heading_window = self.view.open_edition_window(region, current_heading)
             new_heading_window.bind("<<ConfirmClick>>", lambda e: on_confirm())
             new_heading_window.bind("<<CancelClick>>", lambda e: on_cancel())
             
@@ -89,16 +90,28 @@ class Controller:
         region = self.view.meta_sheet.identify("region", event.x, event.y)
         if region == "cell":
             # user click on some cell
-            selected_item = self.view.meta_sheet.identify_row(event.y)
-            selected_column = self.view.meta_sheet.identify_column(event.x)
-            column_index = int(selected_column[1:]) - 1
-            cell_value = self.view.meta_sheet.item(
-                selected_item)['values'][column_index]
+            row_idx = self.view.meta_sheet.identify_row(event.y)
+            col_idx = int(self.view.meta_sheet.identify_column(event.x)[1:]) - 1
+            cell_value = self.view.meta_sheet.item(row_idx)['values'][col_idx]
+            col_name = self._get_meta_col_name(selected_sheet, col_idx)
 
-            if self.is_editable_col(selected_sheet, column_index) == True:
+            if self.is_editable_col(selected_sheet, col_idx) == True:
                 # user has permission to edit this field
-
-                new_cell_window = self.view.open_edition_window("cell", cell_value)
+                match col_name:
+                    # based on colunm, different variable are passed to view
+                    case "expectedType":
+                        # pass content of neighbor cell ie. inferred type
+                        current_type = self.view.meta_sheet.item(row_idx)['values'][col_idx - 1]
+                        authorized_conversion_type = get_authorized_type(current_type)
+                        new_cell_window = self.view.open_edition_window(region, cell_value, selected_sheet, col_name, authorized_conversion_type)
+                    case "referenceTable":
+                        # pass list of data table name
+                        datatable_list = [_ for _ in self.model.tmp_data.keys() if _ not in META_TABLES]
+                        datatable_list.insert(0, "")
+                        new_cell_window = self.view.open_edition_window(region, cell_value, selected_sheet, col_name, datatable_list)
+                    case _:
+                        new_cell_window = self.view.open_edition_window(region, cell_value, selected_sheet, col_name)
+                        
                 new_cell_window.bind("<<ConfirmClick>>", lambda e: on_confirm())
                 new_cell_window.bind("<<CancelClick>>", lambda e: on_cancel())
 
@@ -106,12 +119,19 @@ class Controller:
                     # If a new value was provided, update the cell
                     # store info that a change occurs
                     self.view.variables["change_occurs"] = True
-                    new_cell = new_cell_window.new_value.get("0.0", "end")
-                    self.update_cell_value(new_cell, selected_sheet, selected_item, selected_column)
+                    if isinstance(new_cell_window.new_value, ctk.CTkTextbox):
+                        new_cell = new_cell_window.new_value.get("0.0", "end")
+                    else:
+                        new_cell = new_cell_window.new_value.get()
+                    self.update_cell_value(new_cell, selected_sheet, row_idx, col_idx)
                     new_cell_window.destroy()
     
             def on_cancel():
                 new_cell_window.destroy()
+
+    def _get_meta_col_name(self, metatable_name, column_index):
+        """Retrieve metadata table's column name from its index"""
+        return self.model.tmp_data[metatable_name].columns[column_index]
 
     def refresh_meta(self):
         """Update metadata treeview on changes"""
@@ -145,7 +165,6 @@ class Controller:
 
         # update dataframe
         row = self.view.meta_sheet.index(item)
-        print(row, col)
         self.model.upt_cell(table, row, col, new_value)
 
     def verify_spreadsheet(self):
@@ -217,7 +236,7 @@ class Controller:
 
         self.view.show_success(
             msg="Your spreadsheet has been converted succesfully !")
-        self.view.clean_frame(mode="all")
+        self.view.clean_stage(mode="all")
 
     def sqlite2pdf(self):
         """Run documentation creation from sqlite"""
@@ -233,7 +252,7 @@ class Controller:
         else:
             self.view.show_success(
                 msg="Your pdf has been generated successfully !")
-            self.view.clean_frame()
+            self.view.clean_stage()
 
     def create_missing_metatable(self):
         """Check if metadata tables are missing"""

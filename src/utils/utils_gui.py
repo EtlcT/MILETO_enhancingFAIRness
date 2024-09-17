@@ -30,6 +30,18 @@ def CenterWindowToDisplay(Screen: ctk, width: int, height: int, scale_factor: fl
         y = int(((screen_height/2) - (height/1.5)) * scale_factor)
         return f"{width}x{height}+{x}+{y}"
 
+def get_authorized_type(current_type):
+     """Return list of authorized sqlite type based on current type of an object"""
+
+     match current_type:
+          case "REAL":
+               return ["TEXT"]
+          case "INTEGER":
+               return ["REAL", "TEXT"]
+          case _:
+               return None
+          
+
 # # Function to calculate the required row height
 # def get_max_lines_per_row(data_frame):
 #     """Calculate required row height based on break line"""
