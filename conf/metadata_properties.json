@@ -442,15 +442,15 @@
                 }
             }
         },
-        "RelatedIdentifier": {
-            "name": "12",
+        "12": {
+            "name": "RelatedIdentifier",
             "required":0,
             "occurrences": "1-n",
             "help": "Identifiers of related resources. These must be globally unique identifiers.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relatedidentifier/",
             "M": {
-                "relatedIdentifierType": {
-                    "name": "12.a",
+                "12.a": {
+                    "name": "relatedIdentifierType",
                     "required":0,
                     "occurrences": "1",
                     "help": "The type of the RelatedIdentifier.",
@@ -476,8 +476,8 @@
                         "w3id"
                     ]
                 },
-                "relationType": {
-                    "name": "12.b",
+                "12.b": {
+                    "name": "relationType",
                     "required":0,
                     "occurrences": "1",
                     "help": "Description of the relationship of the resource being registered (A) and the related resource (B).",
@@ -523,22 +523,22 @@
                 }
             },
             "O": {
-                "relatedMetadataScheme": {
-                    "name": "12.c",
+                "12.c": {
+                    "name": "relatedMetadataScheme",
                     "required":0,
                     "occurrences": "1",
                     "help": "The name of the scheme.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relatedidentifier/#c-relatedmetadatascheme",
                     "O": {
-                        "schemeURI": {
-                            "name": "12.d",
+                        "12.d": {
+                            "name": "schemeURI",
                             "required":0,
                             "occurrences": "1",
                             "help": "The URI of the relatedMetadataScheme.",
                             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relatedidentifier/#d-schemeuri"
                         },
-                        "schemeType": {
-                            "name": "12.e",
+                        "12.e": {
+                            "name": "schemeType",
                             "required":0,
                             "occurrences": "1",
                             "help": "The type of the relatedMetadataScheme, linked with the schemeURI.",
@@ -546,8 +546,8 @@
                         }
                     }
                 },
-                "resourceTypeGeneral": {
-                    "name": "12.f",
+                "12.f": {
+                    "name": "resourceTypeGeneral",
                     "required":0,
                     "occurrences": "1",
                     "help": "The general type of the related resource.",
@@ -587,15 +587,15 @@
                 }
             }
         },
-        "Description": {
-            "name": "17",
+        "17": {
+            "name": "Description",
             "required":0,
             "occurrences": "1-n",
             "help": "All additional information that does not fit in any of the other categories. May be used for technical information or detailed information associated with a scientific instrument.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/description/",
             "M": {
-                "descriptionType": {
-                    "name": "17.a",
+                "17.a": {
+                    "name": "descriptionType",
                     "required":0,
                     "occurrences": "1",
                     "help": "The type of the Description.",
@@ -611,28 +611,28 @@
                 }
             }
         },
-        "GeoLocation": {
-            "name": "18",
+        "18": {
+            "name": "GeoLocation",
             "required":0,
             "occurrences": "1-n",
             "help": "Spatial region or named place where the data was gathered or about which the data is focused.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/",
-            "geoLocationPoint": {
-                "name": "18.1",
+            "18.1": {
+                "name": "geoLocationPoint",
                 "required":0,
                 "occurrences": "1",
                 "help": "A point location in space.",
                 "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#geolocationpoint",
                 "M": {
-                    "pointLongitude": {
-                        "name": "18.1.1",
+                    "18.1.1": {
+                        "name": "pointLongitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Longitudinal dimension of point expressed in decimal degrees (positive east).",
                         "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#pointlongitude"
                     },
-                    "pointLatitude": {
-                        "name": "18.1.2",
+                    "18.1.2": {
+                        "name": "pointLatitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Latitudinal dimension of point expressed in decimal degrees (positive north).",
@@ -640,36 +640,36 @@
                     }
                 }
             },
-            "geoLocationBox": {
-                "name": "18.2",
+            "18.2": {
+                "name": "geoLocationBox",
                 "required":0,
                 "occurrences": "1",
                 "help": "The spatial limits of a box using WGS84 coordinates in decimal numbers.",
                 "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#geolocationbox",
                 "M": {
-                    "westBoundLongitude": {
-                        "name": "18.2.1",
+                    "18.2.1": {
+                        "name": "westBoundLongitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Western longitudinal dimension of box.",
                         "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#westboundlongitude"
                     },
-                    "eastBoundLongitude": {
-                        "name": "18.2.2",
+                    "18.2.2": {
+                        "name": "eastBoundLongitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Eastern longitudinal dimension of box.",
                         "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#eastboundlongitude"
                     },
-                    "southBoundLatitude": {
-                        "name": "18.2.3",
+                    "18.2.3": {
+                        "name": "southBoundLatitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Southern latitudinal dimension of box.",
                         "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#southboundlatitude"
                     },
-                    "northBoundLatitude": {
-                        "name": "18.2.4",
+                    "18.2.4": {
+                        "name": "northBoundLatitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Northern latitudinal dimension of box.",
@@ -677,36 +677,36 @@
                     }
                 }
             },
-            "geoLocationPlace": {
-                "name": "18.3",
+            "18.3": {
+                "name": "geoLocationPlace",
                 "required":0,
                 "occurrences": "1",
                 "help": "Description of a geographic location.",
                 "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#geolocationplace"
             },
-            "geoLocationPolygon": {
-                "name": "18.4",
+            "18.4": {
+                "name": "geoLocationPolygon",
                 "required":0,
                 "occurrences": "1-n",
                 "help": "A drawn polygon area, defined by a set of points and lines connecting the points in a closed chain.",
                 "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#geolocationpolygon",
                 "M": {
-                    "polygonPoint": {
-                        "name": "18.4.1",
+                    "18.4.1": {
+                        "name": "polygonPoint",
                         "required":0,
                         "occurrences": "4-n",
                         "help": "A point location in a polygon. There must be at least 4 non-aligned points to make a closed curve, with the last point described the same as the first point.",
                         "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#polygonpoint"
                     },
-                    "pointLongitude": {
-                        "name": "18.4.1.1",
+                    "18.4.1.1": {
+                        "name": "pointLongitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Longitudinal dimension of point expressed in decimal degrees (positive east).",
                         "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#id13"
                     },
-                    "pointLatitude": {
-                        "name": "18.4.1.2",
+                    "18.4.1.2": {
+                        "name": "pointLatitude",
                         "required":0,
                         "occurrences": "1",
                         "help": "Latitudinal dimension of point expressed in decimal degrees (positive north).",
@@ -714,22 +714,22 @@
                     }
                 },
                 "O": {
-                    "inPolygonPoint": {
-                        "name": "18.4.2",
+                    "18.4.2": {
+                        "name": "inPolygonPoint",
                         "required":0,
                         "occurrences": "1",
                         "help": "For any bound area that is larger than half the earth, define a (random) point inside.",
                         "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#inpolygonpoint",
                         "M": {
-                            "pointLongitude": {
-                                "name": "18.4.2.1",
+                            "18.4.2.1": {
+                                "name": "pointLongitude",
                                 "required":0,
                                 "occurrences": "1",
                                 "help": "Longitudinal dimension of point expressed in decimal degrees (positive east).",
                                 "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#id19"
                             },
-                            "pointLatitude": {
-                                "name": "18.4.2.2",
+                            "18.4.2.2": {
+                                "name": "pointLatitude",
                                 "required":0,
                                 "occurrences": "1",
                                 "help": "Latitudinal dimension of point expressed in decimal degrees (positive north).",
@@ -742,22 +742,22 @@
         }
     },
     "optionnal": {
-        "Language": {
-            "name": "9",
+        "9": {
+            "name": "Language",
             "required":0,
             "occurrences": "1",
             "help": "The primary language of the resource.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/language/"
         },
-        "AlternateIdentifier": {
-            "name": "11",
+        "11": {
+            "name": "AlternateIdentifier",
             "required":0,
             "occurrences": "1-n",
             "help": "An identifier other than the primary Identifier applied to the resource being registered.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/alternateidentifier/#alternateidentifier",
             "M": {
-                "alternateIdentifierType": {
-                    "name": "11.a",
+                "11.a": {
+                    "name": "alternateIdentifierType",
                     "required":0,
                     "occurrences": "1",
                     "help": "The type of the AlternateIdentifier.",
@@ -765,57 +765,57 @@
                 }
             }
         },
-        "Size": {
-            "name": "13",
+        "13": {
+            "name": "Size",
             "required":0,
             "occurrences": "1-n",
             "help": "Size (e.g., bytes, pages, inches, etc.) or duration (extent), e.g., hours, minutes, days, etc., of a resource.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/size/#size"
         },
-        "Format": {
-            "name": "14",
+        "14": {
+            "name": "Format",
             "required":0,
             "occurrences": "1-n",
             "help": "Technical format of the resource.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/format/"
         },
-        "Version": {
-            "name": "15",
+        "15": {
+            "name": "Version",
             "required":0,
             "occurrences": "1",
             "help": "The version number of the resource.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/version/"
         },
-        "Rights": {
-            "name": "16",
+        "16": {
+            "name": "Rights",
             "required":0,
             "occurrences": "1-n",
             "help": "Any rights information for this resource.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/rights/",
             "O": {
-                "rightsURI": {
-                    "name": "16.a",
+                "16.a": {
+                    "name": "rightsURI",
                     "required":0,
                     "occurrences": "1",
                     "help": "The URI of the license.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/rights/#a-rightsuri"
                 },
-                "rightsIdentifier": {
-                    "name": "16.b",
+                "16.b": {
+                    "name": "rightsIdentifier",
                     "required":0,
                     "occurrences": "1",
                     "help": "A short, standardized version of the license name.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/rights/#b-rightsidentifier"
                 },
-                "rightsIdentifierScheme": {
-                    "name": "16.c",
+                "16.c": {
+                    "name": "rightsIdentifierScheme",
                     "required":0,
                     "occurrences": "1",
                     "help": "The name of the scheme.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/rights/#c-rightsidentifierscheme"
                 },
-                "schemeURI": {
-                    "name": "16.d",
+                "16.d": {
+                    "name": "schemeURI",
                     "required":0,
                     "occurrences": "1",
                     "help": "The URI of the rightsIdentifierScheme.",
@@ -823,15 +823,15 @@
                 }
             }
         },
-        "FundingReference": {
-            "name": "19",
+        "19": {
+            "name": "FundingReference",
             "required":0,
             "occurrences": "1-n",
             "help": "Information about financial support (funding) for the resource being registered.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/fundingreference/",
             "M": {
-                "funderName": {
-                    "name": "19.1",
+                "19.1": {
+                    "name": "funderName",
                     "required":0,
                     "occurrences": "1",
                     "help": "Name of the funding provider.",
@@ -839,15 +839,15 @@
                 }
             },
             "O": {
-                "funderIdentifier": {
-                    "name": "19.2",
+                "19.2": {
+                    "name": "funderIdentifier",
                     "required":0,
                     "occurrences": "1",
                     "help": "Uniquely identifies a funding entity, according to various types.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/fundingreference/#funderidentifier",
                     "M": {
-                        "funderIdentifierType": {
-                            "name": "19.2.a",
+                        "19.2.a": {
+                            "name": "funderIdentifierType",
                             "required":0,
                             "occurrences": "1",
                             "help": "The type of the funderIdentifier.",
@@ -862,15 +862,15 @@
                         }
                     }
                 },
-                "awardNumber": {
-                    "name": "19.3",
+                "19.3": {
+                    "name": "awardNumber",
                     "required":0,
                     "occurrences": "1",
                     "help": "The code assigned by the funder to a sponsored award (grant).",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/fundingreference/#awardnumber",
                     "O": {
-                        "awardURI": {
-                            "name": "19.3.a",
+                        "19.3.a": {
+                            "name": "awardURI",
                             "required":0,
                             "occurrences": "1",
                             "help": "The URI leading to a page provided by the funder for more information about the award (grant).",
@@ -878,8 +878,8 @@
                         }
                     }
                 },
-                "awardTitle": {
-                    "name": "19.4",
+                "19.4": {
+                    "name": "awardTitle",
                     "required":0,
                     "occurrences": "1",
                     "help": "The human readable title or name of the award (grant).",
@@ -887,15 +887,15 @@
                 }
             }
         },
-        "RelatedItem": {
-            "name": "20",
+        "20": {
+            "name": "RelatedItem",
             "required":0,
             "occurrences": "1-n",
             "help": "Information about a resource related to the one being registered.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/",
             "M": {
-                "relatedItemType": {
-                    "name": "20.a",
+                "20.a": {
+                    "name": "relatedItemType",
                     "required":0,
                     "occurrences": "1",
                     "help": "The general type of the related item.",
@@ -933,8 +933,8 @@
                         "Other"
                     ]
                 },
-                "relationType": {
-                    "name": "20.b",
+                "20.b": {
+                    "name": "relationType",
                     "required":0,
                     "occurrences": "1",
                     "help": "Description of the relationship of the resource being registered (A) and the related item (B).",
@@ -980,15 +980,15 @@
                 }
             },
             "O": {
-                "relatedItemIdentifier": {
-                    "name": "20.1",
+                "20.1": {
+                    "name": "relatedItemIdentifier",
                     "required":0,
                     "occurrences": "1",
                     "help": "The identifier for the related item.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#relateditemidentifier",
                     "O": {
-                        "relatedItemIdentifierType": {
-                            "name": "20.1.a",
+                        "20.1.a": {
+                            "name": "relatedItemIdentifierType",
                             "required":0,
                             "occurrences": "1",
                             "help": "The type of the Identifier for the related item.",
@@ -1014,22 +1014,22 @@
                                 "w3id"
                             ]
                         },
-                        "relatedMetadataScheme": {
-                            "name": "20.1.b",
+                        "20.1.b": {
+                            "name": "relatedMetadataScheme",
                             "required":0,
                             "occurrences": "1",
                             "help": "The name of the scheme.",
                             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#b-relatedmetadatascheme",
                             "O": {
-                                "schemeURI": {
-                                    "name": "20.1.c",
+                                "20.1.c": {
+                                    "name": "schemeURI",
                                     "required":0,
                                     "occurrences": "1",
                                     "help": "The URI of the relatedMetadataScheme.",
                                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#c-schemeuri"
                                 },
-                                "schemeType": {
-                                    "name": "20.1.d",
+                                "20.1.d": {
+                                    "name": "schemeType",
                                     "required":0,
                                     "occurrences": "1",
                                     "help": "The type of the relatedMetadataScheme, linked with the schemeURI.",
@@ -1039,22 +1039,22 @@
                         }
                     }
                 },
-                "creator": {
-                    "name": "20.2",
+                "20.2": {
+                    "name": "creator",
                     "required":0,
                     "occurrences": "1-n",
                     "help": "The institution or person responsible for creating the related resource.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#creator",
                     "O": {
-                        "creatorName": {
-                            "name": "20.2.1",
+                        "20.2.1": {
+                            "name": "creatorName",
                             "required":0,
                             "occurrences": "1",
                             "help": "The full name of the related item creator.",
                             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#creatorname",
                             "O": {
-                                "nameType": {
-                                    "name": "20.2.1.a",
+                                "20.2.1.a": {
+                                    "name": "nameType",
                                     "required":0,
                                     "occurrences": "1",
                                     "help": "The type of name.",
@@ -1066,15 +1066,15 @@
                                 }
                             }
                         },
-                        "givenName": {
-                            "name": "20.2.2",
+                        "20.2.2": {
+                            "name": "givenName",
                             "required":0,
                             "occurrences": "1",
                             "help": "The personal or first name of the creator.",
                             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#givenname"
                         },
-                        "familyName": {
-                            "name": "20.2.3",
+                        "20.2.3": {
+                            "name": "familyName",
                             "required":0,
                             "occurrences": "1",
                             "help": "The surname or last name of the creator.",
@@ -1082,15 +1082,15 @@
                         }
                     }
                 },
-                "title": {
-                    "name": "20.3",
+                "20.3": {
+                    "name": "title",
                     "required":0,
                     "occurrences": "1-n",
                     "help": "Title of the related item.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#title",
                     "O": {
-                        "titleType": {
-                            "name": "20.3.a",
+                        "20.3.a": {
+                            "name": "titleType",
                             "required":0,
                             "occurrences": "1",
                             "help": "Type of the related item title. Use this sub-property to add a subtitle, translation, or alternate title to the main title.",
@@ -1098,36 +1098,36 @@
                         }
                     }
                 },
-                "publicationYear": {
-                    "name": "20.4",
+                "20.4": {
+                    "name": "publicationYear",
                     "required":0,
                     "occurrences": "1",
                     "help": "The year when the item was or will be made publicly available.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#publicationyear"
                 },
-                "volume": {
-                    "name": "20.5",
+                "20.5": {
+                    "name": "volume",
                     "required":0,
                     "occurrences": "1",
                     "help": "Volume of the related item.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#volume"
                 },
-                "issue": {
-                    "name": "20.6",
+                "20.6": {
+                    "name": "issue",
                     "required":0,
                     "occurrences": "1",
                     "help": "Issue number or name of the related item.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#issue"
                 },
-                "number": {
-                    "name": "20.7",
+                "20.7": {
+                    "name": "number",
                     "required":0,
                     "occurrences": "1",
                     "help": "Number of the resource within the related item, e.g., report number or article number.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#number",
                     "O": {
-                        "numberType": {
-                            "name": "20.7.a",
+                        "20.7.a": {
+                            "name": "numberType",
                             "required":0,
                             "occurrences": "1",
                             "help": "Type of the related item’s number, e.g., report number or article number.",
@@ -1141,43 +1141,43 @@
                         }
                     }
                 },
-                "firstPage": {
-                    "name": "20.8",
+                "20.8": {
+                    "name": "firstPage",
                     "required":0,
                     "occurrences": "1",
                     "help": "First page of the resource within the related item, e.g., of the chapter, article, or conference paper in proceedings.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#firstpage"
                 },
-                "lastPage": {
-                    "name": "20.9",
+                "20.9": {
+                    "name": "lastPage",
                     "required":0,
                     "occurrences": "1",
                     "help": "Last page of the resource within the related item, e.g., of the chapter, article, or conference paper in proceedings.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#lastpage"
                 },
-                "publisher": {
-                    "name": "20.10",
+                "20.10": {
+                    "name": "publisher",
                     "required":0,
                     "occurrences": "1",
                     "help": "The name of the entity that holds, archives, publishes prints, distributes, releases, issues, or produces the resource.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#publisher"
                 },
-                "edition": {
-                    "name": "20.11",
+                "20.11": {
+                    "name": "edition",
                     "required":0,
                     "occurrences": "1",
                     "help": "Edition or version of the related item.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#edition"
                 },
-                "Contributor": {
-                    "name": "20.12",
+                "20.12": {
+                    "name": "Contributor",
                     "required":0,
                     "occurrences": "1-n",
                     "help": "An institution or person identified as contributing to the development of the resource.",
                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#contributor",
                     "M": {
-                        "contributorType": {
-                            "name": "20.12.a",
+                        "20.12.a": {
+                            "name": "contributorType",
                             "required":0,
                             "occurrences": "1",
                             "help": "The type of contributor of the resource.",
@@ -1206,15 +1206,15 @@
                                 "Other"
                             ]
                         },
-                        "contributorName": {
-                            "name": "20.12.1",
+                        "20.12.1": {
+                            "name": "contributorName",
                             "required":0,
                             "occurrences": "1",
                             "help": "The full name of the related item contributor.",
                             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#contributorname",
                             "O": {
-                                "nameType": {
-                                    "name": "20.12.1.a",
+                                "20.12.1.a": {
+                                    "name": "nameType",
                                     "help": "The type of name.",
                                     "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#a-nametype",
                                     "controlled_list": [
@@ -1226,15 +1226,15 @@
                         }
                     },
                     "O": {
-                        "givenName": {
-                            "name": "20.12.2",
+                        "20.12.2": {
+                            "name": "givenName",
                             "required":0,
                             "occurrences": "1",
                             "help": "The personal or first name of the contributor.",
                             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#id24"
                         },
-                        "familyName": {
-                            "name": "20.12.3",
+                        "20.12.3": {
+                            "name": "familyName",
                             "required":0,
                             "occurrences": "1",
                             "help": "The surname or last name of the contributor.",

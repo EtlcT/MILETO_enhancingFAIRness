@@ -2,8 +2,8 @@ from src.utils.utils import json2dict
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 
-METAREF = TEMP_CONF["meta_references"]["tab_name"]
-METAREF_ATT = TEMP_CONF["meta_references"]["tab_attr"]
+METAREF = TEMP_CONF["meta_terms"]["tab_name"]
+METAREF_ATT = TEMP_CONF["meta_terms"]["tab_attr"]
 
 INFO = TEMP_CONF["tables_info"]["tab_name"]
 INFO_ATT = TEMP_CONF["tables_info"]["tab_attr"]
@@ -26,3 +26,10 @@ COLUMN_WIDTH_S = [INFO_ATT["type"], INFO_ATT["isPK"], INFO_ATT["isFK"], DDICT_A_
 
 # accepted regex for columm that contains image path to convert to blob
 IMG_COL_REGEX = ["img_", "image_"]
+
+
+# DC terms
+DC_INFO = json2dict("conf/dc_meta_terms.json")
+TERMS_REQ = [key for key in DC_INFO["items"]["required"].keys()]
+DC_JSON_OBJECT = {**DC_INFO["items"]["required"], **DC_INFO["items"]["other"]}
+DC_TERMS = DC_INFO["properties"]

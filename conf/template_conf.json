@@ -1,12 +1,9 @@
 {
-    "meta_references": {
+    "meta_terms": {
         "tab_name": "meta_terms_dc",
         "tab_attr": {
-            "id": "id",
             "property": "property",
-            "value": "value",
-            "obligation": "obligation",
-            "helper": "helper"
+            "value": "value"
         }
     },
 

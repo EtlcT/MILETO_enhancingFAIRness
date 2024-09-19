@@ -1,0 +1,197 @@
+{
+    "data": {
+      "type": "dois",
+      "attributes": {
+        "doi": "10.17596/qf5s-pc52",
+        "event": "publish",
+        "creators": [
+          {
+            "name": "Miller, Elizabeth",
+            "nameType": "Personal",
+            "givenName": "Elizabeth",
+            "familyName": "Miller",
+            "affiliation": [
+              {
+                "affiliationIdentifier": "https://ror.org/04wxnsj81",
+                "affiliationIdentifierScheme": "ROR",
+                "name": "DataCite",
+                "schemeUri": "https://ror.org/"
+              },
+              {
+                "affiliationIdentifier": "https://ror.org/05dxps055",
+                "affiliationIdentifierScheme": "ROR",
+                "name": "California Institute of Technology",
+                "schemeUri": "https://ror.org/"
+              }
+            ],
+            "nameIdentifiers": [
+              {
+                "schemeUri": "https://orcid.org",
+                "nameIdentifier": "https://orcid.org/0000-0001-5000-0007",
+                "nameIdentifierScheme": "ORCID"
+              }
+            ]
+          }
+        ],
+        "titles": [
+          {
+            "lang": "en",
+            "title": "Full DataCite XML Example"
+          },
+          {
+            "lang": "en",
+            "title": "Demonstration of DataCite Properties.",
+            "titleType": "Subtitle"
+          }
+        ],
+        "publisher": {
+          "name": "DataCite",
+          "publisherIdentifier":"https://ror.org/04wxnsj81",
+          "publisherIdentifierScheme":"ROR",
+          "schemeUri": "https://ror.org/"
+        },
+        "publicationYear": 2014,
+        "subjects": [
+          {
+            "subject": "computer science",
+            "schemeUri": "http://dewey.info/",
+            "subjectScheme": "dewey",
+            "classificationCode": "000"
+          }
+        ],
+        "contributors": [
+          {
+            "name": "Starr, Joan",
+            "nameType": "Personal",
+            "givenName": "Joan",
+            "familyName": "Starr",
+            "affiliation": [
+              {
+                "affiliationIdentifier": "https://ror.org/03yrm5c26",
+                "affiliationIdentifierScheme": "ROR",
+                "name": "California Digital Library",
+                "schemeUri": "https://ror.org/"
+              }
+            ],
+            "contributorType": "ProjectLeader",
+            "nameIdentifiers": [
+              {
+                "schemeUri": "https://orcid.org",
+                "nameIdentifier": "https://orcid.org/0000-0002-7285-027X",
+                "nameIdentifierScheme": "ORCID"
+              }
+            ]
+          }
+        ],
+        "dates": [
+          {
+            "date": "2021-01-26",
+            "dateType": "Updated",
+            "dateInformation": "Updated with 4.4 properties"
+          },
+          {
+            "date": "2014",
+            "dateType": "Issued",
+            "dateInformation": null
+          }
+        ],
+        "alternateIdentifiers": [
+          {
+            "alternateIdentifierType": "URL",
+            "alternateIdentifier": "https://schema.datacite.org/meta/kernel-4.4/example/datacite-example-full-v4.4.xml"
+          }
+        ],
+        "language": "en",
+        "types": {
+          "resourceType": "XML",
+          "resourceTypeGeneral": "Software"
+        },
+        "relatedIdentifiers": [
+          {
+            "schemeUri": "https://github.com/citation-style-language/schema/raw/master/csl-data.json",
+            "schemeType": null,
+            "relationType": "HasMetadata",
+            "relatedIdentifier": "https://data.datacite.org/application/citeproc+json/10.5072/example-full",
+            "resourceTypeGeneral": null,
+            "relatedIdentifierType": "URL",
+            "relatedMetadataScheme": "citeproc+json"
+          },
+          {
+            "relationType": "IsReviewedBy",
+            "relatedIdentifier": "arXiv:0706.0001",
+            "resourceTypeGeneral": "Text",
+            "relatedIdentifierType": "arXiv"
+          }
+        ],
+        "relatedItems": [
+          {
+            "titles": [
+              {
+                "title": "Physics letters B"
+              }
+            ],
+            "volume": "776",
+            "lastPage": "264",
+            "firstPage": "249",
+            "relationType": "IsPublishedIn",
+            "publicationYear": "2018",
+            "relatedItemType": "Journal",
+            "relatedItemIdentifier": {
+              "relatedItemIdentifier": "0370-2693",
+              "relatedItemIdentifierType": "ISSN"
+            }
+          }
+        ],
+        "sizes": [
+          "4 kB"
+        ],
+        "formats": [
+          "application/xml"
+        ],
+        "version": "4.2",
+        "rightsList": [
+          {
+            "rights": "Creative Commons Zero v1.0 Universal",
+            "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+            "schemeUri": "https://spdx.org/licenses/",
+            "rightsIdentifier": "cc0-1.0",
+            "rightsIdentifierScheme": "SPDX"
+          }
+        ],
+        "descriptions": [
+          {
+            "lang": "en-US",
+            "description": "XML example of all DataCite Metadata Schema v4.4 properties.",
+            "descriptionType": "Abstract"
+          }
+        ],
+        "geoLocations": [
+          {
+            "geoLocationBox": {
+              "eastBoundLongitude": -68.211,
+              "northBoundLatitude": 42.893,
+              "southBoundLatitude": 41.09,
+              "westBoundLongitude": -71.032
+            },
+            "geoLocationPlace": "Atlantic Ocean",
+            "geoLocationPoint": {
+              "pointLatitude": 31.233,
+              "pointLongitude": -67.302
+            }
+          }
+        ],
+        "fundingReferences": [
+          {
+            "awardUri": "https://www.moore.org/grants/list/GBMF3859.01",
+            "awardTitle": "Full DataCite XML Example",
+            "funderName": "National Science Foundation",
+            "awardNumber": "CBET-106",
+            "funderIdentifier": "https://ror.org/021nxhr62",
+            "funderIdentifierType": "ROR"
+          }
+        ],
+        "url": "https://schema.datacite.org/meta/kernel-4.0/index.html"
+      }
+    }
+  }
+  

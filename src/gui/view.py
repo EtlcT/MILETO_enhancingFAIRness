@@ -4,11 +4,171 @@ from tkinter import ttk
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
+import re
 
-from conf.config import *
 from src.utils.utils import resource_path, output_exist
+from conf.config import *
 from src.utils.utils_gui import *
 from conf.view_config import *
+
+# TODO
+# DCTermsForm class has been imagined to automate the creation of the
+# to edit datacite metadata terms based on dc_meta_terms.json file only
+# ie: "required":1 items and their associated "has_r" items should be
+# directly displayed ; "has_o" attributes should be added if user want
+# with another style to distinguish them from terms that require value
+# values already compile should appears in ctkEntry, etc
+# The class has not been implemented because of time constraints,
+# instead label and entries are declared manually, this  is a simpler 
+# approache but offers less flexibility to the code in case of changes
+# of the datacite schema
+class DCTermsForm(ctk.CTkScrollableFrame):
+    def __init__(self, master, data, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+
+        self.entries = {}
+        self.property_frames = {}
+        self.duplicates_count = {}
+        self.req_terms, self.opt_terms = self.process_dc_json(DC_JSON_OBJECT, DC_TERMS)
+
+        style = ttk.Style()
+        style.configure("TLabelframe", background="#565b5e")
+        master.pack(expand=True,fill="both")
+        for name, info in DC_JSON_OBJECT.items():
+            # print(name) Label frame name correspond to global object
+            self.entries[name] = {}
+            property_frame = ttk.Labelframe(master, text=name)
+            property_frame.pack(fill="both", expand="yes", padx=(10,10), pady=(10,10))
+            self.property_frames[info["id"]] = property_frame
+            match DC_TERMS[info['id']]['occurrences']:
+                case "1":
+                    self.create_entry(property_frame, self.entries[name], info["id"])
+                case "1-n":
+                    self.duplicates_count[info['id']] = 0
+                    self.entries[name][0] = {}
+                    def handle_duplicate(property_frame=property_frame, entries=self.entries[name], object_id=info['id']):
+                            self.duplicates_count[object_id] += 1  # Increment the counter first
+                            self.duplicate_entries(property_frame, entries, object_id, self.duplicates_count[object_id])
+                    duplicate_btn = ctk.CTkButton(property_frame, text="add entity", command=handle_duplicate)
+                    duplicate_btn.pack()
+                    self.create_entry(property_frame, self.entries[name][0], info["id"], many=True)
+    
+    def process_item(self, key, my_dict):
+        req_terms = {}  # Dictionary to store required sub-items with their names
+        opt_terms = []  # List to store optional sub-item names
+
+        # Initialize the list for the current key in req_terms
+        if key not in req_terms:
+            req_terms[key] = []
+
+        # Process required sub-items (has_r)
+        if my_dict[key].get("has_r") is not None:
+            for req_item in my_dict[key].get("has_r"):
+                req_terms[key].append(req_item)  # Collect required sub-item
+                # Recursively process required sub-items
+                sub_req_terms, sub_opt_terms = self.process_item(req_item, my_dict)
+                for sub_key, sub_values in sub_req_terms.items():
+                    if sub_key not in req_terms:
+                        req_terms[sub_key] = []
+                    req_terms[sub_key].extend(sub_values)  # Collect nested required items
+                opt_terms.extend(sub_opt_terms)  # Collect nested optional items
+
+        # Process optional sub-items (has_o)
+        if my_dict[key].get("has_o") is not None:
+            for opt_item in my_dict[key].get("has_o"):
+                opt_terms.append(opt_item)  # Collect optional sub-item
+                sub_req_terms, sub_opt_terms = self.process_item(opt_item, my_dict)  # Recursively process
+                for sub_key, sub_values in sub_req_terms.items():
+                    if sub_key not in req_terms:
+                        req_terms[sub_key] = []
+                    req_terms[sub_key].extend(sub_values)  # Collect nested required items
+                opt_terms.extend(sub_opt_terms)  # Collect nested optional items
+
+        return req_terms, opt_terms  # Return both required and optional terms
+    
+    def process_dc_json(self, dc_json_objects, dc_json_terms):
+        """
+        Return a dictionnary of required terms and a list of optionnal terms
+        from conf/dc_meta_terms.json file
+
+        Arguments:
+        dc_json_object corresponds to {**DC_TERMS["items"]["required"], **DC_TERMS["items"]["other"]}
+        dc_json_terms corresponds to DC_TERMS["properties"]
+
+        req_terms dictionnary contain as object_id each term that has required sub terms
+        and the list of those required sub_terms as value
+        
+        opt_terms is a list of all terms that are opionnals
+        """
+        req_terms, opt_terms = {}, []
+        for obj, info in dc_json_objects.items():
+
+            if info["id"] not in req_terms:
+                req_terms[info["id"]] = []
+            sub_req_terms, sub_opt_terms = process_item(info["id"], dc_json_terms)
+
+            for sub_object_id, sub_values in sub_req_terms.items():
+                if sub_object_id not in req_terms:
+                    req_terms[sub_object_id] = []
+                req_terms[sub_object_id].extend(sub_values)  # Collect nested required items
+            opt_terms.extend(sub_opt_terms)  # Collect optional items
+
+            if len(sub_req_terms.keys()) == 1:
+                if dc_json_terms[info["id"]]["required"] == 0:
+                    opt_terms.append(info["id"])
+        req_terms = {k:v for k, v in req_terms.items() if v}
+        return req_terms, opt_terms
+
+    def add_entry(self, entries, property_frame, label_value, suffix=""):
+        label = ctk.CTkLabel(property_frame, text=label_value)
+        label.pack()
+        entry = ctk.CTkEntry(property_frame)
+        entry.pack()
+        entries[f"{label_value}{suffix}"] = [entry]
+
+    def add_dropmenu(self, entries, property_frame, label_value, controlled_list, suffix=""):
+        label = ctk.CTkLabel(property_frame, text=label_value)
+        label.pack()
+        value_list = list(controlled_list)
+        value_list.insert(0, "")
+        dropmenu = ctk.CTkComboBox(property_frame, values=value_list)
+        dropmenu.pack()
+        entries[f"{label_value}{suffix}"] = [dropmenu]
+
+    def create_entry(self, property_frame, entries, object_id, suffix="", many=None):
+
+        if many:
+            property_frame = ctk.CTkFrame(property_frame)
+            property_frame.pack(side="left")
+
+        if object_id not in ["2", "7", "13", "14", "19", "20"] and object_id not in self.opt_terms:
+            if DC_TERMS[object_id].get("controlled_list") is not None:
+                controlled_list = list(DC_TERMS[object_id]["controlled_list"])
+                self.add_dropmenu(entries, property_frame, DC_TERMS[object_id]['name'], controlled_list, suffix)
+            else:
+                self.add_entry(entries, property_frame, DC_TERMS[object_id]['name'], suffix)
+        for req_term, sub_req in self.req_terms.items():
+            if re.match(f"{object_id}(?!\d)", req_term):
+                for value in sub_req:
+                    if DC_TERMS[value].get("controlled_list") is not None:
+                        controlled_list = list(DC_TERMS[value]["controlled_list"])
+                        self.add_dropmenu(entries, property_frame, DC_TERMS[value]['name'], controlled_list, suffix)
+                    else:
+                        self.add_entry(entries, property_frame, DC_TERMS[value]['name'], suffix)
+        for sub_opt in self.opt_terms:
+            if re.match(f"{object_id}(?!\d)", sub_opt):
+                if DC_TERMS[sub_opt].get("controlled_list") is not None:
+                    controlled_list = list(DC_TERMS[sub_opt]["controlled_list"])
+                    self.add_dropmenu(entries, property_frame, DC_TERMS[sub_opt]['name'], controlled_list, suffix)
+                else:
+                    self.add_entry(entries, property_frame, DC_TERMS[sub_opt]['name'], suffix)
+
+    def duplicate_entries(self, property_frame, entries, object_id, counter):
+        entries[counter] = {}
+        self.create_entry(property_frame, entries[counter], object_id, many=True)
+        counter+=1
+
+
 
 
 class ToplevelWindow(ctk.CTkToplevel):
@@ -435,10 +595,10 @@ class View(ctk.CTk):
         """Add dropmenu for sheet selection to view"""
 
         table_list = [_ for _ in tmp_data.keys() if _ not in META_TABLES]
-        table_list.insert(0, "Select a sheet")
+        table_list.insert(0, "Select a data sheet")
 
         meta_table_list = [_ for _ in tmp_data.keys() if _ in META_TABLES]
-        meta_table_list.insert(0, "Select a sheet")
+        meta_table_list.insert(0, "Select a metadata sheet")
 
         def sheet_selector_l_callback(choice, tmp_data):
             """Callback function that display sheet corresponding
@@ -457,8 +617,13 @@ class View(ctk.CTk):
             if self.get_widget("meta_sheet") is not None:
                 self.meta_sheet.pack_forget()
                 self.meta_sheet_xscroll.pack_forget()
+                self.edit_btn.pack_forget()
             if choice != "Select a sheet":
                 self.display_meta_sheet(tmp_data, choice)
+            if choice == METAREF:
+                self.edit_btn.pack(
+                    side="bottom"
+                )
 
         self.data_sheet_selector = ctk.CTkComboBox(
             master=self.spreadsheet_frame_l,
@@ -525,6 +690,17 @@ class View(ctk.CTk):
             self.meta_sheet.insert("", "end", values=row)
         
         self.meta_sheet.bind("<Button-1>", lambda event: self.controller.on_cell_click(event, selected_sheet))
+        self.edit_btn = ctk.CTkButton(
+                    master=self.spreadsheet_frame_r,
+                    text="Edit content",
+                    command=lambda: self.edit_dc_terms(tmp_data[METAREF])
+                )
+
+    def edit_dc_terms(self, data):
+        """Display a frame to edit datacite terms"""
+
+        self.dc_frame = DCTermsForm(self.main_frame, data=data)
+
 
     def display_upt_cell(self, value, x, y):
         """Display entry widget for changes in metadata table cell"""
@@ -610,7 +786,8 @@ class View(ctk.CTk):
                 text=""
             )
             self.error_icon.pack(
-                side="left"
+                side="left",
+                anchor="center"
             )
 
             self.errors = tk.Text(
@@ -622,6 +799,7 @@ class View(ctk.CTk):
 
             self.errors.pack(
                 side="left",
+                anchor="center",
                 padx=10,
                 pady=5
             )

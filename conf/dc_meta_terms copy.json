@@ -6,81 +6,78 @@
                 "type": "object"
             },
             "creators": {
-                "id": "2",
-                "type": "list"
+                "id":"2",
+                "type":"list"
             },
             "titles": {
-                "id": "3",
-                "type": "list"
+                "id":"3",
+                "type":"list"
             },
             "publisher": {
-                "id": "4",
-                "type": "object"
+                "id":"4",
+                "type":"object"
             },
             "publicationYear": {
-                "id": "5",
-                "type": "int"
+                "id":"5",
+                "type":"int"
             },
             "types": {
-                "id": "10",
-                "type": "object"
+                "id":"10",
+                "type":"object"
             }
         },
         "other": {
             "subjects": {
-                "id": "6",
-                "type": "list"
+                "id":"6",
+                "type":"list"
             },
             "contributors": {
-                "id": "7",
-                "type": "list"
+                "id":"7",
+                "type":"list"
             },
             "dates": {
-                "id": "8",
-                "type": "list"
+                "id":"8",
+                "type":"list"
             },
             "alternateIdentifiers": {
-                "id": "11",
-                "type": "list"
+                "id":"11",
+                "type":"list"
             },
-            "relatedidentifier": {
-                "id": "12",
-                "type": "list"
+            "relatedidentifier":{
+                "id":"12",
+                "type":"list"
             },
             "sizes": {
-                "id": "13",
-                "type": "list",
-                "no_sub": 1
+                "id":"13",
+                "type":"list"
             },
             "formats": {
-                "id": "14",
-                "type": "list",
-                "no_sub": 1
+                "id":"14",
+                "type":"list"
             },
-            "version": {
-                "id": "15",
-                "type": "string",
-                "no_sub": 1
+            "version":{
+                "id":"15",
+                "type":"string"
             },
             "rightsList": {
-                "id": "16",
-                "type": "list"
+                "id":"16",
+                "type":"list"
             },
             "descriptions": {
-                "id": "17",
-                "type": "list"
+                "id":"17",
+                "type":"list"
             },
             "geolocation": {
-                "id": "18",
-                "type": "list"
+                "id":"18",
+                "type":"list"
             },
             "fundingReferences": {
-                "id": "19",
-                "type": "list"
+                "id":"19",
+                "type":"list"
             },
             "relatedItems": {
-                "id": "20",
-                "type": "list"
+                "id":"20",
+                "type":"list"
             }
         }
     },
@@ -105,20 +102,8 @@
                 "DOI"
             ]
         },
-        "2": {
-            "has_r": [
-                "2.1"
-            ],
-            "has_o": [
-                "2.2",
-                "2.3",
-                "2.4",
-                "2.5"
-            ],
-            "occurrences":"1-n"
-        },
         "2.1": {
-            "name": "name",
+            "name": "creatorName",
             "required": 1,
             "has_o": [
                 "2.1.a"
@@ -383,8 +368,6 @@
         },
         "7.1.a": {
             "name": "nameType",
-            "required":0,
-            "occurrences":"1",
             "help": "The type of name.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#a-nametype",
             "controlled_list": [
@@ -822,12 +805,6 @@
         "18": {
             "name": "geoLocation",
             "required": 0,
-            "has_o": [
-                "18.1",
-                "18.2",
-                "18.3",
-                "18.4"
-            ],
             "occurrences": "1-n",
             "help": "Spatial region or named place where the data was gathered or about which the data is focused.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/"
@@ -1399,8 +1376,6 @@
         },
         "20.12.1.a": {
             "name": "nameType",
-            "required":0,
-            "occurrences":"1",
             "help": "The type of name.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/contributor/#a-nametype",
             "controlled_list": [

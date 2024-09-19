@@ -6,6 +6,8 @@ import os
 import pandas as pd
 import base64
 from PIL import Image
+import re
+from conf.config import *
 
 def check_uniqueness(fields, table) -> bool:
     """
@@ -120,3 +122,16 @@ def save_spreadsheet(sheets_dict, filepath, format):
     with pd.ExcelWriter(filepath, engine=engine) as doc:
         for table_name, table in sheets_dict.items():
             table.to_excel(doc, sheet_name=table_name, index=False)
+
+def get_relative_items(dc_dict, dc_id, required=None):
+    """Return key: value from dc_meta_terms relative to dc_id
+    
+    Example: dc_id=2 would return key: value for keys from 2.1 to 2.5
+    including sub properties
+    """
+    dc_terms = dc_dict["properties"]
+    return {key:value for key, value in dc_terms.items() if re.match(f"{dc_id}(?!\d)", key)}
+
+def format_as_json(text: str):
+    parsed_json = json.loads(text, )
+    return json.dumps(parsed_json, indent=4)
