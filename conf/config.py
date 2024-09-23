@@ -27,7 +27,6 @@ COLUMN_WIDTH_S = [INFO_ATT["type"], INFO_ATT["isPK"], INFO_ATT["isFK"], DDICT_A_
 # accepted regex for columm that contains image path to convert to blob
 IMG_COL_REGEX = ["img_", "image_"]
 
-
 # DC terms
 DC_INFO = json2dict("conf/dc_meta_terms.json")
 TERMS_REQ = [key for key in DC_INFO["items"]["required"].keys()]

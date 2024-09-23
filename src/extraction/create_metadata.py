@@ -4,7 +4,7 @@ import os
 
 from conf.config import *
 from src.utils.utils_extraction import regex_exclude_meta
-from src.utils.utils import json2dict
+from src.utils.utils import json2dict, get_relative_items, format_as_json
 
 class GenerateMeta:
     """
@@ -151,14 +151,17 @@ class GenerateMeta:
 
 
     def generate_meta_ref(self):
-        """Generate meta_references metadata table which contains
-        Datacite schema metadata terms
+        """Generate meta_dc_terms metadata table which contains
+        Datacite schema mandatory metadata terms
         """
 
-        metaterms = json2dict("conf/metadata_properties.json")
-        data_prop = pd.Series([keys for keys in metaterms["mandatory"].keys()])
-        data_value = pd.Series([str() for _ in range(len(data_prop))])
-        data = {METAREF_ATT["property"]: data_prop, METAREF_ATT["value"]: data_value}
+        terms_name = pd.Series(DC_JSON_OBJECT.keys())
+        terms_value = [str() for _ in range(len(DC_JSON_OBJECT.keys()))]
+
+        data = {
+            METAREF_ATT["property"]: terms_name,
+            METAREF_ATT["value"]: terms_value
+        }
 
         metaref = pd.DataFrame(data)
         self.sheets_dict[METAREF] = metaref
@@ -177,6 +180,7 @@ class GenerateMeta:
         self.sheets_dict[METAEXTRA] = meta_extra
         return meta_extra
 
+# TODO ?
 def update_metatable(self):
     """Update metadata tables:
     - remove attributes that does not exist anymore,
@@ -186,7 +190,7 @@ def update_metatable(self):
 
     pass
 
-
+# TODO ?
 def get_diff(self, former_info) -> pd.DataFrame:
     """Return a dataframe of comparison between former 
     and actual tables_infos like below

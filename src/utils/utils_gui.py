@@ -1,5 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
+import json
+from json import JSONDecodeError
 import textwrap
 
 def get_zoomed_geometry():
@@ -40,40 +42,25 @@ def get_authorized_type(current_type):
                return ["REAL", "TEXT"]
           case _:
                return None
-
-def process_item(key, my_dict):
-    req_terms = {}  # Dictionary to store required sub-items with their names
-    opt_terms = []  # List to store optional sub-item names
-
-    # Initialize the list for the current key in req_terms
-    if key not in req_terms:
-        req_terms[key] = []
-
-    # Process required sub-items (has_r)
-    if my_dict[key].get("has_r") is not None:
-        for req_item in my_dict[key].get("has_r"):
-            req_terms[key].append(req_item)  # Collect required sub-item
-            # Recursively process required sub-items
-            sub_req_terms, sub_opt_terms = process_item(req_item, my_dict)
-            for sub_key, sub_values in sub_req_terms.items():
-                if sub_key not in req_terms:
-                    req_terms[sub_key] = []
-                req_terms[sub_key].extend(sub_values)  # Collect nested required items
-            opt_terms.extend(sub_opt_terms)  # Collect nested optional items
-
-    # Process optional sub-items (has_o)
-    if my_dict[key].get("has_o") is not None:
-        for opt_item in my_dict[key].get("has_o"):
-            opt_terms.append(opt_item)  # Collect optional sub-item
-            sub_req_terms, sub_opt_terms = process_item(opt_item, my_dict)  # Recursively process
-            for sub_key, sub_values in sub_req_terms.items():
-                if sub_key not in req_terms:
-                    req_terms[sub_key] = []
-                req_terms[sub_key].extend(sub_values)  # Collect nested required items
-            opt_terms.extend(sub_opt_terms)  # Collect nested optional items
-
-    return req_terms, opt_terms  # Return both required and optional terms
-
+          
+# def recurse_str_to_dict(json_str):
+#     try:
+#         # Check if the input is a string, then attempt to load it as JSON
+#         if isinstance(json_str, str):
+#             loaded_d = json.loads(json_str)
+#         elif isinstance(json_str, dict):
+#             loaded_d = json_str
+#         else:
+#             return json_str  # If it's neither a string nor a dict, return as-is
+          
+#         # Recurse through the dictionary's items
+#         for k, v in loaded_d.items():
+#             loaded_d[k] = recurse_str_to_dict(v)
+#     except (json.JSONDecodeError, TypeError):
+#         return json_str  # Return the original string or object if loading fails
+#     return loaded_d
+            
+     
 # # Function to calculate the required row height
 # def get_max_lines_per_row(data_frame):
 #     """Calculate required row height based on break line"""

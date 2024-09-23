@@ -55,7 +55,7 @@ def checks_pipeline(check_funcs: list):
         logging.info("All checks passed successfully.")
 
 def json2dict(json_filepath) -> dict :
-    """Read a config files
+    """Read a json file and return it as a python dictionnary
     """
 
     with open(resource_path(json_filepath)) as json_file:

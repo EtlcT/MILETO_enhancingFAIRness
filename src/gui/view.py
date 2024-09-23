@@ -1,4 +1,5 @@
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
@@ -22,154 +23,6 @@ from conf.view_config import *
 # instead label and entries are declared manually, this  is a simpler 
 # approache but offers less flexibility to the code in case of changes
 # of the datacite schema
-class DCTermsForm(ctk.CTkScrollableFrame):
-    def __init__(self, master, data, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
-
-        self.entries = {}
-        self.property_frames = {}
-        self.duplicates_count = {}
-        self.req_terms, self.opt_terms = self.process_dc_json(DC_JSON_OBJECT, DC_TERMS)
-
-        style = ttk.Style()
-        style.configure("TLabelframe", background="#565b5e")
-        master.pack(expand=True,fill="both")
-        for name, info in DC_JSON_OBJECT.items():
-            # print(name) Label frame name correspond to global object
-            self.entries[name] = {}
-            property_frame = ttk.Labelframe(master, text=name)
-            property_frame.pack(fill="both", expand="yes", padx=(10,10), pady=(10,10))
-            self.property_frames[info["id"]] = property_frame
-            match DC_TERMS[info['id']]['occurrences']:
-                case "1":
-                    self.create_entry(property_frame, self.entries[name], info["id"])
-                case "1-n":
-                    self.duplicates_count[info['id']] = 0
-                    self.entries[name][0] = {}
-                    def handle_duplicate(property_frame=property_frame, entries=self.entries[name], object_id=info['id']):
-                            self.duplicates_count[object_id] += 1  # Increment the counter first
-                            self.duplicate_entries(property_frame, entries, object_id, self.duplicates_count[object_id])
-                    duplicate_btn = ctk.CTkButton(property_frame, text="add entity", command=handle_duplicate)
-                    duplicate_btn.pack()
-                    self.create_entry(property_frame, self.entries[name][0], info["id"], many=True)
-    
-    def process_item(self, key, my_dict):
-        req_terms = {}  # Dictionary to store required sub-items with their names
-        opt_terms = []  # List to store optional sub-item names
-
-        # Initialize the list for the current key in req_terms
-        if key not in req_terms:
-            req_terms[key] = []
-
-        # Process required sub-items (has_r)
-        if my_dict[key].get("has_r") is not None:
-            for req_item in my_dict[key].get("has_r"):
-                req_terms[key].append(req_item)  # Collect required sub-item
-                # Recursively process required sub-items
-                sub_req_terms, sub_opt_terms = self.process_item(req_item, my_dict)
-                for sub_key, sub_values in sub_req_terms.items():
-                    if sub_key not in req_terms:
-                        req_terms[sub_key] = []
-                    req_terms[sub_key].extend(sub_values)  # Collect nested required items
-                opt_terms.extend(sub_opt_terms)  # Collect nested optional items
-
-        # Process optional sub-items (has_o)
-        if my_dict[key].get("has_o") is not None:
-            for opt_item in my_dict[key].get("has_o"):
-                opt_terms.append(opt_item)  # Collect optional sub-item
-                sub_req_terms, sub_opt_terms = self.process_item(opt_item, my_dict)  # Recursively process
-                for sub_key, sub_values in sub_req_terms.items():
-                    if sub_key not in req_terms:
-                        req_terms[sub_key] = []
-                    req_terms[sub_key].extend(sub_values)  # Collect nested required items
-                opt_terms.extend(sub_opt_terms)  # Collect nested optional items
-
-        return req_terms, opt_terms  # Return both required and optional terms
-    
-    def process_dc_json(self, dc_json_objects, dc_json_terms):
-        """
-        Return a dictionnary of required terms and a list of optionnal terms
-        from conf/dc_meta_terms.json file
-
-        Arguments:
-        dc_json_object corresponds to {**DC_TERMS["items"]["required"], **DC_TERMS["items"]["other"]}
-        dc_json_terms corresponds to DC_TERMS["properties"]
-
-        req_terms dictionnary contain as object_id each term that has required sub terms
-        and the list of those required sub_terms as value
-        
-        opt_terms is a list of all terms that are opionnals
-        """
-        req_terms, opt_terms = {}, []
-        for obj, info in dc_json_objects.items():
-
-            if info["id"] not in req_terms:
-                req_terms[info["id"]] = []
-            sub_req_terms, sub_opt_terms = process_item(info["id"], dc_json_terms)
-
-            for sub_object_id, sub_values in sub_req_terms.items():
-                if sub_object_id not in req_terms:
-                    req_terms[sub_object_id] = []
-                req_terms[sub_object_id].extend(sub_values)  # Collect nested required items
-            opt_terms.extend(sub_opt_terms)  # Collect optional items
-
-            if len(sub_req_terms.keys()) == 1:
-                if dc_json_terms[info["id"]]["required"] == 0:
-                    opt_terms.append(info["id"])
-        req_terms = {k:v for k, v in req_terms.items() if v}
-        return req_terms, opt_terms
-
-    def add_entry(self, entries, property_frame, label_value, suffix=""):
-        label = ctk.CTkLabel(property_frame, text=label_value)
-        label.pack()
-        entry = ctk.CTkEntry(property_frame)
-        entry.pack()
-        entries[f"{label_value}{suffix}"] = [entry]
-
-    def add_dropmenu(self, entries, property_frame, label_value, controlled_list, suffix=""):
-        label = ctk.CTkLabel(property_frame, text=label_value)
-        label.pack()
-        value_list = list(controlled_list)
-        value_list.insert(0, "")
-        dropmenu = ctk.CTkComboBox(property_frame, values=value_list)
-        dropmenu.pack()
-        entries[f"{label_value}{suffix}"] = [dropmenu]
-
-    def create_entry(self, property_frame, entries, object_id, suffix="", many=None):
-
-        if many:
-            property_frame = ctk.CTkFrame(property_frame)
-            property_frame.pack(side="left")
-
-        if object_id not in ["2", "7", "13", "14", "19", "20"] and object_id not in self.opt_terms:
-            if DC_TERMS[object_id].get("controlled_list") is not None:
-                controlled_list = list(DC_TERMS[object_id]["controlled_list"])
-                self.add_dropmenu(entries, property_frame, DC_TERMS[object_id]['name'], controlled_list, suffix)
-            else:
-                self.add_entry(entries, property_frame, DC_TERMS[object_id]['name'], suffix)
-        for req_term, sub_req in self.req_terms.items():
-            if re.match(f"{object_id}(?!\d)", req_term):
-                for value in sub_req:
-                    if DC_TERMS[value].get("controlled_list") is not None:
-                        controlled_list = list(DC_TERMS[value]["controlled_list"])
-                        self.add_dropmenu(entries, property_frame, DC_TERMS[value]['name'], controlled_list, suffix)
-                    else:
-                        self.add_entry(entries, property_frame, DC_TERMS[value]['name'], suffix)
-        for sub_opt in self.opt_terms:
-            if re.match(f"{object_id}(?!\d)", sub_opt):
-                if DC_TERMS[sub_opt].get("controlled_list") is not None:
-                    controlled_list = list(DC_TERMS[sub_opt]["controlled_list"])
-                    self.add_dropmenu(entries, property_frame, DC_TERMS[sub_opt]['name'], controlled_list, suffix)
-                else:
-                    self.add_entry(entries, property_frame, DC_TERMS[sub_opt]['name'], suffix)
-
-    def duplicate_entries(self, property_frame, entries, object_id, counter):
-        entries[counter] = {}
-        self.create_entry(property_frame, entries[counter], object_id, many=True)
-        counter+=1
-
-
-
 
 class ToplevelWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -234,7 +87,7 @@ class ToplevelWindow(ctk.CTkToplevel):
         self.new_value.pack(
             **LABEL_OPT
         )
-    
+        
     def edit_cell(self, current_value, selected_sheet=None, col_name=None, *args):
         """Open appropriate top level window to modify cell value
         based on column currently edited
@@ -244,7 +97,8 @@ class ToplevelWindow(ctk.CTkToplevel):
                 self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
                 self.new_value = ctk.CTkComboBox(
                     master=self,
-                    values=args[0]
+                    values=args[0],
+                    state="readonly"
                 )
                 self.new_value.pack(
                     **LABEL_OPT
@@ -295,7 +149,8 @@ class ToplevelWindow(ctk.CTkToplevel):
                 self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
                 self.new_value = ctk.CTkComboBox(
                     master=self,
-                    values=args[0]
+                    values=args[0],
+                    state="readonly"
                 )
                 self.new_value.pack(
                     **LABEL_OPT
@@ -617,17 +472,19 @@ class View(ctk.CTk):
             if self.get_widget("meta_sheet") is not None:
                 self.meta_sheet.pack_forget()
                 self.meta_sheet_xscroll.pack_forget()
-                self.edit_btn.pack_forget()
-            if choice != "Select a sheet":
+                if self.get_widget("meta_sheet") != METAREF and self.edit_btn.winfo_exists():
+                    self.edit_btn.destroy()
+            if choice != "Select a metadata sheet":
                 self.display_meta_sheet(tmp_data, choice)
             if choice == METAREF:
                 self.edit_btn.pack(
                     side="bottom"
                 )
-
+    
         self.data_sheet_selector = ctk.CTkComboBox(
             master=self.spreadsheet_frame_l,
             values=table_list,
+            state="readonly",
             command=lambda choice : sheet_selector_l_callback(choice, tmp_data),
             font=TEXT_FONT,
             # width=get_str_max_length(table_list)*8,
@@ -642,6 +499,7 @@ class View(ctk.CTk):
         self.meta_sheet_selector = ctk.CTkComboBox(
             master=self.spreadsheet_frame_r,
             values=meta_table_list,
+            state="readonly",
             command=lambda choice : sheet_selector_r_callback(choice, tmp_data),
             font=TEXT_FONT,
             # width=get_str_max_length(table_list)*8,
@@ -688,26 +546,20 @@ class View(ctk.CTk):
 
         for row in df_rows:
             self.meta_sheet.insert("", "end", values=row)
-        
-        self.meta_sheet.bind("<Button-1>", lambda event: self.controller.on_cell_click(event, selected_sheet))
+        if selected_sheet != METAREF:
+            self.meta_sheet.bind("<Button-1>", lambda event: self.controller.on_cell_click(event, selected_sheet))
         self.edit_btn = ctk.CTkButton(
                     master=self.spreadsheet_frame_r,
                     text="Edit content",
-                    command=lambda: self.edit_dc_terms(tmp_data[METAREF])
+                    command= self.controller.edit_dc_terms
                 )
-
-    def edit_dc_terms(self, data):
-        """Display a frame to edit datacite terms"""
-
-        self.dc_frame = DCTermsForm(self.main_frame, data=data)
-
-
-    def display_upt_cell(self, value, x, y):
-        """Display entry widget for changes in metadata table cell"""
-        self.cell_entry = ctk.CTkEntry(self.data_sheet)
-        self.cell_entry.insert(0, value)
-        self.cell_entry.place(x=x,y=y)
-        self.cell_entry.focus()
+#! deprecated
+    # def display_upt_cell(self, value, x, y):
+    #     """Display entry widget for changes in metadata table cell"""
+    #     self.cell_entry = ctk.CTkEntry(self.data_sheet)
+    #     self.cell_entry.insert(0, value)
+    #     self.cell_entry.place(x=x,y=y)
+    #     self.cell_entry.focus()
     
     #TODO update df, warning on non exist
     def display_spreadsheet_option(self):
@@ -723,10 +575,6 @@ class View(ctk.CTk):
 
         self.display_save_spreadsheet()
         self.display_check_spreadsheet()
-
-
-    #TODO: add control on metadata table content ?
-
     
     def display_check_spreadsheet(self):
         """Display check spreadsheet data button to check
@@ -1073,6 +921,7 @@ class View(ctk.CTk):
             frame = self.get_frame(frame_name)
             del self.additional_frames[frame_name]
             frame.destroy()
+            self.main_frame.update_idletasks()
     
     def rm_widget(self, widget_name):
         """Remove frame from view if exist"""
@@ -1123,4 +972,221 @@ class View(ctk.CTk):
         """Remove previous filename variable if exist"""
         if "filename_var" in self.variables:
             del self.variables["filename_var"]
+
+class DCTermsForm(ToplevelWindow):
+    def __init__(self, controller, data, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # open fullscreen window
+        if sys.platform.startswith('linux'):
+            geometry = get_zoomed_geometry()
+            self.geometry(geometry)
+        else:
+            self._state_before_windows_set_titlebar_color = 'zoomed'
+        # store entry object
+        self.entries = {}
+        # store frames to group entry based on the associated global terms
+        self.property_frames = {}
+        # handle 1-n entry for each property_frame that support it
+        self.duplicates_count = {}
+        self.controller = controller
+        self.req_terms, self.opt_terms = self.process_dc_json(DC_JSON_OBJECT, DC_TERMS)
+
+        style = ttk.Style()
+        style.configure("TLabelframe", background="#565b5e")
+        self.dc_frame = ctk.CTkScrollableFrame(self)
+        self.dc_frame.pack(expand=True,fill="both")
+
+        for name, info in DC_JSON_OBJECT.items():
+            self.entries[name] = {}
+            property_frame = ttk.Labelframe(self.dc_frame, text=name)
+            property_frame.pack(fill="both", expand="yes", padx=(10,10), pady=(10,10))
+            self.property_frames[info["id"]] = property_frame
+            match DC_TERMS[info['id']]['occurrences']:
+                # check if property support several objects
+                case "1":
+                    self.create_entry(property_frame, self.entries[name], info["id"])
+                case "1-n":
+                    self.duplicates_count[info['id']] = 0
+                    self.entries[name][0] = {}
+
+                    def handle_duplicate(property_frame=property_frame, entries=self.entries[name], object_id=info['id']):
+                            self.duplicates_count[object_id] += 1  # Increment the counter first
+                            self.duplicate_entries(property_frame, entries, object_id, self.duplicates_count[object_id])
+
+                    duplicate_btn = ctk.CTkButton(property_frame, text="add entity", command=handle_duplicate)
+                    duplicate_btn.pack()
+                    self.create_entry(property_frame, self.entries[name][0], info["id"], many=True)
+
+        self.confirm_dc_terms = ctk.CTkButton(
+            self.dc_frame,
+            text="Confirm changes",
+            command= lambda: self.controller.get_entries(self.entries)
+            )
+        self.confirm_dc_terms.pack()
+        self.fill_existing_values(data)
     
+    def fill_existing_values(self, data):
+        for _ , row in data.iterrows():
+            object_name, json_string = row[METAREF_ATT["property"]], row[METAREF_ATT["value"]]
+            object_id = DC_JSON_OBJECT[object_name]["id"]
+          
+            if re.match(r"\{", str(json_string)):
+                # contain one object:
+                curr_value = json.loads(json_string)
+                for key, value in curr_value.items():
+                    entry = self.entries[object_name][key][0]
+                    if type(entry) == ctk.CTkComboBox:
+                        entry.set(value)
+                    else:
+                        entry.insert(0, value)
+
+            elif re.match(r'\[', str(json_string)):
+                item_idx = 0
+                for entity in json.loads(json_string):
+                    if item_idx > 0:
+                        self.duplicate_entries(
+                            property_frame=self.property_frames[object_id],
+                            entries=self.entries[object_name],
+                            object_id=object_id,
+                            counter=item_idx
+                        )
+                    for key, value in entity.items():
+                        entry =  self.entries[object_name][item_idx][key][0]
+                        if type(entry) == ctk.CTkComboBox:
+                            entry.set(value)
+                        else:
+                            entry.insert(0, value)
+                    item_idx+=1
+            else:
+                entry =  self.entries[object_name][object_name][0]
+                if type(entry) == ctk.CTkComboBox:
+                    entry.set(json_string)
+                else:
+                    entry.insert(0, json_string)
+
+    def process_item(self, object_id, dc_terms_dict):
+        """
+            Collect required and optionnal terms and sub_terms (recursively) for each object_id
+        """
+        req_terms = {}  # Store required sub_terms id and the id of the terms that imply them to be mandatory
+        opt_terms = []  # Store optional sub_terms id
+
+        # Initialize the list for the current key in req_terms
+        if object_id not in req_terms:
+            req_terms[object_id] = []
+
+        # Process required sub_terms (has_r)
+        if dc_terms_dict[object_id].get("has_r") is not None:
+            for req_item in dc_terms_dict[object_id].get("has_r"):
+                req_terms[object_id].append(req_item)  # Collect required sub_terms
+                # Recursively process required sub_terms
+                sub_req_terms, sub_opt_terms = self.process_item(req_item, dc_terms_dict)
+                for sub_key, sub_values in sub_req_terms.items():
+                    if sub_key not in req_terms:
+                        req_terms[sub_key] = []
+                    req_terms[sub_key].extend(sub_values)  # Collect nested required terms
+                opt_terms.extend(sub_opt_terms)  # Collect nested optional terms
+
+        # Process optional sub_terms (has_o)
+        if dc_terms_dict[object_id].get("has_o") is not None:
+            for opt_item in dc_terms_dict[object_id].get("has_o"):
+                opt_terms.append(opt_item)  # Collect optional sub-item
+                sub_req_terms, sub_opt_terms = self.process_item(opt_item, dc_terms_dict)  # Recursively process
+                for sub_key, sub_values in sub_req_terms.items():
+                    if sub_key not in req_terms:
+                        req_terms[sub_key] = []
+                    req_terms[sub_key].extend(sub_values)  # Collect nested required terms
+                opt_terms.extend(sub_opt_terms)  # Collect nested optional terms
+
+        return req_terms, opt_terms  # Return both required and optional terms
+    
+    def process_dc_json(self, dc_json_objects, dc_json_terms):
+        """
+        Return a dictionnary of required terms and a list of optionnal terms
+        from conf/dc_meta_terms.json file
+
+        Arguments:
+        dc_json_object corresponds to {**DC_TERMS["items"]["required"], **DC_TERMS["items"]["other"]}
+        dc_json_terms corresponds to DC_TERMS["properties"]
+
+        req_terms dictionnary contain as object_id each term that has required sub terms
+        and the list of those required sub_terms as value
+        
+        opt_terms is a list of all terms that are opionnals
+        """
+        req_terms, opt_terms = {}, []
+        for obj, info in dc_json_objects.items():
+
+            if info["id"] not in req_terms:
+                req_terms[info["id"]] = []
+            sub_req_terms, sub_opt_terms = self.process_item(info["id"], dc_json_terms)
+
+            for sub_object_id, sub_values in sub_req_terms.items():
+                if sub_object_id not in req_terms:
+                    req_terms[sub_object_id] = []
+                req_terms[sub_object_id].extend(sub_values)  # Collect nested required items
+            opt_terms.extend(sub_opt_terms)  # Collect optional items
+
+            if len(sub_req_terms.keys()) == 1:
+                if dc_json_terms[info["id"]]["required"] == 0:
+                    opt_terms.append(info["id"])
+        req_terms = {k:v for k, v in req_terms.items() if v}
+        return req_terms, opt_terms
+
+    def add_entry(self, entries, property_frame, label_value, suffix=""):
+        label = ctk.CTkLabel(property_frame, text=label_value)
+        label.pack()
+        entry = ctk.CTkEntry(property_frame)
+        entry.pack()
+        entries[f"{label_value}{suffix}"] = [entry]
+
+    def add_dropmenu(self, entries, property_frame, label_value, controlled_list, suffix=""):
+        label = ctk.CTkLabel(property_frame, text=label_value)
+        label.pack()
+        value_list = list(controlled_list)
+        value_list.insert(0, "")
+        dropmenu = ctk.CTkComboBox(property_frame, values=value_list, state="readonly")
+        dropmenu.pack()
+        entries[f"{label_value}{suffix}"] = [dropmenu]
+
+    def create_entry(self, property_frame, entries, object_id, suffix="", many=None):
+        """
+            Retrieve all terms associated to object_id and display entries
+            for each of them
+        """
+
+        if many:
+            property_frame = ctk.CTkFrame(property_frame)
+            property_frame.pack(side="left")
+
+        if object_id not in ["2", "7", "13", "14", "19", "20"] and object_id not in self.opt_terms:
+            if DC_TERMS[object_id].get("controlled_list") is not None:
+                controlled_list = list(DC_TERMS[object_id]["controlled_list"])
+                self.add_dropmenu(entries, property_frame, DC_TERMS[object_id]['name'], controlled_list, suffix)
+            else:
+                self.add_entry(entries, property_frame, DC_TERMS[object_id]['name'], suffix)
+        for req_term, sub_req in self.req_terms.items():
+            if re.match(f"{object_id}(?!\d)", req_term):
+                for value in sub_req:
+                    if DC_TERMS[value].get("controlled_list") is not None:
+                        controlled_list = list(DC_TERMS[value]["controlled_list"])
+                        self.add_dropmenu(entries, property_frame, DC_TERMS[value]['name'], controlled_list, suffix)
+                    else:
+                        self.add_entry(entries, property_frame, DC_TERMS[value]['name'], suffix)
+        for sub_opt in self.opt_terms:
+            if re.match(f"{object_id}(?!\d)", sub_opt):
+                if DC_TERMS[sub_opt].get("controlled_list") is not None:
+                    controlled_list = list(DC_TERMS[sub_opt]["controlled_list"])
+                    self.add_dropmenu(entries, property_frame, DC_TERMS[sub_opt]['name'], controlled_list, suffix)
+                else:
+                    self.add_entry(entries, property_frame, DC_TERMS[sub_opt]['name'], suffix)
+
+    def duplicate_entries(self, property_frame, entries, object_id, counter):
+        """
+            Called on clicking on add entries button associated to 
+            meta terms that can have 1-n occurrences
+        """
+        entries[counter] = {}
+        self.create_entry(property_frame, entries[counter], object_id, many=True)
+        counter+=1

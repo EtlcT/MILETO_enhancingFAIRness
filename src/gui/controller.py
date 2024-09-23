@@ -2,13 +2,14 @@ import os
 import logging
 import tkinter as tk
 import customtkinter as ctk
+import time
 from CTkMessagebox import CTkMessagebox
 
-from src.gui.view import View
+from src.gui.view import View, DCTermsForm
 from src.gui.model import Model
 from src.extraction.check import InvalidData, InvalidTemplate
 from src.utils.utils import output_exist, save_spreadsheet
-from src.utils.utils_gui import get_authorized_type
+from src.utils.utils_gui import get_authorized_type, CenterWindowToDisplay
 from conf.config import *
 
 logging.basicConfig(level=logging.ERROR,
@@ -21,6 +22,7 @@ class Controller:
     def __init__(self, model, view):
         self.model = model
         self.view = view
+        self.dc_form_window = None
 
     def spreadsheet_loader(self, spreadsheet_path):
         """Display path to selected spreadsheet and load it
@@ -132,6 +134,43 @@ class Controller:
     def _get_meta_col_name(self, metatable_name, column_index):
         """Retrieve metadata table's column name from its index"""
         return self.model.tmp_data[metatable_name].columns[column_index]
+    
+    def edit_dc_terms(self):
+        """Display a frame to edit datacite terms, if already open,
+        focus on it
+        """
+        if self.dc_form_window is None or not self.dc_form_window.winfo_exists():
+            self.dc_form_window = DCTermsForm(self, self.model.tmp_data[METAREF])
+        else:
+            self.dc_form_window.focus()
+
+
+    def get_entries(self, entries):
+
+        self.view.variables["change_occurs"] = True
+        values = {}
+        for object_name, content in entries.items():
+            match DC_JSON_OBJECT[object_name]["type"]:
+                case "object" :
+                    values[object_name] = {}
+                    for terms, entry in content.items():
+                        values[object_name][terms] = entry[0].get()
+                case "list":
+                    values[object_name] = []
+                    for terms, entry in content.items():
+                        term_dict = {}
+                        for entity, value in entry.items():
+                            term_dict[entity] = value[0].get()
+                        values[object_name].append(term_dict)
+                case _:
+                    for terms, entry in content.items():
+                        values[object_name] = entry[0].get()
+        
+        self.model.process_meta_dc_terms(values)
+        self.refresh_meta()
+        
+        self.dc_form_window.destroy()
+        
 
     def refresh_meta(self):
         """Update metadata treeview on changes"""
