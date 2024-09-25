@@ -49,7 +49,10 @@ class sqliteCreate():
             # looks for composite pk
             pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']].tolist()
             attr_list = table_info[INFO_ATT['attribute']].tolist()
-            attr_type = table_info['type'].tolist()
+            attr_type = table_info["expectedType"].where(
+                table_info["expectedType"] != "",
+                table_info['type']
+            ).tolist()
 
             if len(pk_attr) > 1:
                 # if PK is composite

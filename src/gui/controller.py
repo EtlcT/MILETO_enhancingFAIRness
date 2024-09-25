@@ -105,7 +105,8 @@ class Controller:
                         # pass content of neighbor cell ie. inferred type
                         current_type = self.view.meta_sheet.item(row_idx)['values'][col_idx - 1]
                         authorized_conversion_type = get_authorized_type(current_type)
-                        new_cell_window = self.view.open_edition_window(region, cell_value, selected_sheet, col_name, authorized_conversion_type)
+                        if authorized_conversion_type is not None:
+                            new_cell_window = self.view.open_edition_window(region, cell_value, selected_sheet, col_name, authorized_conversion_type)
                     case "referenceTable":
                         # pass list of data table name
                         datatable_list = [_ for _ in self.model.tmp_data.keys() if _ not in META_TABLES]
@@ -139,38 +140,53 @@ class Controller:
         """Display a frame to edit datacite terms, if already open,
         focus on it
         """
-        if self.dc_form_window is None or not self.dc_form_window.winfo_exists():
+        if (self.dc_form_window is None) or (not self.dc_form_window.winfo_exists()):
             self.dc_form_window = DCTermsForm(self, self.model.tmp_data[METAREF])
         else:
             self.dc_form_window.focus()
 
 
     def get_entries(self, entries):
-
+        
+        print(entries)
         self.view.variables["change_occurs"] = True
         values = {}
         for object_name, content in entries.items():
             match DC_JSON_OBJECT[object_name]["type"]:
                 case "object" :
                     values[object_name] = {}
-                    for terms, entry in content.items():
-                        values[object_name][terms] = entry[0].get()
+                    for term, entry in content.items():
+                        if isinstance(entry, dict):
+                            values[object_name][term] = []
+                            for idx, sub_entry_dict in entry.items():
+                                sub_dict = {}
+                                for sub_term, sub_entry in sub_entry_dict.items():
+                                    sub_dict[sub_term] = sub_entry[0].get()
+                                values[object_name][term].append(sub_dict)
+                        else:
+                            values[object_name][term] = entry[0].get()
                 case "list":
                     values[object_name] = []
-                    for terms, entry in content.items():
-                        term_dict = {}
-                        for entity, value in entry.items():
-                            term_dict[entity] = value[0].get()
-                        values[object_name].append(term_dict)
+                    for occurrence, occurrence_details in content.items():
+                        occurrence_dict = {}
+                        for term, value in occurrence_details.items():
+                            if isinstance(value, dict):
+                                occurrence_dict[term] = []
+                                for idx, sub_entry_dict in value.items():
+                                    sub_dict = {}
+                                    for sub_term, sub_entry in sub_entry_dict.items():
+                                        sub_dict[sub_term] = sub_entry[0].get()
+                                    occurrence_dict[term].append(sub_dict)
+                            else:
+                                occurrence_dict[term] = value[0].get()
+                        values[object_name].append(occurrence_dict)
                 case _:
-                    for terms, entry in content.items():
+                    for term, entry in content.items():
                         values[object_name] = entry[0].get()
-        
+
         self.model.process_meta_dc_terms(values)
         self.refresh_meta()
-        
         self.dc_form_window.destroy()
-        
 
     def refresh_meta(self):
         """Update metadata treeview on changes"""
@@ -241,6 +257,7 @@ class Controller:
             save_spreadsheet(self.model.tmp_data, file.name, format=file_format)
             # store saved spreadsheet filename to check for pending changes later
             self.view.variables["saved_spreadsheet"] = file.name
+            
 
     def convert(self):
         """Run conversion process based on user selection,

@@ -102,7 +102,7 @@ class Model:
             self.tmp_data[METAREF].loc[
                 self.tmp_data[METAREF][METAREF_ATT["property"]] == key,
                 METAREF_ATT["value"]
-            ] = json.dumps(value)
+            ] = json.dumps(value).replace('""', 'null')
 
     def upt_cell(self, table, row, col, new_value):
         """Update cell content of metadata table"""

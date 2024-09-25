@@ -48,6 +48,7 @@ class GenerateMeta:
                             INFO_ATT["table"],
                             INFO_ATT["attribute"],
                             INFO_ATT["type"],
+                            INFO_ATT["usr_type"],
                             INFO_ATT["isPK"],
                             INFO_ATT["isFK"],
                             INFO_ATT["refTable"]
@@ -120,13 +121,14 @@ class GenerateMeta:
         information schema data, ie. Primary Key and Foreign Key
         constraints, reference_table
         """
-        data = {INFO_ATT["table"]: [], INFO_ATT["attribute"]: [], INFO_ATT["type"]: [], INFO_ATT["isPK"]: [], INFO_ATT["isFK"]: [], INFO_ATT["refTable"]: []}
+        data = {value: [] for value in INFO_ATT.values()}
         for table_name, table in self.sheets_dict.items():
             if regex_exclude_meta(table_name)==False:
                 for column in table.columns:
                     data[INFO_ATT["table"]].append(table_name)
                     data[INFO_ATT["attribute"]].append(column)
                     data[INFO_ATT["type"]].append(self.infer_sqlite_type(column, table[column]))
+                    data[INFO_ATT["usr_type"]].append(str())
                     data[INFO_ATT["isPK"]].append(str())
                     data[INFO_ATT["isFK"]].append(str())
                     data[INFO_ATT["refTable"]].append(str())
@@ -145,7 +147,7 @@ class GenerateMeta:
         if re.search('int', str(col_type)) != None:
             return 'INTEGER'
         elif re.search('float', str(col_type)) != None:
-            return "FLOAT"
+            return "REAL"
         else:
             return "TEXT"
 

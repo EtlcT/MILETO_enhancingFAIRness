@@ -135,3 +135,11 @@ def get_relative_items(dc_dict, dc_id, required=None):
 def format_as_json(text: str):
     parsed_json = json.loads(text, )
     return json.dumps(parsed_json, indent=4)
+
+def get_name_id_pairs(data):
+    result = {}
+    for key, values in data.items():
+        name = values.get('name')
+        if name:
+            result[name] = key
+    return result

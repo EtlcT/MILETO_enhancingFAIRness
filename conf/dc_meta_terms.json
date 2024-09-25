@@ -43,7 +43,7 @@
                 "id": "11",
                 "type": "list"
             },
-            "relatedidentifier": {
+            "relatedidentifiers": {
                 "id": "12",
                 "type": "list"
             },
@@ -70,7 +70,7 @@
                 "id": "17",
                 "type": "list"
             },
-            "geolocation": {
+            "geolocations": {
                 "id": "18",
                 "type": "list"
             },
@@ -158,6 +158,9 @@
             "has_r": [
                 "2.4.a"
             ],
+            "has_o": [
+                "2.4.b"
+            ],
             "occurrences": "1-n",
             "help": "Uniquely identifies an individual or legal entity, according to various schemes.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#nameidentifier"
@@ -165,9 +168,6 @@
         "2.4.a": {
             "name": "nameIdentifierScheme",
             "required": 0,
-            "has_o": [
-                "2.4.b"
-            ],
             "occurrences": "1",
             "help": "The name of the name identifier scheme.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/creator/#a-nameidentifierscheme"

@@ -1,4 +1,4 @@
-from src.utils.utils import json2dict
+from src.utils.utils import json2dict, get_name_id_pairs
 
 TEMP_CONF = json2dict("conf/template_conf.json")
 
@@ -32,3 +32,4 @@ DC_INFO = json2dict("conf/dc_meta_terms.json")
 TERMS_REQ = [key for key in DC_INFO["items"]["required"].keys()]
 DC_JSON_OBJECT = {**DC_INFO["items"]["required"], **DC_INFO["items"]["other"]}
 DC_TERMS = DC_INFO["properties"]
+DC_NAME_ID_PAIRS = get_name_id_pairs(DC_TERMS)
