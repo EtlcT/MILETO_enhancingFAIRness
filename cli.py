@@ -13,7 +13,7 @@ from src.extraction.create_metadata import GenerateMeta
 from src.extraction.check import CheckSpreadsheet
 from src.dbcreate.dbcreate import sqliteCreate
 from src.doccreate.pdf_create import docCreate, sqlite2pdf
-from src.utils.utils import save_spreadsheet
+from src.utils.utils import save_spreadsheet, output_exist, move_metadata_json
 
 
 def main_cli():
@@ -42,18 +42,18 @@ def main_cli():
             
             save_spreadsheet(sheets_dict=ss_with_meta.sheets_dict, filepath=filename, format=file_format)
 
-
-    elif args.update_metadata:
-        pass
     else:
-        output_path = os.path.normpath(args.output_path)
+        output_path = os.path.normpath(os.path.abspath(args.output_path))
         
         if args.from_sqlite == True:
             doc = sqlite2pdf(input_path, output_path)
             doc.createPDF()
         else:
-            # check data in spreadsheet is valid
-            checker = CheckSpreadsheet(input_path)
+
+            spreadsheet_name = os.path.splitext(os.path.basename(input_path))[0]
+
+            # check data in spreadsheet is valid and save metadata terms in json
+            checker = CheckSpreadsheet(input_path, os.path.splitext(input_path)[0])
             checker.validate_spreadsheet()
 
             data = GetSpreadsheetData(
@@ -61,21 +61,39 @@ def main_cli():
                         checked_data=checker.sheets_dict
                     )
             
-            spreadsheet_name = os.path.splitext(os.path.basename(input_path))[0]
-            
             if args.overwrite == False and args.filename is None:
                 # user haven't specified filename
-                fileExistsHandler(os.path.join(output_path, spreadsheet_name + ".sqlite"))
+                fileExistsHandler(output_path, spreadsheet_name)
+                move_metadata_json(
+                    input_path=os.path.splitext(input_path)[0],
+                    output_path=output_path,
+                    output_name=spreadsheet_name
+                )
             elif args.overwrite == True and args.filename:
-                # overwrite the specified filename if exists
                 rm_if_exists(os.path.join(output_path, args.filename + ".sqlite"))
+                move_metadata_json(
+                    input_path=os.path.splitext(input_path)[0],
+                    output_path=output_path,
+                    output_name=args.filename
+                )
                 data.db_name = args.filename
             elif args.overwrite == True and args.filename is None:
-                # user overwrite file with default filename if exits
+                # overwrite the specified filename if exists
                 rm_if_exists(os.path.join(output_path, spreadsheet_name + ".sqlite"))
+                
+                move_metadata_json(
+                    input_path=os.path.splitext(input_path)[0],
+                    output_path=output_path,
+                    output_name=spreadsheet_name
+                )
             elif args.overwrite == False and args.filename:
                 # user specified filename but donesn't want to overwrite
-                fileExistsHandler(os.path.join(output_path, args.filename + ".sqlite"))
+                fileExistsHandler(output_path, args.filename)
+                move_metadata_json(
+                    input_path=os.path.splitext(input_path)[0],
+                    output_path=output_path,
+                    output_name=args.filename
+                )
                 data.db_name = args.filename
             
                     
@@ -91,6 +109,8 @@ def main_cli():
 
             doc.createPDF()
 
+            print(f"Process successful for {input_path}")
+
     
 def rm_if_exists(filepath):
     try:
@@ -98,18 +118,17 @@ def rm_if_exists(filepath):
     except FileNotFoundError:
         pass
 
-def fileExistsHandler(filepath):
+def fileExistsHandler(output_path, output_basename):
     """Raise error and log error if file exist"""
 
-    filename = os.path.splitext(os.path.basename(filepath))[0]
-    if os.path.isfile(filepath):
+    if output_exist(output_path, output_basename):
     # file already exists and user doesn't specify how to handle it
         logging.error(
-            f"{FileExistsError}: {filename} already exists in output directory\n"
+            f"{FileExistsError}: Output(s) already exist in output directory for this spreadsheet\n"
             "Overwrite it with -ow --overwritte flag OR specify anothe name using --filename"
         )
         raise FileExistsError(
-            f"{filename} already exists in output directory\n"
+            f"Output(s) already exist in output directory for this spreadsheet\n"
             "Overwrite it with -ow --overwritte flag OR specify another filename using --filename"
         )
 
@@ -136,11 +155,6 @@ def getArgs():
         "--create-metadata",
         action="store_true",
         help="Generate metadata tables that should then be filled before running"
-    )
-    exclusive_group.add_argument(
-        "--update-metadata",
-        action="store_true",
-        help="Update metadata tables, keeping intact non altered values"
     )
 
     parser.add_argument(

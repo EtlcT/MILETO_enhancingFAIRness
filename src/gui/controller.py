@@ -8,7 +8,7 @@ from CTkMessagebox import CTkMessagebox
 from src.gui.view import View, DCTermsForm
 from src.gui.model import Model
 from src.extraction.check import InvalidData, InvalidTemplate
-from src.utils.utils import output_exist, save_spreadsheet
+from src.utils.utils import save_spreadsheet
 from src.utils.utils_gui import get_authorized_type, CenterWindowToDisplay
 from conf.config import *
 
@@ -148,7 +148,6 @@ class Controller:
 
     def get_entries(self, entries):
         
-        print(entries)
         self.view.variables["change_occurs"] = True
         values = {}
         for object_name, content in entries.items():
@@ -255,10 +254,10 @@ class Controller:
         if file:
             file_format = file.name.split('.')[-1] if '.' in file.name else None
             save_spreadsheet(self.model.tmp_data, file.name, format=file_format)
+            del self.view.variables["change_occurs"]
             # store saved spreadsheet filename to check for pending changes later
             self.view.variables["saved_spreadsheet"] = file.name
             
-
     def convert(self):
         """Run conversion process based on user selection,
         ie: create database, erd and pdf

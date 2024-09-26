@@ -7,6 +7,8 @@ import pandas as pd
 import base64
 from PIL import Image
 import re
+import shutil
+
 from conf.config import *
 
 def check_uniqueness(fields, table) -> bool:
@@ -98,6 +100,7 @@ def output_exist(output_dir, output_basename):
         return True if output already exist else False
         """
         outputs = [
+            os.path.join(output_dir, output_basename + ".json"),
             os.path.join(output_dir, output_basename + ".sqlite"),
             os.path.join(output_dir, output_basename + ".pdf"),
             os.path.join(output_dir, "ERD_" + output_basename + ".svg"),
@@ -143,3 +146,23 @@ def get_name_id_pairs(data):
         if name:
             result[name] = key
     return result
+
+def parse_json(value):
+    if pd.isna(value):
+        # if value is np.nan return None to get valid value null in json
+        return None
+    try:
+        # Try to parse the value as JSON
+        return json.loads(value)
+    except (json.JSONDecodeError, TypeError):
+        # if fails return the value as it is
+        return value
+
+def move_metadata_json(input_path, output_path, output_name):
+    """Move json file that contain metadata for actual database"""
+    src = f"{input_path}.json"
+    dst = os.path.join(output_path, f"metadata_{output_name}.json")
+    shutil.move(
+        src=src,
+        dst=dst
+    )

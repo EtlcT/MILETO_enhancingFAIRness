@@ -543,15 +543,7 @@ class View(ctk.CTk):
                     text="Edit content",
                     command= self.controller.edit_dc_terms
                 )
-#! deprecated
-    # def display_upt_cell(self, value, x, y):
-    #     """Display entry widget for changes in metadata table cell"""
-    #     self.cell_entry = ctk.CTkEntry(self.data_sheet)
-    #     self.cell_entry.insert(0, value)
-    #     self.cell_entry.place(x=x,y=y)
-    #     self.cell_entry.focus()
-    
-    #TODO update df, warning on non exist
+
     def display_spreadsheet_option(self):
         """Display buttons to create and update metadata tables
         and finally check spreadsheet

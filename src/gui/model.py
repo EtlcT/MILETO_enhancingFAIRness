@@ -5,6 +5,7 @@ import numpy as np
 import json
 
 from conf.config import *
+from src.utils.utils import move_metadata_json
 from src.extraction.create_metadata import GenerateMeta
 from src.extraction.retrieve_data import GetSpreadsheetData
 from src.extraction.check import CheckSpreadsheet
@@ -123,7 +124,8 @@ class Model:
 
     def verify_spreadsheet(self):
 
-        checker = CheckSpreadsheet(self.tmp_data)
+        filename = os.path.splitext(self.input_path)[0]
+        checker = CheckSpreadsheet(self.tmp_data, filename)
         checker.validate_spreadsheet()
 
         self.checked_data = checker.sheets_dict
@@ -138,6 +140,8 @@ class Model:
         # create sqlite and erd_schema
         createdDb = self.dbCreate()
 
+        move_metadata_json(os.path.splitext(self.input_path)[0], self.output_path, self.data.db_name)
+
         # create pdf
         self.pdfCreate(createdDb)
 
@@ -149,7 +153,7 @@ class Model:
         )
 
     def dbCreate(self) -> sqliteCreate:
-
+        """Create sqlite file for spreadsheet"""
         sqlite_db = sqliteCreate(
             self.data,
             output_dir=self.output_path
@@ -168,5 +172,6 @@ class Model:
         doc.createPDF()
 
     def sqlite2pdf(self):
+
         doc = sqlite2pdf(self.input_path, self.output_path)
         doc.createPDF()
