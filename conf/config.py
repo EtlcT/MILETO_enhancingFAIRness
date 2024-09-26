@@ -29,7 +29,7 @@ IMG_COL_REGEX = ["img_", "image_"]
 
 # DC terms
 DC_INFO = json2dict("conf/dc_meta_terms.json")
-TERMS_REQ = [key for key in DC_INFO["items"]["required"].keys()]
 DC_JSON_OBJECT = {**DC_INFO["items"]["required"], **DC_INFO["items"]["other"]}
 DC_TERMS = DC_INFO["properties"]
-DC_NAME_ID_PAIRS = get_name_id_pairs(DC_TERMS)
+TERMS_REQ_BY_OBJECT = {key: value for key, value in zip(list(DC_INFO["items"]["required"].keys()),[DC_TERMS[term_id]["name"] for term_id in DC_TERMS.keys() if DC_TERMS[term_id].get("required") and DC_TERMS[term_id]["required"]==1])}
+DC_NAME_ID_PAIRS, DC_ID_NAME_PAIRS = get_name_id_pairs(DC_TERMS)

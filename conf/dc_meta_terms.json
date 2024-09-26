@@ -97,7 +97,7 @@
         },
         "1.a": {
             "name": "identifierType",
-            "required": 1,
+            "required": 0,
             "occurrences": "1",
             "help": "Digital Object Identifier",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/identifier/#a-identifiertype",
@@ -529,7 +529,7 @@
         },
         "10.a": {
             "name": "resourceTypeGeneral",
-            "required": 1,
+            "required": 0,
             "occurrences": "1",
             "help": "The general type of the resource.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/resourcetype/#a-resourcetypegeneral",

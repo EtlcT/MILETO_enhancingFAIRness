@@ -1,9 +1,11 @@
 import logging
 import pandas as pd
+import numpy as np
+import json
 
 from conf.config import *
 from src.extraction.create_metadata import *
-from src.utils.utils import check_uniqueness
+from src.utils.utils import check_uniqueness, parse_json
 from src.utils.utils_extraction import get_datatables_list, rm_extra_tables
 
 logging.basicConfig(level=logging.ERROR, 
@@ -17,18 +19,52 @@ class CheckSpreadsheet:
         relationnal schema and template
     """
 
-    def __init__(self, spreadsheet):
+    def __init__(self, spreadsheet, filename):
         if isinstance(spreadsheet, dict):
         ## GUI: spreadsheet has already been loaded and is stored as dict
             self.sheets_dict = rm_extra_tables(spreadsheet)
         else:
         ## CLI: spreadsheet is read for the first time
             self.sheets_dict = rm_extra_tables(pd.read_excel(spreadsheet, sheet_name=None))
+        
         self.metadata_tables = [METAREF, INFO, DDICT_T, DDICT_A]
         # check template is respected before all
+        self.json_file = self.create_dc_api_request(filename)
         self.validate_template()
         self.tables_info = self._get_tables_info()
         
+    def create_dc_api_request(self, filename):
+        """ Create a json file containing metadata in the folder where
+        the initial spreadsheet is saved with the name of actual spreadsheet
+
+        This metadata json file is formatted like the json request
+        expected by Datacite API (without event information for instance)
+
+        Later in the process this file is moved from input folder to
+        output folder ith the named chosed by researcher
+        """
+
+        id_dict = json.loads(self.sheets_dict[METAREF].loc[
+            self.sheets_dict[METAREF][METAREF_ATT["property"]]=="identifier",
+            METAREF_ATT["value"]
+            ].values[0])
+        doi = id_dict["identifier"]
+        dc_request = {}
+        dc_request["data"] = {}
+        dc_request["data"]["type"] = "dois"
+        dc_request["data"]["attributes"] = {}
+        dc_request["data"]["attributes"]["doi"] = doi if not doi =="" else ":tba"
+
+        values = self.sheets_dict[METAREF][METAREF_ATT["value"]].apply(parse_json)
+        json_dict = dict(zip(
+            self.sheets_dict[METAREF][METAREF_ATT["property"]],
+            values
+        ))
+        dc_request["data"]["attributes"].update(json_dict)
+
+        with open(f"{filename}.json", "w", encoding="utf-8") as f:
+            json.dump(dc_request, f, ensure_ascii=True, indent=4)
+
 
     def validate_template(self):
         """Raise error if spreasheet is not compliant with template"""
@@ -36,17 +72,16 @@ class CheckSpreadsheet:
         errors = []
         check_tasks = [
             self.check_metadata_exists,
-            #self.check_metadata_not_empty,
             self.check_infos,
-            self.check_attributes, #TODO
-            self.check_tables, #TODO
-            # self.check_dc_terms, #TODO
+            self.check_attributes,
+            self.check_tables,
+            self.check_dc_terms, #TODO
         ]
         for check in check_tasks:
             try:
                 check()
             except CheckSpreadsheetError as e:
-                # logging.error(f"{e.__class__.__name__}: {str(e)}\n")
+                logging.error(f"{e.__class__.__name__}: {str(e)}\n")
                 errors.append(f"{e.__class__.__name__}: {e}\n")
             except KeyError as e:
                 pass
@@ -70,7 +105,7 @@ class CheckSpreadsheet:
             try:
                 check()
             except CheckSpreadsheetError as e:
-                # logging.error(f"{e.__class__.__name__}: {str(e)}")
+                logging.error(f"{e.__class__.__name__}: {str(e)}")
                 errors.append(f"{e.__class__.__name__}: {e}")
             except KeyError as e:
                 pass
@@ -87,16 +122,45 @@ class CheckSpreadsheet:
             if self.sheets_dict.get(table_name, None) is None:
                 missing_tables.append(table_name)
         if missing_tables:
-            raise MissingMetadataError(missing_tables)
+            raise MissingMetadataTermError(missing_tables)
         
         return
 
-    #?
-    def check_metadata_not_empty(self):
+    def check_dc_terms(self):
         """
-            Raise error if metadata are not completed (description)
+            Raise error if required datacite metadata terms or secondly
+            required terms are not completed
         """
-        pass
+
+        meta_ref = json2dict("data/output/metadata_2018_ErosionExperiment_Marganai_v2024.json")
+
+        def check_strictly_req(meta_ref):
+            """Retrieve required property that have not been compiled"""
+            missing_req = []
+            for key, value in TERMS_REQ_BY_OBJECT.items():
+                match DC_INFO["items"]["required"][key]["type"]:
+                    case "list":
+                        for entity in meta_ref["data"]["attributes"][key]:
+                            if entity[value] is None:
+                                missing_req.append(value)
+                    case "object":
+                        if meta_ref["data"]["attributes"][key][value] is None:
+                            missing_req.append(value)
+                    case _:
+                        if meta_ref["data"]["attributes"][key] is None:
+                            missing_req.append(value)
+            return missing_req
+
+        missing_req = check_strictly_req(meta_ref)
+        if missing_req:
+            raise MissingMetadataError(missing_req)
+        
+        #TODO
+        def check_induced_req(meta_ref):
+            """Retrieve datacite property that become mandatory because
+            relative property has been compiled
+            """
+            pass
 
     def check_infos(self):
         """
@@ -125,7 +189,6 @@ class CheckSpreadsheet:
         if errors:
             raise InvalidInformationSchema(errors)
 
-    ## TODO
     def check_attributes(self):
         """
             Raise error for missing attributes in DDict_Attributes
@@ -149,7 +212,6 @@ class CheckSpreadsheet:
         if errors:
             raise InvalidDataDictAttribute(errors)
     
-    ## TODO
     def check_tables(self):
         """
             Raise error for missing tables in DDict_tables
@@ -462,4 +524,15 @@ class TableMissingError(CheckSpreadsheetError):
             f"The following tables are not found in metadata table:\n"
             f"{self.missing_table}\n"
             "Please check your spreadsheet"
+        )
+
+class MissingMetadataTermError(CheckSpreadsheetError):
+    """Raised if mandatory metadata terms is empty"""
+    def __init__(self, req_attr, req_if_attr) -> None:
+        super().__init__(
+            "The following metadata terms are mandatory and have not been"
+            f"filled: {req_attr}\n"
+            "Some attributes are mandatory if another has been completed,"
+            "see the dictionnary of attribute: mandatory_if_attribute:"
+            f"{req_if_attr}"
         )

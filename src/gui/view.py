@@ -767,7 +767,7 @@ class View(ctk.CTk):
             ow_state = self.get_var("check_ow")
             if (output_exist(self.output_dir, self.filename_var.get()) == False
                 and self.filename_var.get() != "") or ow_state == True:
-                # fie does not exists yet
+                # file does not exists yet
                 self.convert_btn.configure(state="normal")
                 self.add_variable("filename_var", self.filename_var.get())
             else:
@@ -1052,12 +1052,10 @@ class DCTermsForm(ToplevelWindow):
                         )
                     for key, value in entity.items():
                         if isinstance(value, list):
-                            print(object_name, value)
                             sub_item_idx = 0
                             for sub_item_dict in value:
                                 sub_item_name = list(sub_item_dict.keys())[0]
                                 sub_item_id = DC_NAME_ID_PAIRS[sub_item_name]
-                                print(sub_item_id)
                                 if sub_item_idx > 0:
                                     self.duplicate_sub_entry(
                                         sub_property_frame=self.property_frames[sub_item_id],
@@ -1092,6 +1090,13 @@ class DCTermsForm(ToplevelWindow):
         label = ctk.CTkLabel(property_frame, text=label_value)
         label.pack()
         entry = ctk.CTkEntry(property_frame)
+        entry.pack()
+        entries[label_value] = [entry]
+    
+    def add_textbox(self, entries, property_frame, label_value):
+        label = ctk.CTkLabel(property_frame, text=label_value)
+        label.pack()
+        entry = ctk.CTkTextbox(property_frame)
         entry.pack()
         entries[label_value] = [entry]
 
@@ -1188,12 +1193,16 @@ class DCTermsForm(ToplevelWindow):
                 if DC_TERMS[toi_id].get("controlled_list") is not None:
                     controlled_list = list(DC_TERMS[toi_id]["controlled_list"])
                     self.add_dropmenu(sub_entries[0], sub_property_frame, toi_name, controlled_list)
+                elif re.match("17", toi_id):
+                    self.add_textbox(sub_entries[0], sub_property_frame, toi_name)
                 else:
                     self.add_entry(sub_entries[0], sub_property_frame, toi_name)
             else:
                 if DC_TERMS[toi_id].get("controlled_list") is not None:
                     controlled_list = list(DC_TERMS[toi_id]["controlled_list"])
                     self.add_dropmenu(entries, property_frame, toi_name, controlled_list)
+                elif re.match("17", toi_id):
+                    self.add_textbox(entries, property_frame, toi_name)
                 else:
                     self.add_entry(entries, property_frame, toi_name)
         
@@ -1219,25 +1228,3 @@ class DCTermsForm(ToplevelWindow):
             self.duplicate_sub_entry(property_frame, entries[counter], object_id)
         else:
             self.create_entry(property_frame, entries[counter], object_id, object_name, many=True, occurrence=counter)
-
-        # if object_id not in ["2", "7", "13", "14", "19", "20"] and object_id not in self.opt_terms:
-        #     if DC_TERMS[object_id].get("controlled_list") is not None:
-        #         controlled_list = list(DC_TERMS[object_id]["controlled_list"])
-        #         self.add_dropmenu(entries, property_frame, DC_TERMS[object_id]['name'], controlled_list, suffix)
-        #     else:
-        #         self.add_entry(entries, property_frame, DC_TERMS[object_id]['name'], suffix)
-        # for req_term, sub_req in self.req_terms.items():
-        #     if re.match(f"{object_id}(?!\d)", req_term):
-        #         for value in sub_req:
-        #             if DC_TERMS[value].get("controlled_list") is not None:
-        #                 controlled_list = list(DC_TERMS[value]["controlled_list"])
-        #                 self.add_dropmenu(entries, property_frame, DC_TERMS[value]['name'], controlled_list, suffix)
-        #             else:
-        #                 self.add_entry(entries, property_frame, DC_TERMS[value]['name'], suffix)
-        # for sub_opt in self.opt_terms:
-        #     if re.match(f"{object_id}(?!\d)", sub_opt):
-        #         if DC_TERMS[sub_opt].get("controlled_list") is not None:
-        #             controlled_list = list(DC_TERMS[sub_opt]["controlled_list"])
-        #             self.add_dropmenu(entries, property_frame, DC_TERMS[sub_opt]['name'], controlled_list, suffix)
-        #         else:
-        #             self.add_entry(entries, property_frame, DC_TERMS[sub_opt]['name'], suffix)
