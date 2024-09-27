@@ -1043,6 +1043,7 @@ class DCTermsForm(ToplevelWindow):
                 item_idx = 0
                 for entity in json.loads(json_string):
                     if item_idx > 0:
+                        self.duplicates_count[object_id] += 1  # Increment the counter first
                         self.duplicate_entries(
                             property_frame=self.property_frames[object_id],
                             entries=self.entries[object_name],
@@ -1074,8 +1075,10 @@ class DCTermsForm(ToplevelWindow):
                             entry =  self.entries[object_name][item_idx][key][0]
                             if type(entry) == ctk.CTkComboBox and value is not None:
                                 entry.set(value)
-                            elif value is not None:
+                            elif type(entry) == ctk.CTkEntry and value is not None:
                                 entry.insert(0, value)
+                            elif value is not None:
+                                entry.insert("0.0", value)
                     item_idx+=1
             elif json_string == "":
                 pass
@@ -1136,11 +1139,11 @@ class DCTermsForm(ToplevelWindow):
             k: v 
             for k, v in DC_TERMS.items() 
             if (re.match(f"{object_id}(?!\d)", k) and 
-            (object_id not in ["2", "7", "19", "20"]) or
-            re.match(f"{object_id}\.", k))
+            (DC_TERMS[k].get("required") is not None))
         }
+
         for toi_id in tois.keys():
-            
+
             # retrieve term name
             toi_name = DC_TERMS[toi_id]["name"]
 
@@ -1149,8 +1152,8 @@ class DCTermsForm(ToplevelWindow):
                 # group sub-terms 1-n in their own sub-frame
                 sub_property_frame = ttk.Labelframe(property_frame, text=f"{toi_name}s")
                 sub_property_frame.pack(fill="both", expand="yes", padx=(10,10), pady=(10,10))
-                #! self.property_frames[f'{object_id]_{term}']
                 self.property_frames[toi_id] = sub_property_frame
+                # keep trace that toi_id support 1-n occurrence
                 sub_with_many = toi_id
                 
                 if occurrence is None:
@@ -1190,6 +1193,7 @@ class DCTermsForm(ToplevelWindow):
                 duplicate_btn.pack()
 
             if re.match(str(sub_with_many), toi_id):
+                # term with toi_id is part of the 1-n group of sub-item
                 if DC_TERMS[toi_id].get("controlled_list") is not None:
                     controlled_list = list(DC_TERMS[toi_id]["controlled_list"])
                     self.add_dropmenu(sub_entries[0], sub_property_frame, toi_name, controlled_list)
@@ -1207,6 +1211,9 @@ class DCTermsForm(ToplevelWindow):
                     self.add_entry(entries, property_frame, toi_name)
         
     def duplicate_sub_entry(self, sub_property_frame, sub_entries, sub_term_id):
+        """Called on clicking o add entries button for sub-terms
+        to duplicate sub-terms entries
+        """
         
         toi = {k:v for k,v in DC_TERMS.items() if re.match(sub_term_id, k)}
         for toi_id in toi.keys():
@@ -1214,6 +1221,8 @@ class DCTermsForm(ToplevelWindow):
             if toi[toi_id].get("controlled_list") is not None:
                 controlled_list = toi[toi_id]["controlled_list"]
                 self.add_dropmenu(sub_entries, sub_property_frame, toi_name, controlled_list)
+            elif re.match("17", toi_id):
+                self.add_textbox(sub_entries, sub_property_frame, toi_name)
             else:
                 self.add_entry(sub_entries, sub_property_frame, toi_name)
 

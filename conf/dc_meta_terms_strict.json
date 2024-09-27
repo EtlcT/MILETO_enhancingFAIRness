@@ -240,7 +240,7 @@
             ]
         },
         "4": {
-            "name": "name",
+            "name": "publisher",
             "required": 1,
             "has_o": [
                 "4.a"
@@ -326,6 +326,7 @@
         },
         "7": {
             "name": "contributor",
+            "required": 0,
             "has_r": [
                 "7.a",
                 "7.1"
@@ -371,7 +372,7 @@
             ]
         },
         "7.1": {
-            "name": "name",
+            "name": "contributorName",
             "required": 0,
             "has_o": [
                 "7.1.a"
@@ -967,6 +968,7 @@
         },
         "19": {
             "name": "fundingReference",
+            "required": 0,
             "has_r": [
                 "19.1"
             ],
@@ -1036,6 +1038,7 @@
         },
         "20": {
             "name": "relatedItem",
+            "required": 0,
             "has_r": [
                 "20.a",
                 "20.b"
@@ -1205,6 +1208,7 @@
         },
         "20.2": {
             "name": "creator",
+            "required": 0,
             "has_o": [
                 "20.2.1",
                 "20.2.2",

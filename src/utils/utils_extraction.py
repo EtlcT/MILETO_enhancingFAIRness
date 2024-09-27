@@ -64,3 +64,39 @@ def bytes_in_df_col(column: pd.Series) -> bool:
     is_bytes = pd.Series()
     is_bytes = column.apply(lambda x: isinstance(x, bytes))
     return is_bytes.any()
+
+def process_item(object_id, dc_terms_dict):
+    """
+        Collect required and optionnal terms and sub_terms (recursively) for each object_id
+    """
+    req_terms = {}  # Store required sub_terms id and the id of the terms that imply them to be mandatory
+    opt_terms = []  # Store optional sub_terms id
+
+    # Initialize the list for the current key in req_terms
+    if object_id not in req_terms:
+        req_terms[object_id] = []
+
+    # Process required sub_terms (has_r)
+    if dc_terms_dict[object_id].get("has_r") is not None:
+        for req_item in dc_terms_dict[object_id].get("has_r"):
+            req_terms[object_id].append(req_item)  # Collect required sub_terms
+            # Recursively process required sub_terms
+            sub_req_terms, sub_opt_terms = process_item(req_item, dc_terms_dict)
+            for sub_key, sub_values in sub_req_terms.items():
+                if sub_key not in req_terms:
+                    req_terms[sub_key] = []
+                req_terms[sub_key].extend(sub_values)  # Collect nested required terms
+            opt_terms.extend(sub_opt_terms)  # Collect nested optional terms
+
+    # Process optional sub_terms (has_o)
+    if dc_terms_dict[object_id].get("has_o") is not None:
+        for opt_item in dc_terms_dict[object_id].get("has_o"):
+            opt_terms.append(opt_item)  # Collect optional sub-item
+            sub_req_terms, sub_opt_terms = process_item(opt_item, dc_terms_dict)  # Recursively process
+            for sub_key, sub_values in sub_req_terms.items():
+                if sub_key not in req_terms:
+                    req_terms[sub_key] = []
+                req_terms[sub_key].extend(sub_values)  # Collect nested required terms
+            opt_terms.extend(sub_opt_terms)  # Collect nested optional terms
+
+    return req_terms, opt_terms  # Return both required and optional terms

@@ -147,7 +147,7 @@ class Controller:
 
 
     def get_entries(self, entries):
-        
+
         self.view.variables["change_occurs"] = True
         values = {}
         for object_name, content in entries.items():
@@ -177,7 +177,10 @@ class Controller:
                                         sub_dict[sub_term] = sub_entry[0].get()
                                     occurrence_dict[term].append(sub_dict)
                             else:
-                                occurrence_dict[term] = value[0].get()
+                                if type(value[0]) == ctk.CTkTextbox:
+                                    occurrence_dict[term] = value[0].get("0.0", "end")
+                                else:
+                                    occurrence_dict[term] = value[0].get()
                         values[object_name].append(occurrence_dict)
                 case _:
                     for term, entry in content.items():
@@ -185,7 +188,7 @@ class Controller:
 
         self.model.process_meta_dc_terms(values)
         self.refresh_meta()
-        self.dc_form_window.destroy()
+        self.view.show_success("Metadata correctly added to meta_dc_terms table!\nYou can close this window")
 
     def refresh_meta(self):
         """Update metadata treeview on changes"""

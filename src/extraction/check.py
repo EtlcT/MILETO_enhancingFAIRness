@@ -6,7 +6,7 @@ import json
 from conf.config import *
 from src.extraction.create_metadata import *
 from src.utils.utils import check_uniqueness, parse_json
-from src.utils.utils_extraction import get_datatables_list, rm_extra_tables
+from src.utils.utils_extraction import get_datatables_list, rm_extra_tables, process_item
 
 logging.basicConfig(level=logging.ERROR, 
                     format="%(asctime)s %(levelname)s %(message)s",
@@ -152,16 +152,106 @@ class CheckSpreadsheet:
             return missing_req
 
         missing_req = check_strictly_req(meta_ref)
-        if missing_req:
-            raise MissingMetadataError(missing_req)
         
-        #TODO
         def check_induced_req(meta_ref):
             """Retrieve datacite property that become mandatory because
             relative property has been compiled
             """
-            pass
 
+            def get_req_induced_dict():
+                """Retrieve a dictionnary of induced required terms with
+                DC_JSON_OBJECT value : {term_name: [induced_req_term_name]}
+                for sub sub required induced term:
+                DC_JSON_OBJECT value : {term_name: {sub_term_name: [induced_req_term_name]}}
+
+                Example:
+                ````python
+                
+                "creators": {
+                    "nameIdentifier": ["nameIdentifierScheme"],
+                    "affiliation": {
+                            "affiliationIdentifier": ["affiliationIdentifierScheme"]
+                        }
+                    }
+                ````
+                """
+                dc_object_name_list = list(DC_JSON_OBJECT.keys())
+                dc_object_idx_list = [DC_JSON_OBJECT[key]["id"] for key in dc_object_name_list]
+                req_induced_dict = {}
+                i = 0
+                for dc_term in dc_object_idx_list:
+                    required_term_dict, _ = process_item(dc_term, DC_TERMS)
+                    for key, req_if_key in required_term_dict.items():
+                        if  DC_TERMS[key].get("required") == 0 and req_if_key:
+                            if req_induced_dict.get(dc_object_name_list[i]) is None:
+                                req_induced_dict[dc_object_name_list[i]] = {}
+                            is_nested_sub = re.match("\d\.[a-zA-Z0-9]\.", key)
+                            if is_nested_sub:
+                                ancestor_name = DC_ID_NAME_PAIRS[is_nested_sub.group()[:-1]]
+                                if req_induced_dict[dc_object_name_list[i]].get(ancestor_name) is None:
+                                    req_induced_dict[dc_object_name_list[i]][ancestor_name] = {}
+                                req_induced_dict[dc_object_name_list[i]][ancestor_name].update({DC_ID_NAME_PAIRS[key]: [DC_ID_NAME_PAIRS[i] for i in req_if_key]})
+                            else:
+                                req_induced_dict[dc_object_name_list[i]].update({DC_ID_NAME_PAIRS[key]: [DC_ID_NAME_PAIRS[i] for i in req_if_key]})
+                    i += 1
+                
+                return req_induced_dict
+        
+            req_induced_dict = get_req_induced_dict()
+
+            def get_missing_req_induced_from(req_induced_dict):
+                missing_induced_req = []
+                for object_name, req_induced in req_induced_dict.items():
+                    # object_name correspond to DC_JSON_OBJECT (creators, publisher...)
+                    for term, value in req_induced.items():
+                        # term is a DC_TERM term_name (nameIdentifier, affiliation)
+                    
+                        dc_object = meta_ref["data"]["attributes"][object_name]
+                        match dc_object:
+                            case list():
+                                # dc_object has occurrence 1-n, ex: creators
+                                for entity in dc_object:
+                                    # check for each creators for instance
+                                    if isinstance(value, list):
+                                        for sub_req in value:
+                                            try:
+                                                entity[term]
+                                                if entity[term] is not None and entity[sub_req] is None:
+                                                    missing_induced_req.append(sub_req)
+                                            except:
+                                                # term not found because has several occurrences 
+                                                # ex: nameIdentifier, in this case the key is term+s like nameIdentifiers
+                                                for sub_item in entity[term+"s"]:
+                                                    if sub_item[term] is not None and sub_item[sub_req] is None:
+                                                        missing_induced_req.append(sub_req)
+                                                                        
+                                    elif isinstance(value, dict):
+                                        for sub_term, sub_req_list in  value.items():
+                                            for sub_req in sub_req_list:
+                                                for sub_item in entity[term+"s"]:
+                                                    if sub_item[term] is not None and sub_item[sub_req] is None:
+                                                        missing_induced_req.append(sub_req)
+                                                        
+                            case dict():
+                                for sub_req in value:
+                                    if dc_object[term] is not None and dc_object[sub_req] is None:
+                                        missing_induced_req.append(sub_req)
+
+                            case _:
+                                pass
+                return missing_induced_req
+
+            missing_req_induced = get_missing_req_induced_from(req_induced_dict)
+
+            return missing_req_induced
+
+        missing_req_induced = check_induced_req(meta_ref)
+
+        if missing_req:
+            raise MissingMetadataTermError(missing_req, missing_req_induced)
+            
+
+                
     def check_infos(self):
         """
             Raise error for unknown or missing fields in tables_infos
