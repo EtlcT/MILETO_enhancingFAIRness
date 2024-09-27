@@ -1043,7 +1043,7 @@ class DCTermsForm(ToplevelWindow):
                 item_idx = 0
                 for entity in json.loads(json_string):
                     if item_idx > 0:
-                        self.duplicates_count[object_id] += 1  # Increment the counter first
+                        self.duplicates_count[object_id] += 1  # Increment the counter
                         self.duplicate_entries(
                             property_frame=self.property_frames[object_id],
                             entries=self.entries[object_name],
@@ -1092,14 +1092,14 @@ class DCTermsForm(ToplevelWindow):
     def add_entry(self, entries, property_frame, label_value):
         label = ctk.CTkLabel(property_frame, text=label_value)
         label.pack()
-        entry = ctk.CTkEntry(property_frame)
+        entry = ctk.CTkEntry(property_frame, width=150)
         entry.pack()
         entries[label_value] = [entry]
     
     def add_textbox(self, entries, property_frame, label_value):
         label = ctk.CTkLabel(property_frame, text=label_value)
         label.pack()
-        entry = ctk.CTkTextbox(property_frame)
+        entry = ctk.CTkTextbox(property_frame, width=350)
         entry.pack()
         entries[label_value] = [entry]
 
@@ -1108,7 +1108,7 @@ class DCTermsForm(ToplevelWindow):
         label.pack()
         value_list = list(controlled_list)
         value_list.insert(0, "")
-        dropmenu = ctk.CTkComboBox(property_frame, values=value_list, state="readonly")
+        dropmenu = ctk.CTkComboBox(property_frame, values=value_list, state="readonly", width=150)
         dropmenu.pack()
         entries[label_value] = [dropmenu]
     

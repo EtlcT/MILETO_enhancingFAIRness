@@ -100,3 +100,4 @@ def process_item(object_id, dc_terms_dict):
             opt_terms.extend(sub_opt_terms)  # Collect nested optional terms
 
     return req_terms, opt_terms  # Return both required and optional terms
+

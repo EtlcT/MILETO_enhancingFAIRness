@@ -29,11 +29,12 @@ class CheckSpreadsheet:
         
         self.metadata_tables = [METAREF, INFO, DDICT_T, DDICT_A]
         # check template is respected before all
-        self.json_file = self.create_dc_api_request(filename)
+        self.filepath = str(filename) + ".json"
+        self.json_file = self.create_dc_api_request()
         self.validate_template()
         self.tables_info = self._get_tables_info()
         
-    def create_dc_api_request(self, filename):
+    def create_dc_api_request(self):
         """ Create a json file containing metadata in the folder where
         the initial spreadsheet is saved with the name of actual spreadsheet
 
@@ -62,7 +63,7 @@ class CheckSpreadsheet:
         ))
         dc_request["data"]["attributes"].update(json_dict)
 
-        with open(f"{filename}.json", "w", encoding="utf-8") as f:
+        with open(self.filepath, "w", encoding="utf-8") as f:
             json.dump(dc_request, f, ensure_ascii=True, indent=4)
 
 
@@ -129,10 +130,10 @@ class CheckSpreadsheet:
     def check_dc_terms(self):
         """
             Raise error if required datacite metadata terms or secondly
-            required terms are not completed
+            required terms (called required induced) are not completed
         """
 
-        meta_ref = json2dict("data/output/metadata_2018_ErosionExperiment_Marganai_v2024.json")
+        meta_ref = json2dict(self.filepath)
 
         def check_strictly_req(meta_ref):
             """Retrieve required property that have not been compiled"""
@@ -250,8 +251,7 @@ class CheckSpreadsheet:
         if missing_req:
             raise MissingMetadataTermError(missing_req, missing_req_induced)
             
-
-                
+           
     def check_infos(self):
         """
             Raise error for unknown or missing fields in tables_infos
