@@ -15,20 +15,21 @@ CSV is a widespread open format for sharing but it presents limitations in terms
 <ul>
     <li>Findable</li>
     <ul>
-        <li></li>
+        <li>Support the use of data repositories and the insertion of DOI</li>
     </ul>
     <li>Accessible</li>
     <ul>
-        <li></li>
+        <li>Generate metadata in JSON format (mainly to facilitate communication with data repositories' API)</li>
     </ul>
     <li>Interoperable</li>
     <ul>
-        <li></li>
+        <li>Produce files in Open format (sqlite, png, svg, pdf, json)</li>
+        <li>The JSON file produced from user's metadata facilitate communication through API (after mapping to fit API terms)</li>
     </ul>
     <li>Reusable</li>
     <ul>
-        <li>Provide rich metadata</li>
-        <li>Preserve data relationship</li>
+        <li>Encourage providing rich metadata</li>
+        <li>Encourage the use of data dictionnaries to facilitate reuse</li>
     </ul>
 </ul>
 

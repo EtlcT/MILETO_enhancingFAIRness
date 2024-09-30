@@ -122,12 +122,15 @@ class docCreate():
 
         keywords = [ subject["subject"] for subject in meta_ref["data"]["attributes"]["subjects"]]
 
-        extra_synthesis = meta_extra.loc[
-            meta_extra[METAEXTRA_ATT['property']] == METAEXTRA_PROP["synthesis"]
-            ][METAEXTRA_ATT['value']].iloc[0]
-        extra_desc = meta_extra.loc[
-            meta_extra[METAEXTRA_ATT['property']] == METAEXTRA_PROP["description"]
-            ][METAEXTRA_ATT['value']].iloc[0]
+        extra_synthesis = next((item["description"] for item in meta_ref["data"]["attributes"]["descriptions"] if item["descriptionType"] == "Abstract"), "")
+        extra_desc = next((item["description"] for item in meta_ref["data"]["attributes"]["descriptions"] if item["descriptionType"] == "Other"), "")
+
+        # extra_synthesis = meta_extra.loc[
+        #     meta_extra[METAEXTRA_ATT['property']] == METAEXTRA_PROP["synthesis"]
+        #     ][METAEXTRA_ATT['value']].iloc[0]
+        # extra_desc = meta_extra.loc[
+        #     meta_extra[METAEXTRA_ATT['property']] == METAEXTRA_PROP["description"]
+        #     ][METAEXTRA_ATT['value']].iloc[0]
 
         img_tag_erd = (
             "<figure>"

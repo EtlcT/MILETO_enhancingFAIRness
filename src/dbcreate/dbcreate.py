@@ -50,7 +50,7 @@ class sqliteCreate():
             pk_attr = table_info[table_info[INFO_ATT['isPK']]=='Y'][INFO_ATT['attribute']].tolist()
             attr_list = table_info[INFO_ATT['attribute']].tolist()
             attr_type = table_info["expectedType"].where(
-                table_info["expectedType"] != "",
+                pd.notna(table_info["expectedType"]),
                 table_info['type']
             ).tolist()
 
