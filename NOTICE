@@ -1,0 +1,113 @@
+The Nuoro Forestry School Data Documentation Procedure Software,
+known as NFS-DDP
+Copyright 2024 The NFS-DDP Authors
+
+The following components are included in this product (relative licenses
+are available in LICENSES folder):
+
+CTKMessageBox 2.7
+https://github.com/Akascape/CTkMessagebox
+Licensed under CC0 1.0 Universal
+
+customtkinter 5.2.2
+https://github.com/TomSchimansky/CustomTkinter
+Copyright (c) 2023 Tom Schimansky
+Licensed under MIT License
+
+darkdetect 0.8.0
+https://github.com/albertosottile/darkdetect
+Copyright (c) 2019, Alberto Sottile
+Licensed under BSD-3-Clause
+
+defusedxml 0.7.1
+https://github.com/tiran/defusedxml?tab=License-1-ov-file#readme
+Copyright (c) 2013-2017 by Christian Heimes <christian@python.org>
+Licensed to PSF under a Contributor Agreement.
+
+et-xmlfile 1.1.0
+https://foss.heptapod.net/openpyxl/et_xmlfile
+Copyright (c) 2010 openpyxl
+Licensed under MIT LIcense
+
+graphviz 0.20.3
+https://github.com/xflr6/graphviz
+Copyright (c) 2013-2024 Sebastian Bank
+Licensed under the MIT License
+
+numpy 2.1.0
+https://github.com/numpy/numpy
+Copyright (c) 2005-2024, NumPy Developers.
+Licensed under BSD License
+
+odfpy 1.4.1
+https://github.com/eea/odfpy
+Copyright (C) 2006-2014, Daniel Carrera, Alex Hudson, Søren Roug, Thomas Zander, Roman Fordinal, Michael Howitz and Georges Khaznadar except for OpenDocument schemas.
+Copyright © OASIS Open 2005 for OpenDocument RelaxNG.
+Licensed under the GNU GPL v2 or later version or Apache 2.0 License. For this project Apache 2.0 License has been selected.
+
+openpyxl 3.1.5
+https://foss.heptapod.net/openpyxl/openpyxl
+Copyright (c) 2010 openpyxl
+Licensed under the MIT License.
+
+packaging 24.1
+https://github.com/pypa/packaging
+Copyright (c) Donald Stufft and individual contributors.
+Licensed under Apache 2.0 or BSD-2-Clause. For this project Apache 2.0 License has been selected.
+
+pandas 2.2.2
+https://github.com/pandas-dev/pandas
+Copyright (c) 2008-2011, AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team
+Licensed under BSD 3-Clause License.
+
+parameterized 0.9.0
+https://github.com/wolever/parameterized
+Unless stated otherwise in the source files, all code is copyright 2010 David Wolever <david@wolever.net>
+Licensed under FreeBSD License.
+
+pdfkit 1.0.0
+https://github.com/JazzCore/python-pdfkit
+Copyright (c) 2012 JazzCore
+Licensed under MIT License.
+
+pillow 10.4.0
+https://github.com/python-pillow/Pillow
+The Python Imaging Library (PIL) is
+    Copyright © 1997-2011 by Secret Labs AB
+    Copyright © 1995-2011 by Fredrik Lundh and contributors
+Pillow is the friendly PIL fork. It is
+    Copyright © 2010-2024 by Jeffrey A. Clark and contributors
+    Licensed under the open source HPND License
+
+python-dateutil 2.9.0.post0
+https://github.com/dateutil/dateutil
+Copyright 2017- Paul Ganssle <paul@ganssle.io>
+Copyright 2017- dateutil contributors
+Licensed under the Apache License, Version 2.0
+
+pytz 2024.1
+https://github.com/stub42/pytz
+Copyright (c) 2003-2019 Stuart Bishop <stuart@stuartbishop.net>
+Licensed under MIT License
+
+setuptools 65.5.0
+https://github.com/pypa/setuptools
+Licensed under MIT License
+
+six 1.15.0
+https://github.com/benjaminp/six
+Copyright (c) 2010-2020 Benjamin Peterson
+Licensed under MIT License
+
+tzdata 2024.1
+https://github.com/python/tzdata
+Copyright (c) 2020, Paul Ganssle (Google)
+Licensed under Apache 2.0 License
+
+Graphviz 2.46.0
+https://gitlab.com/graphviz/graphviz.gitlab.io/tree/main/content/en/
+Licensed under Common Public License - v 1.0
+
+Wkhtmltopdf 0.12.6
+https://github.com/wkhtmltopdf/wkhtmltopdf
+Licensed under GNU LESSER GENERAL PUBLIC LICENSE

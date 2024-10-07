@@ -76,7 +76,7 @@ class CheckSpreadsheet:
             self.check_infos,
             self.check_attributes,
             self.check_tables,
-            self.check_dc_terms, #TODO
+            self.check_dc_terms,
         ]
         for check in check_tasks:
             try:
@@ -248,7 +248,7 @@ class CheckSpreadsheet:
 
         missing_req_induced = check_induced_req(meta_ref)
 
-        if missing_req:
+        if missing_req or missing_req_induced:
             raise MissingMetadataTermError(missing_req, missing_req_induced)
             
            
