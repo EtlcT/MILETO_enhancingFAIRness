@@ -6,18 +6,20 @@ import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
 import re
+import json
 
 from src.utils.utils import resource_path, output_exist
 from conf.config import *
 from src.utils.utils_gui import *
 from conf.view_config import *
 
+
 class ToplevelWindow(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title("Modify content")
-        self.after(10, self.lift) # force focus on toplevel window
-    
+        self.after(10, self.lift)  # force focus on toplevel window
+
     def edit(self, cell_type, current_value, selected_sheet, col_name, *args):
         """top level window that allow user to modify header and cell content"""
 
@@ -65,7 +67,8 @@ class ToplevelWindow(ctk.CTkToplevel):
     def edit_headers(self, current_value):
         """Open top level window to modify header value"""
 
-        self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
+        self.geometry(CenterWindowToDisplay(
+            self, 500, 150, self._get_window_scaling()))
         self.txt_var = ctk.StringVar(value=current_value)
         self.new_value = ctk.CTkEntry(
             master=self,
@@ -75,14 +78,15 @@ class ToplevelWindow(ctk.CTkToplevel):
         self.new_value.pack(
             **LABEL_OPT
         )
-        
+
     def edit_cell(self, current_value, selected_sheet=None, col_name=None, *args):
         """Open appropriate top level window to modify cell value
         based on column currently edited
         """
         match col_name:
             case "expectedType":
-                self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
+                self.geometry(CenterWindowToDisplay(
+                    self, 500, 150, self._get_window_scaling()))
                 self.new_value = ctk.CTkComboBox(
                     master=self,
                     values=args[0],
@@ -92,20 +96,21 @@ class ToplevelWindow(ctk.CTkToplevel):
                     **LABEL_OPT
                 )
             case "isPK":
-                self.geometry(CenterWindowToDisplay(self, 500, 200, self._get_window_scaling()))
+                self.geometry(CenterWindowToDisplay(
+                    self, 500, 200, self._get_window_scaling()))
                 self.new_value = ctk.StringVar(value="")
                 self.new_value_radio_y = ctk.CTkRadioButton(
                     self,
                     text="is Primary key",
                     variable=self.new_value,
                     value="Y"
-                    )
+                )
                 self.new_value_radio_n = ctk.CTkRadioButton(
                     self,
                     text="is NOT Primary key",
                     variable=self.new_value,
                     value=""
-                    )
+                )
                 self.new_value_radio_y.pack(
                     **LABEL_OPT
                 )
@@ -113,20 +118,21 @@ class ToplevelWindow(ctk.CTkToplevel):
                     **LABEL_OPT
                 )
             case "isFK":
-                self.geometry(CenterWindowToDisplay(self, 500, 200, self._get_window_scaling()))
+                self.geometry(CenterWindowToDisplay(
+                    self, 500, 200, self._get_window_scaling()))
                 self.new_value = ctk.StringVar(value="")
                 self.new_value_radio_y = ctk.CTkRadioButton(
                     self,
                     text="is Foreign key",
                     variable=self.new_value,
                     value="Y"
-                    )
+                )
                 self.new_value_radio_n = ctk.CTkRadioButton(
                     self,
                     text="is NOT Foreign key",
                     variable=self.new_value,
                     value=""
-                    )
+                )
                 self.new_value_radio_y.pack(
                     **LABEL_OPT
                 )
@@ -134,7 +140,8 @@ class ToplevelWindow(ctk.CTkToplevel):
                     **LABEL_OPT
                 )
             case "referenceTable":
-                self.geometry(CenterWindowToDisplay(self, 500, 150, self._get_window_scaling()))
+                self.geometry(CenterWindowToDisplay(
+                    self, 500, 150, self._get_window_scaling()))
                 self.new_value = ctk.CTkComboBox(
                     master=self,
                     values=args[0],
@@ -144,7 +151,8 @@ class ToplevelWindow(ctk.CTkToplevel):
                     **LABEL_OPT
                 )
             case _:
-                self.geometry(CenterWindowToDisplay(self, 500, 350, self._get_window_scaling()))
+                self.geometry(CenterWindowToDisplay(
+                    self, 500, 350, self._get_window_scaling()))
                 self.new_value = ctk.CTkTextbox(
                     master=self,
                     wrap="word"
@@ -155,25 +163,25 @@ class ToplevelWindow(ctk.CTkToplevel):
                     padx=10,
                     pady=10,
                     fill="both"
-            )
-
+                )
 
     def on_confirm(self):
         self.event_generate("<<ConfirmClick>>")
-    
+
     def on_cancel(self):
         self.event_generate("<<CancelClick>>")
+
 
 class View(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Ss2db")
+        self.title("NFS-FAIR-DDP")
         self.controller = None
         self.createWidgets()
         self.additional_frames = {}
         self.additional_widgets = {}
         self.variables = {}
-        self.protocol("WM_DELETE_WINDOW",lambda: self.controller.on_closing())
+        self.protocol("WM_DELETE_WINDOW", lambda: self.controller.on_closing())
 
     def createWidgets(self):
 
@@ -189,12 +197,12 @@ class View(ctk.CTk):
 
         self.welcome_label = ctk.CTkLabel(
             master=self.main_frame,
-            text="Welcome into Spreadsheet to SQLite converter !",
+            text="Welcome into the Nuoro Forestry School FAIR Data Documentation Procedure\nSpreadsheet to SQLite converter",
             font=TITLE_FONT
         )
         self.welcome_label.pack(
             side="top",
-            pady=(20,20),
+            pady=(20, 20),
             anchor="center"
         )
 
@@ -205,8 +213,8 @@ class View(ctk.CTk):
         )
         self.input_label.pack(
             side="top",
-            padx=(10,0),
-            pady=(10,0),
+            padx=(10, 0),
+            pady=(10, 0),
             anchor="w"
         )
 
@@ -229,7 +237,7 @@ class View(ctk.CTk):
 
         self.spreadsheet_radio.pack(
             side="left",
-            padx=(10,10)
+            padx=(10, 10)
         )
 
         self.sqlite_radio = ctk.CTkRadioButton(
@@ -245,8 +253,8 @@ class View(ctk.CTk):
 
         self.file_selection_frame = ctk.CTkFrame(master=self.main_frame)
         self.file_selection_frame.pack(
-            padx=(10,0),
-            pady=(10,0),
+            padx=(10, 0),
+            pady=(10, 0),
             side="top",
             fill="both"
         )
@@ -259,10 +267,10 @@ class View(ctk.CTk):
         )
         self.browse_file_label.pack(
             side="left",
-            padx=(10,0),
-            pady=(10,0)
+            padx=(10, 0),
+            pady=(10, 0)
         )
-        
+
         # browse button open file dialog
         self.browse_file_btn = ctk.CTkButton(
             self.file_selection_frame,
@@ -271,8 +279,8 @@ class View(ctk.CTk):
             font=TEXT_FONT
         )
         self.browse_file_btn.pack(
-            padx=(10,0),
-            pady=(10,0),
+            padx=(10, 0),
+            pady=(10, 0),
             side="left",
             anchor="nw"
         )
@@ -285,32 +293,36 @@ class View(ctk.CTk):
         then display selected file
         """
         self.variables["input_radio"] = self.input_radio.get()
-        if self.get_var("input_radio") == 1:
+        tmp_radio = self.variables["input_radio"]
+        if self.variables["input_radio"] == 1:
 
             self.filepath = ctk.filedialog.askopenfilename(
                 title="Select a file",
                 initialdir=os.path.expanduser("~"),
-                filetypes=[("All Excel files", "*.xlsx *.xls *.xlsm *.xlsb *.odf *.ods *.odt")]
+                filetypes=[
+                    ("All Excel files", "*.xlsx *.xls *.xlsm *.xlsb *.odf *.ods *.odt")]
             )
 
             if self.filepath:
                 # delete previous content if exist
                 self.clean_stage(mode="all")
+                self.variables["input_radio"] = tmp_radio
                 # display selected file in view input_frame
                 self.display_selected_file()
                 self.controller.spreadsheet_loader(self.filepath)
-        
+
         else:
             self.filepath = ctk.filedialog.askopenfilename(
                 title="Select a file",
                 filetypes=[("sqlite File", "*.sqlite")]
             )
-            
+
             if self.filepath:
-                #delete previous content if exist
+                # delete previous content if exist
                 self.clean_stage(mode="all")
+                self.variables["input_radio"] = tmp_radio
                 self.display_conversion_frame()
-    
+
     def display_selected_file(self):
 
         self.selected_file = ctk.CTkLabel(
@@ -344,7 +356,7 @@ class View(ctk.CTk):
             expand=True,
             fill="x",
             side="left",
-            padx=(10,10)
+            padx=(10, 10)
         )
         self.spreadsheet_frame_l.pack_propagate(False)
         self.add_frame("spreadsheet_frame_l", self.spreadsheet_frame_l)
@@ -357,24 +369,24 @@ class View(ctk.CTk):
             expand=True,
             fill="x",
             side="right",
-            padx=(10,10)
+            padx=(10, 10)
         )
         self.spreadsheet_frame_r.pack_propagate(False)
         self.add_frame("spreadsheet_frame_r", self.spreadsheet_frame_r)
-    
+
     def display_spreadsheet_data(self):
         """Create treeviews to display data sheet"""
 
-        #* Style treeview table 
+        # * Style treeview table
         style = ttk.Style()
         style.theme_use("default")
         if ctk.get_appearance_mode() == "Dark":
-            style.configure("data.Treeview",**DARK_TV_CONFIG)
+            style.configure("data.Treeview", **DARK_TV_CONFIG)
             style.map('data.Treeview', background=[('selected', '#22559b')])
             style.configure("data.Treeview.Heading", **DARK_TVH_CONFIG)
             style.map("data.Treeview.Heading",
-                    background=[('active', '#3484F0')]
-            )
+                      background=[('active', '#3484F0')]
+                      )
 
         # create treeview widget in spreadsheet_frame_l
         self.data_sheet_xscroll = ctk.CTkScrollbar(
@@ -401,22 +413,22 @@ class View(ctk.CTk):
     def display_spreadsheet_meta(self):
         """Create treeviews to display metadata sheet"""
 
-        #* Style treeview table 
+        # * Style treeview table
         style = ttk.Style()
         style.theme_use("default")
         if ctk.get_appearance_mode() == "Dark":
-            style.configure("meta.Treeview",**DARK_TV_CONFIG)
+            style.configure("meta.Treeview", **DARK_TV_CONFIG)
             style.map('meta.Treeview', background=[('selected', '#22559b')])
             style.configure("meta.Treeview.Heading", **DARK_TVH_CONFIG)
             style.map("meta.Treeview.Heading",
-                    background=[('active', '#565b5e')]
-            )
-        
+                      background=[('active', '#565b5e')]
+                      )
+
         # create treeview widget in spreadsheet_frame_r
         self.meta_sheet_xscroll = ctk.CTkScrollbar(
             self.spreadsheet_frame_r,
             orientation="horizontal"
-        )       
+        )
         self.meta_sheet = ttk.Treeview(
             master=self.spreadsheet_frame_r,
             xscrollcommand=self.meta_sheet_xscroll.set,
@@ -452,7 +464,7 @@ class View(ctk.CTk):
                 self.data_sheet_xscroll.pack_forget()
             if choice != "Select a sheet":
                 self.display_data_sheet(tmp_data, choice)
-        
+
         def sheet_selector_r_callback(choice, tmp_data):
             """Callback function that display sheet corresponding
             to user selection in drop menu
@@ -468,12 +480,12 @@ class View(ctk.CTk):
                 self.edit_btn.pack(
                     side="bottom"
                 )
-    
+
         self.data_sheet_selector = ctk.CTkComboBox(
             master=self.spreadsheet_frame_l,
             values=table_list,
             state="readonly",
-            command=lambda choice : sheet_selector_l_callback(choice, tmp_data),
+            command=lambda choice: sheet_selector_l_callback(choice, tmp_data),
             font=TEXT_FONT,
             # width=get_str_max_length(table_list)*8,
         )
@@ -488,7 +500,7 @@ class View(ctk.CTk):
             master=self.spreadsheet_frame_r,
             values=meta_table_list,
             state="readonly",
-            command=lambda choice : sheet_selector_r_callback(choice, tmp_data),
+            command=lambda choice: sheet_selector_r_callback(choice, tmp_data),
             font=TEXT_FONT,
             # width=get_str_max_length(table_list)*8,
         )
@@ -498,7 +510,7 @@ class View(ctk.CTk):
             anchor="n"
         )
         self.add_widget("meta_sheet_selector", self.meta_sheet_selector)
-    
+
     def display_data_sheet(self, tmp_data, selected_sheet):
         """Called on sheet_selector's changes
         Update treeview widget to display selected data sheet
@@ -511,12 +523,13 @@ class View(ctk.CTk):
         for column in self.data_sheet["columns"]:
             self.data_sheet.heading(column, text=column)
             self.data_sheet.column(column=column, stretch=0)
-        
+
         df_rows = tmp_data[selected_sheet].to_numpy().tolist()
         for row in df_rows:
             self.data_sheet.insert("", "end", values=row)
-        
-        self.data_sheet.bind("<Button-1>", lambda event: self.controller.on_header_click(event, selected_sheet))
+
+        self.data_sheet.bind(
+            "<Button-1>", lambda event: self.controller.on_header_click(event, selected_sheet))
 
     def display_meta_sheet(self, tmp_data, selected_sheet):
         """Called on sheet_selector's changes
@@ -531,18 +544,19 @@ class View(ctk.CTk):
             self.meta_sheet.column(column=column, stretch=0)
             if column in COLUMN_WIDTH_S:
                 self.meta_sheet.column(column, width=50, stretch=0)
-        
+
         df_rows = tmp_data[selected_sheet].to_numpy().tolist()
 
         for row in df_rows:
             self.meta_sheet.insert("", "end", values=row)
         if selected_sheet != METAREF:
-            self.meta_sheet.bind("<Button-1>", lambda event: self.controller.on_cell_click(event, selected_sheet))
+            self.meta_sheet.bind(
+                "<Button-1>", lambda event: self.controller.on_cell_click(event, selected_sheet))
         self.edit_btn = ctk.CTkButton(
-                    master=self.spreadsheet_frame_r,
-                    text="Edit content",
-                    command= self.controller.edit_dc_terms
-                )
+            master=self.spreadsheet_frame_r,
+            text="Edit content",
+            command=self.controller.edit_dc_terms
+        )
 
     def display_spreadsheet_option(self):
         """Display buttons to create and update metadata tables
@@ -557,7 +571,7 @@ class View(ctk.CTk):
 
         self.display_save_spreadsheet()
         self.display_check_spreadsheet()
-    
+
     def display_check_spreadsheet(self):
         """Display check spreadsheet data button to check
         data consistency regarding template
@@ -571,11 +585,11 @@ class View(ctk.CTk):
         self.check_btn.pack(
             side="left",
             anchor="center",
-            padx=(10,10),
-            pady=(10,10)
+            padx=(10, 10),
+            pady=(10, 10)
         )
         self.add_widget("check_btn", self.check_btn)
-    
+
     def display_save_spreadsheet(self):
         """Display save changes button to save changes applied to the
         spreadsheet
@@ -588,8 +602,8 @@ class View(ctk.CTk):
         )
         self.save_btn.pack(
             side="left",
-            padx=(10,10),
-            pady=(10,10)
+            padx=(10, 10),
+            pady=(10, 10)
         )
         self.add_widget("save_btn", self.save_btn)
 
@@ -607,8 +621,9 @@ class View(ctk.CTk):
             self.add_frame("error_frame", self.error_frame)
 
             self.error_icon_img = ctk.CTkImage(
-                light_image= Image.open(os.path.normpath(resource_path("src/gui/assets/error.png"))),
-                size=(40,40)
+                light_image=Image.open(os.path.normpath(
+                    resource_path("src/gui/assets/error.png"))),
+                size=(40, 40)
             )
             self.error_icon = ctk.CTkLabel(
                 master=self.error_frame,
@@ -653,7 +668,7 @@ class View(ctk.CTk):
         elif error_type == "template":
             self.errors.insert(tk.END, error_msg)
 
-    #TODO radio button only sqlite and erd OR all
+    # TODO radio button only sqlite and erd OR all
     def display_conversion_frame(self):
         """Add a conversion frame to view with:
         - browse folder button for output directory selection
@@ -667,8 +682,8 @@ class View(ctk.CTk):
             font=SUBTITLE_FONT
         )
         self.conversion_frame_label.pack(
-            padx=(10,0),
-            pady=(20,0),
+            padx=(10, 0),
+            pady=(20, 0),
             anchor="w"
         )
         self.add_widget("conversion_frame_label", self.conversion_frame_label)
@@ -677,8 +692,8 @@ class View(ctk.CTk):
         self.conversion_frame.pack(
             fill="both",
             expand=True,
-            padx=(10,10),
-            pady=(10,0)
+            padx=(10, 10),
+            pady=(10, 0)
         )
         self.add_frame("conversion_frame", self.conversion_frame)
 
@@ -723,7 +738,7 @@ class View(ctk.CTk):
         )
 
         if self.output_dir:
-            if self.get_var("input_radio") == 2:
+            if self.variables["input_radio"] == 2:
                 self.sqlite2pdf_btn()
             else:
                 output_basename = os.path.normpath(
@@ -739,7 +754,7 @@ class View(ctk.CTk):
                 else:
                     self.convert_btn.configure(state="normal")
 
-                self.filename_selection_frame=ctk.CTkFrame(
+                self.filename_selection_frame = ctk.CTkFrame(
                     self.conversion_frame
                 )
                 self.filename_selection_frame.pack(
@@ -755,7 +770,6 @@ class View(ctk.CTk):
                     pady=10
                 )
 
-        
     def filename_entry(self, output_basename):
         """Add Entry widget to allow user to chose
         another name for generated outputs
@@ -766,7 +780,7 @@ class View(ctk.CTk):
             """
             ow_state = self.get_var("check_ow")
             if (output_exist(self.output_dir, self.filename_var.get()) == False
-                and self.filename_var.get() != "") or ow_state == True:
+                    and self.filename_var.get() != "") or ow_state == True:
                 # file does not exists yet
                 self.convert_btn.configure(state="normal")
                 self.add_variable("filename_var", self.filename_var.get())
@@ -789,7 +803,7 @@ class View(ctk.CTk):
         filename_entry.pack(
             side="left"
         )
-    
+
     def ow_checkbox(self):
         """Add checkbox for overwrite previous output option"""
 
@@ -816,15 +830,16 @@ class View(ctk.CTk):
         self.overwrite_cb.pack(
             side="left"
         )
-    
-    def open_edition_window(self, cell_type, current_value, selected_sheet, col_name, *args):
+
+    def open_edition_window(self, cell_type, current_value, selected_sheet=None, col_name=None, *args):
         """Open a top level window to edit content"""
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = ToplevelWindow(self)
-            self.toplevel_window.edit(cell_type, current_value, selected_sheet, col_name, *args)
+            self.toplevel_window.edit(
+                cell_type, current_value, selected_sheet, col_name, *args)
         else:
             self.toplevel_window.focus()  # if window exists focus it
-        
+
         return self.toplevel_window
 
     def display_convert_btn(self):
@@ -841,7 +856,7 @@ class View(ctk.CTk):
     def display_file_exist_warning(self):
         """Display warning if file(s) already exist"""
 
-        self.file_exists_warning_msg = ( 
+        self.file_exists_warning_msg = (
             f"WARNING: Output(s) already exist in output directory for this spreadsheet"
             "\nCheck the overwrite checkbox to delete existing file(s)"
             " or provide another filename: "
@@ -878,25 +893,25 @@ class View(ctk.CTk):
             icon="check",
             option_1="OK"
         )
-    
+
     def warning_exit(self):
         """Open window to ask if user want to quit without saving"""
         msg_box = CTkMessagebox(
-                    title="Pending Changes !",
-                    message="Warning there are pending changes that haven't be saved yet!\nDo you want to save them ?",
-                    option_1="Yes, save spreadsheet",
-                    option_2="Quit without saving"
-                )
+            title="Pending Changes !",
+            message="Warning there are pending changes that haven't be saved yet!\nDo you want to save them ?",
+            option_1="Yes, save spreadsheet",
+            option_2="Quit without saving"
+        )
         return msg_box
 
     def add_frame(self, frame_name, frame):
         """Add new widget to additional_frames for future retrieving"""
         self.additional_frames[frame_name] = frame
-    
+
     def add_widget(self, widget_name, widget):
         """Add new widget to additional_frames for future retrieving"""
         self.additional_widgets[widget_name] = widget
-    
+
     def rm_frame(self, frame_name):
         """Remove frame from view if exist"""
         if frame_name in self.additional_frames:
@@ -904,7 +919,7 @@ class View(ctk.CTk):
             del self.additional_frames[frame_name]
             frame.destroy()
             self.main_frame.update_idletasks()
-    
+
     def rm_widget(self, widget_name):
         """Remove frame from view if exist"""
 
@@ -916,11 +931,11 @@ class View(ctk.CTk):
     def get_frame(self, frame_name):
         """Retrieve widget created from controller"""
         return self.additional_frames.get(frame_name)
-    
+
     def get_widget(self, widget_name):
         """Retrieve widget created from controller"""
         return self.additional_widgets.get(widget_name)
-    
+
     def add_variable(self, var_name, value):
         """Add variable value to view for future access"""
         self.variables[var_name] = value
@@ -930,14 +945,14 @@ class View(ctk.CTk):
         if key doesn't exist, return None
         """
         return self.variables.get(var_name, None)
-    
+
     def erase_var_dict(self):
         """Delete every variable in self.variables dict"""
         self.variables = {}
 
     def clean_stage(self, mode="all"):
         """Remove frames and widgets from view, delete variables"""
-        if mode=="all":
+        if mode == "all":
             self.rm_widget("selected_file")
             self.rm_frame("ss_option_frame")
             self.rm_frame("spreadsheet_frame")
@@ -949,11 +964,12 @@ class View(ctk.CTk):
             self.erase_var_dict()
         else:
             pass
-    
+
     def rm_filename_var(self):
         """Remove previous filename variable if exist"""
         if "filename_var" in self.variables:
             del self.variables["filename_var"]
+
 
 class DCTermsForm(ToplevelWindow):
     """ DCTermsForm class automate the creation of the form to edit
@@ -963,6 +979,7 @@ class DCTermsForm(ToplevelWindow):
     support 1-n occurrences
     Values already compile appears in entries and dropmenus
     """
+
     def __init__(self, controller, data, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -984,51 +1001,71 @@ class DCTermsForm(ToplevelWindow):
         style = ttk.Style()
         style.configure("TLabelframe", background="#565b5e")
         self.dc_frame = ctk.CTkScrollableFrame(self)
-        self.dc_frame.pack(expand=True,fill="both")
+        self.dc_frame.pack(expand=True, fill="both")
 
         for obj_name, obj_info in DC_JSON_OBJECT.items():
             self.entries[obj_name] = {}
-            property_frame = ttk.Labelframe(self.dc_frame, text=obj_name)
-            property_frame.pack(fill="both", expand="yes", padx=(10,10), pady=(10,10))
+            property_frame_lbl = ctk.CTkLabel(
+                master=self.dc_frame,
+                text=obj_name,
+                font=SUBTITLE_FONT,
+                fg_color="transparent"
+            )
+            property_frame = ttk.Labelframe(
+                self.dc_frame,
+                labelwidget=property_frame_lbl
+            )
+            property_frame.pack(
+                fill="both",
+                expand="yes",
+                padx=(10, 10),
+                pady=(10, 10)
+            )
             self.property_frames[obj_info["id"]] = property_frame
             match DC_TERMS[obj_info['id']]['occurrences']:
                 # check if property support several objects
                 case "1":
-                    self.create_entry(property_frame, self.entries[obj_name], obj_info["id"], obj_name)
-                case "1-n":
+                    self.create_entries(
+                        property_frame, self.entries[obj_name], obj_info["id"], obj_name)
+                case _:
                     self.duplicates_count[obj_info['id']] = 0
                     self.entries[obj_name][0] = {}
 
                     duplicate_btn = ctk.CTkButton(
                         property_frame,
                         text="add entity",
-                        command= lambda pf=property_frame, ent=self.entries[obj_name], oid=obj_info['id'], on=obj_name: self.handle_duplicate(pf, ent, oid, on)
+                        command=lambda pf=property_frame, ent=self.entries[obj_name], oid=obj_info['id'], on=obj_name: self.handle_duplicate(
+                            pf, ent, oid, on)
                     )
                     duplicate_btn.pack()
-                    self.create_entry(property_frame, self.entries[obj_name][0], obj_info["id"], obj_name, many=True, occurrence=0)
+                    self.create_entries(
+                        property_frame, self.entries[obj_name][0], obj_info["id"], obj_name, many=True, occurrence=0)
 
         self.confirm_dc_terms = ctk.CTkButton(
             self.dc_frame,
             text="Confirm changes",
-            command= lambda: self.controller.get_entries(self.entries)
-            )
+            command=lambda: self.controller.get_entries(self.entries)
+        )
         self.confirm_dc_terms.pack()
         self.fill_existing_values(data)
-    
+
     def handle_duplicate(self, property_frame, entries, object_id, object_name, sub=None, occurrence=None):
         if isinstance(self.duplicates_count[object_id], dict):
             self.duplicates_count[object_id][occurrence] += 1
             counter = self.duplicates_count[object_id][occurrence]
         else:
-            self.duplicates_count[object_id] += 1  # Increment the counter first
+            # Increment the counter first
+            self.duplicates_count[object_id] += 1
             counter = self.duplicates_count[object_id]
-        self.duplicate_entries(property_frame, entries, object_id, object_name, counter, sub=sub)
+        self.duplicate_entries(property_frame, entries,
+                               object_id, object_name, counter, sub=sub)
 
     def fill_existing_values(self, data):
-        for _ , row in data.iterrows():
-            object_name, json_string = row[METAREF_ATT["property"]], row[METAREF_ATT["value"]]
+        for _, row in data.iterrows():
+            object_name, json_string = row[METAREF_ATT["property"]
+                                           ], row[METAREF_ATT["value"]]
             object_id = DC_JSON_OBJECT[object_name]["id"]
-          
+
             if re.match(r"\{", str(json_string)):
                 # contain one object:
                 curr_value = json.loads(json_string)
@@ -1039,16 +1076,18 @@ class DCTermsForm(ToplevelWindow):
                     elif value is not None:
                         entry.insert(0, value)
 
-            elif re.match(r'\[', str(json_string)):
+            elif re.match(r'\[\{', str(json_string)):
+                # match terms that are list of objects
                 item_idx = 0
                 for entity in json.loads(json_string):
                     if item_idx > 0:
-                        self.duplicates_count[object_id] += 1  # Increment the counter
+                        # Increment the counter
+                        self.duplicates_count[object_id] += 1
                         self.duplicate_entries(
                             property_frame=self.property_frames[object_id],
                             entries=self.entries[object_name],
                             object_id=object_id,
-                            object_name= object_name,
+                            object_name=object_name,
                             counter=item_idx
                         )
                     for key, value in entity.items():
@@ -1056,46 +1095,77 @@ class DCTermsForm(ToplevelWindow):
                             sub_item_idx = 0
                             for sub_item_dict in value:
                                 sub_item_name = list(sub_item_dict.keys())[0]
-                                sub_item_id = DC_NAME_ID_PAIRS[sub_item_name]
+                                sub_item_id = get_sub_item_id(DC_TERMS, object_id, sub_item_name)
                                 if sub_item_idx > 0:
                                     self.duplicate_sub_entry(
                                         sub_property_frame=self.property_frames[sub_item_id],
-                                        sub_entries=self.entries[object_name][f"{sub_item_name}s"][sub_item_idx],
+                                        sub_entries=self.entries[object_name][sub_item_name][sub_item_idx],
                                         sub_term_id=sub_item_id
                                     )
                                 for sub_term, sub_entry in sub_item_dict.items():
-
-                                    entry = self.entries[object_name][item_idx][f"{sub_item_name}s"][sub_item_idx][sub_term][0]
+                                    try:
+                                        entry = self.entries[object_name][item_idx][key+"s"][sub_item_idx][sub_term][0]
+                                    except:
+                                        entry = self.entries[object_name][item_idx][key][sub_item_idx][sub_term][0]
                                     if type(entry) == ctk.CTkComboBox and sub_entry is not None:
                                         entry.set(sub_entry)
                                     elif sub_entry is not None:
                                         entry.insert(0, sub_entry)
-                                
+
                         else:
-                            entry =  self.entries[object_name][item_idx][key][0]
+                            entry = self.entries[object_name][item_idx][key][0]
                             if type(entry) == ctk.CTkComboBox and value is not None:
                                 entry.set(value)
                             elif type(entry) == ctk.CTkEntry and value is not None:
                                 entry.insert(0, value)
                             elif value is not None:
                                 entry.insert("0.0", value)
+                    item_idx += 1
+            elif re.match(r'\[', str(json_string)):
+                # match terms that are list
+                item_idx = 0
+                for value in json.loads(json_string):
+                    if item_idx > 0:
+                        # Increment the counter
+                        self.duplicates_count[object_id] += 1
+                        self.duplicate_entries(
+                            property_frame=self.property_frames[object_id],
+                            entries=self.entries[object_name],
+                            object_id=object_id,
+                            object_name=object_name,
+                            counter=item_idx
+                        )
+                    entry = list(self.entries[object_name][item_idx].values())[0][0]
+                    if type(entry) == ctk.CTkComboBox and value is not None:
+                        entry.set(value)
+                    elif type(entry) == ctk.CTkEntry and value is not None:
+                        entry.insert(0, value)
+                    elif value is not None:
+                        entry.insert("0.0", value)
+                    else:
+                        pass
                     item_idx+=1
             elif json_string == "":
                 pass
             else:
-                entry =  self.entries[object_name][object_name][0]
-                if type(entry) == ctk.CTkComboBox  and value is not None:
+                # match string and integer
+                entry = self.entries[object_name][object_name][0]
+                if type(entry) == ctk.CTkComboBox and json_string != "null":
                     entry.set(json_string)
-                elif value is not None:
+                elif type(entry) == ctk.CTkEntry and json_string != "null":
                     entry.insert(0, json_string)
+                elif json_string != "null":
+                    entry.insert("0.0", value)
+                else:
+                    pass
 
     def add_entry(self, entries, property_frame, label_value):
         label = ctk.CTkLabel(property_frame, text=label_value)
         label.pack()
-        entry = ctk.CTkEntry(property_frame, width=150)
+        entry = ctk.CTkEntry(property_frame, width=250)
         entry.pack()
         entries[label_value] = [entry]
-    
+
     def add_textbox(self, entries, property_frame, label_value):
         label = ctk.CTkLabel(property_frame, text=label_value)
         label.pack()
@@ -1108,17 +1178,12 @@ class DCTermsForm(ToplevelWindow):
         label.pack()
         value_list = list(controlled_list)
         value_list.insert(0, "")
-        dropmenu = ctk.CTkComboBox(property_frame, values=value_list, state="readonly", width=150)
+        dropmenu = ctk.CTkComboBox(
+            property_frame, values=value_list, state="readonly", width=150)
         dropmenu.pack()
         entries[label_value] = [dropmenu]
-    
-    def _get_id_by_name(self, data, target_name):
-        for key, values in data.items():
-            if values.get('name') == target_name:
-                return key
-        return None
 
-    def create_entry(self, property_frame, entries, object_id, object_name, many=None, occurrence=None):
+    def create_entries(self, property_frame, entries, object_id, object_name, many=None, occurrence=None):
         """
             Retrieve all terms associated to object_id and display entries
             for each of them
@@ -1127,8 +1192,8 @@ class DCTermsForm(ToplevelWindow):
         if many:
             # when they can be several occurrences, frame is packed on left side
             property_frame = ctk.CTkFrame(property_frame)
-            property_frame.pack(side="left")
-        
+            property_frame.pack(side="left", anchor="n")
+
         # handle sub attributes supporting occurences 1-n
         # contains the id of the sub-term having 1-n occurrences
         sub_with_many = None
@@ -1136,10 +1201,13 @@ class DCTermsForm(ToplevelWindow):
         # keep only terms related to object_id currently considered
         # exclude terms that should not appear in datacite json
         tois = {
-            k: v 
-            for k, v in DC_TERMS.items() 
-            if (re.match(f"{object_id}(?!\d)", k) and 
-            (DC_TERMS[k].get("required") is not None))
+            k: v
+            for k, v in DC_TERMS.items()
+            if (re.match(f"{object_id}(?!\d)", k) and
+                (DC_TERMS[k].get("required") is not None) or 
+                (re.match(f"{object_id}\.", k) and
+                (DC_TERMS[k].get("required") is None))
+            )
         }
 
         for toi_id in tois.keys():
@@ -1150,77 +1218,87 @@ class DCTermsForm(ToplevelWindow):
             # identify sub-terms that support 1-n occurrences
             if re.search("\.", toi_id) and DC_TERMS[toi_id]["occurrences"] != "1":
                 # group sub-terms 1-n in their own sub-frame
-                sub_property_frame = ttk.Labelframe(property_frame, text=f"{toi_name}s")
-                sub_property_frame.pack(fill="both", expand="yes", padx=(10,10), pady=(10,10))
+                sub_property_frame = ttk.Labelframe(
+                    property_frame, text=toi_name+"s")
+                sub_property_frame.pack(
+                    fill="both",
+                    expand="yes",
+                    padx=(10, 10),
+                    pady=(10, 10),
+                    anchor="n"
+                )
                 self.property_frames[toi_id] = sub_property_frame
                 # keep trace that toi_id support 1-n occurrence
                 sub_with_many = toi_id
-                
+
+
                 if occurrence is None:
-                    #* loop not entered with current datacite schema 4.5
-                    #* entered only for 1-n sub-terms that belong to terms 
-                    #* with occurrence 1 ; no terms fit this yet
-                    if self.entries[object_name].get(f"{toi_name}s") is None:
+                    # * loop not entered with current datacite schema 4.5
+                    # * entered only for 1-n sub-terms that belong to terms
+                    # * with occurrence 1 ; no terms fit this yet
+                    if self.entries[object_name].get(toi_name) is None:
                         # first occurrence of sub-term 1-n, set counter on 0
                         self.duplicates_count[toi_id] = 0
-                        self.entries[object_name][f"{toi_name}s"][0] = {}
-                        sub_entries = self.entries[object_name][f"{toi_name}s"][0]
-                    
+                        self.entries[object_name][toi_name+"s"][0] = {}
+                        sub_entries = self.entries[object_name][toi_name+"s"][0]
+
                     duplicate_btn = ctk.CTkButton(
                         property_frame,
                         text="add entity",
-                        command= lambda pf=sub_property_frame, ent=sub_entries, oid=toi_id, on=object_name: self.handle_duplicate(pf, ent, oid, on, sub=True, occurrence=occurrence)
+                        command=lambda pf=sub_property_frame, ent=sub_entries, oid=toi_id, on=object_name: self.handle_duplicate(
+                            pf, ent, oid, on, sub=True, occurrence=occurrence)
                     )
 
                 else:
                     # entered for sub-terms 1-n that belong to terms 1-n (and 4-n)
-                    if self.entries[object_name][occurrence].get(f"{toi_name}s") is None:
+                    if self.entries[object_name][occurrence].get(toi_name) is None:
                         # first occurrence of sub-term 1-n, set counter on 0 for actual entity
                         if occurrence == 0:
-                            self.duplicates_count[toi_id] = {occurrence:0}
+                            self.duplicates_count[toi_id] = {occurrence: 0}
                         else:
                             self.duplicates_count[toi_id][occurrence] = 0
-                        self.entries[object_name][occurrence][f"{toi_name}s"] = {}
-                        self.entries[object_name][occurrence][f"{toi_name}s"][0] = {}
-                        sub_entries = self.entries[object_name][occurrence][f"{toi_name}s"]
-                    
+                        self.entries[object_name][occurrence][toi_name+"s"] = {}
+                        self.entries[object_name][occurrence][toi_name+"s"][0] = {}
+                        sub_entries = self.entries[object_name][occurrence][toi_name+"s"]
+
                     duplicate_btn = ctk.CTkButton(
                         property_frame,
                         text="add entity",
-                        command= lambda pf=sub_property_frame, ent=sub_entries, oid=toi_id, on=object_name, occ=occurrence: self.handle_duplicate(pf, ent, oid, on, sub=True, occurrence=occ)
+                        command=lambda pf=sub_property_frame, ent=sub_entries, oid=toi_id, on=object_name, occ=occurrence: self.handle_duplicate(
+                            pf, ent, oid, on, sub=True, occurrence=occ)
                     )
 
                 duplicate_btn.pack()
 
             if re.match(str(sub_with_many), toi_id):
                 # term with toi_id is part of the 1-n group of sub-item
-                if DC_TERMS[toi_id].get("controlled_list") is not None:
-                    controlled_list = list(DC_TERMS[toi_id]["controlled_list"])
-                    self.add_dropmenu(sub_entries[0], sub_property_frame, toi_name, controlled_list)
-                elif re.match("17", toi_id):
-                    self.add_textbox(sub_entries[0], sub_property_frame, toi_name)
-                else:
-                    self.add_entry(sub_entries[0], sub_property_frame, toi_name)
+                entries_var = sub_entries[0]
+                frame = sub_property_frame
             else:
-                if DC_TERMS[toi_id].get("controlled_list") is not None:
-                    controlled_list = list(DC_TERMS[toi_id]["controlled_list"])
-                    self.add_dropmenu(entries, property_frame, toi_name, controlled_list)
-                elif re.match("17", toi_id):
-                    self.add_textbox(entries, property_frame, toi_name)
-                else:
-                    self.add_entry(entries, property_frame, toi_name)
-        
+                entries_var = entries
+                frame = property_frame
+
+            if DC_TERMS[toi_id].get("controlled_list") is not None:
+                controlled_list = list(DC_TERMS[toi_id]["controlled_list"])
+                self.add_dropmenu(entries_var, frame,
+                                    toi_name, controlled_list)
+            elif DC_TERMS[toi_id].get("long_string") is not None:
+                self.add_textbox(entries_var, frame, toi_name)
+            else:
+                self.add_entry(entries_var, frame, toi_name)
+
     def duplicate_sub_entry(self, sub_property_frame, sub_entries, sub_term_id):
         """Called on clicking o add entries button for sub-terms
         to duplicate sub-terms entries
         """
-        
-        toi = {k:v for k,v in DC_TERMS.items() if re.match(sub_term_id, k)}
+
+        toi = {k: v for k, v in DC_TERMS.items() if re.match(sub_term_id, k)}
         for toi_id in toi.keys():
             toi_name = toi[toi_id]["name"]
             if toi[toi_id].get("controlled_list") is not None:
                 controlled_list = toi[toi_id]["controlled_list"]
-                self.add_dropmenu(sub_entries, sub_property_frame, toi_name, controlled_list)
+                self.add_dropmenu(
+                    sub_entries, sub_property_frame, toi_name, controlled_list)
             elif re.match("17", toi_id):
                 self.add_textbox(sub_entries, sub_property_frame, toi_name)
             else:
@@ -1234,6 +1312,8 @@ class DCTermsForm(ToplevelWindow):
 
         entries[counter] = {}
         if sub:
-            self.duplicate_sub_entry(property_frame, entries[counter], object_id)
+            self.duplicate_sub_entry(
+                property_frame, entries[counter], object_id)
         else:
-            self.create_entry(property_frame, entries[counter], object_id, object_name, many=True, occurrence=counter)
+            self.create_entries(
+                property_frame, entries[counter], object_id, object_name, many=True, occurrence=counter)

@@ -100,7 +100,6 @@ def output_exist(output_dir, output_basename):
         return True if output already exist else False
         """
         outputs = [
-            os.path.join(output_dir, output_basename + ".json"),
             os.path.join(output_dir, output_basename + ".sqlite"),
             os.path.join(output_dir, output_basename + ".pdf"),
             os.path.join(output_dir, "ERD_" + output_basename + ".svg"),
@@ -138,16 +137,6 @@ def get_relative_items(dc_dict, dc_id, required=None):
 def format_as_json(text: str):
     parsed_json = json.loads(text, )
     return json.dumps(parsed_json, indent=4)
-
-def get_name_id_pairs(data):
-    name_id_dict = {}
-    id_name_dict = {}
-    for key, values in data.items():
-        name = values.get('name')
-        if name:
-            name_id_dict[name] = key
-            id_name_dict[key] = name
-    return name_id_dict, id_name_dict
 
 def parse_json(value):
     if pd.isna(value):
@@ -237,3 +226,12 @@ def process_dc_json(self, dc_json_objects, dc_json_terms):
                 opt_terms.append(info["id"])
     req_terms = {k:v for k, v in req_terms.items() if v}
     return req_terms, opt_terms
+
+def rm_whitespace(text:str):
+    """Remove, break line, spaces and """
+    if text is None:
+        return None
+    elif type(text) == int:
+        return "integer type is not empty"
+    else:
+        return re.sub("\s", "", text)

@@ -5,7 +5,7 @@ import json
 
 from conf.config import *
 from src.extraction.create_metadata import *
-from src.utils.utils import check_uniqueness, parse_json
+from src.utils.utils import check_uniqueness, parse_json, rm_whitespace
 from src.utils.utils_extraction import get_datatables_list, rm_extra_tables, process_item
 
 logging.basicConfig(level=logging.ERROR, 
@@ -29,10 +29,9 @@ class CheckSpreadsheet:
         
         self.metadata_tables = [METAREF, INFO, DDICT_T, DDICT_A]
         # check template is respected before all
-        self.filepath = str(filename) + ".json"
-        self.json_file = self.create_dc_api_request()
         self.validate_template()
         self.tables_info = self._get_tables_info()
+        self.filepath = str(filename) + ".json"
         
     def create_dc_api_request(self):
         """ Create a json file containing metadata in the folder where
@@ -66,6 +65,26 @@ class CheckSpreadsheet:
         with open(self.filepath, "w", encoding="utf-8") as f:
             json.dump(dc_request, f, ensure_ascii=True, indent=4)
 
+    def validate_meta_terms(self):
+        """Raise error if mandatory metadata terms are not compiled"""
+
+        self.json_file = self.create_dc_api_request()
+
+        errors = []
+        check_tasks = [
+            self.check_dc_terms,
+            self.check_license
+        ]
+        for check in check_tasks:
+            try:
+                check()
+            except CheckSpreadsheetError as e:
+                logging.error(f"{e.__class__.__name__}: {str(e)}\n")
+                errors.append(f"{e.__class__.__name__}: {e}\n")
+        
+        if errors:
+            os.remove(self.filepath)
+            raise InvalidTemplate(errors)
 
     def validate_template(self):
         """Raise error if spreasheet is not compliant with template"""
@@ -75,8 +94,7 @@ class CheckSpreadsheet:
             self.check_metadata_exists,
             self.check_infos,
             self.check_attributes,
-            self.check_tables,
-            self.check_dc_terms,
+            self.check_tables
         ]
         for check in check_tasks:
             try:
@@ -123,7 +141,7 @@ class CheckSpreadsheet:
             if self.sheets_dict.get(table_name, None) is None:
                 missing_tables.append(table_name)
         if missing_tables:
-            raise MissingMetadataTermError(missing_tables)
+            raise MissingMetadataError(missing_tables)
         
         return
 
@@ -133,28 +151,30 @@ class CheckSpreadsheet:
             required terms (called required induced) are not completed
         """
 
-        meta_ref = json2dict(self.filepath)
+        meta_terms = json2dict(self.filepath)
 
-        def check_strictly_req(meta_ref):
+        def check_strictly_req(meta_terms):
             """Retrieve required property that have not been compiled"""
             missing_req = []
             for key, value in TERMS_REQ_BY_OBJECT.items():
                 match DC_INFO["items"]["required"][key]["type"]:
-                    case "list":
-                        for entity in meta_ref["data"]["attributes"][key]:
-                            if entity[value] is None:
+                    case "list_of_object":
+                        for entity in meta_terms["data"]["attributes"][key]:
+                            if rm_whitespace(entity[value]) in [None, ""]:
                                 missing_req.append(value)
                     case "object":
-                        if meta_ref["data"]["attributes"][key][value] is None:
+                        if rm_whitespace(meta_terms["data"]["attributes"][key][value]) in [None, ""]:
                             missing_req.append(value)
                     case _:
-                        if meta_ref["data"]["attributes"][key] is None:
+                        print(key)
+                        print(meta_terms["data"]["attributes"][key])
+                        if rm_whitespace(meta_terms["data"]["attributes"][key]) in [None, ""]:
                             missing_req.append(value)
             return missing_req
 
-        missing_req = check_strictly_req(meta_ref)
+        missing_req = check_strictly_req(meta_terms)
         
-        def check_induced_req(meta_ref):
+        def check_induced_req(meta_terms):
             """Retrieve datacite property that become mandatory because
             relative property has been compiled
             """
@@ -207,7 +227,7 @@ class CheckSpreadsheet:
                     for term, value in req_induced.items():
                         # term is a DC_TERM term_name (nameIdentifier, affiliation)
                     
-                        dc_object = meta_ref["data"]["attributes"][object_name]
+                        dc_object = meta_terms["data"]["attributes"][object_name]
                         match dc_object:
                             case list():
                                 # dc_object has occurrence 1-n, ex: creators
@@ -216,26 +236,25 @@ class CheckSpreadsheet:
                                     if isinstance(value, list):
                                         for sub_req in value:
                                             try:
-                                                entity[term]
-                                                if entity[term] is not None and entity[sub_req] is None:
+                                                if rm_whitespace(entity[term]) not in [None, ""] and rm_whitespace(entity[sub_req]) in [None, ""]:
                                                     missing_induced_req.append(sub_req)
                                             except:
                                                 # term not found because has several occurrences 
                                                 # ex: nameIdentifier, in this case the key is term+s like nameIdentifiers
                                                 for sub_item in entity[term+"s"]:
-                                                    if sub_item[term] is not None and sub_item[sub_req] is None:
+                                                    if rm_whitespace(sub_item[term]) not in [None, ""] and rm_whitespace(sub_item[sub_req]) in [None, ""]:
                                                         missing_induced_req.append(sub_req)
                                                                         
                                     elif isinstance(value, dict):
                                         for sub_term, sub_req_list in  value.items():
                                             for sub_req in sub_req_list:
                                                 for sub_item in entity[term+"s"]:
-                                                    if sub_item[term] is not None and sub_item[sub_req] is None:
+                                                    if rm_whitespace(sub_item[term]) not in [None, ""] and rm_whitespace(sub_item[sub_req]) in [None, ""]:
                                                         missing_induced_req.append(sub_req)
                                                         
                             case dict():
                                 for sub_req in value:
-                                    if dc_object[term] is not None and dc_object[sub_req] is None:
+                                    if rm_whitespace(dc_object[term]) not in [None, ""] and rm_whitespace(dc_object[sub_req]) in [None, ""]:
                                         missing_induced_req.append(sub_req)
 
                             case _:
@@ -246,12 +265,21 @@ class CheckSpreadsheet:
 
             return missing_req_induced
 
-        missing_req_induced = check_induced_req(meta_ref)
+        missing_req_induced = check_induced_req(meta_terms)
 
         if missing_req or missing_req_induced:
             raise MissingMetadataTermError(missing_req, missing_req_induced)
             
-           
+    def check_license(self):
+        """Raise error if no license information has been provided"""
+
+        meta_terms = json2dict(self.filepath)
+        for item in meta_terms["data"]["attributes"]["rightsList"]:
+            if item.get("rightsURI") is not None or item.get("rightsIdentifier") is not None:
+                return
+        return MissingLicenseTermError()
+
+
     def check_infos(self):
         """
             Raise error for unknown or missing fields in tables_infos
@@ -623,6 +651,13 @@ class MissingMetadataTermError(CheckSpreadsheetError):
             "The following metadata terms are mandatory and have not been"
             f"filled: {req_attr}\n"
             "Some attributes are mandatory if another has been completed,"
-            "see the dictionnary of attribute: mandatory_if_attribute:"
+            "see the dictionnary of required induced attribute:"
             f"{req_if_attr}"
+        )
+
+class MissingLicenseTermError(CheckSpreadsheetError):
+    """Raised if mandatory metadata terms is empty"""
+    def __init__(self) -> None:
+        super().__init__(
+            "No license has been defined for your dataset.\nPlease provide licensing information to ensure (or forbid) reuse explicitely"
         )

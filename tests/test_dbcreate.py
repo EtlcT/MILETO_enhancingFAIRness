@@ -1,7 +1,7 @@
 import unittest
 import os
 import time
-from parameterized import parameterized
+import shutil
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -11,11 +11,6 @@ from src.extraction.retrieve_data import GetSpreadsheetData
 from src.dbcreate.dbcreate import sqliteCreate
 from conf.config import *
 
-TEST_CONF = utils.json2dict("tests/conf.json")
-IMG_1 = TEST_CONF['img_path']["img_1"]
-IMG_2 = TEST_CONF['img_path']["img_2"]
-IMG_3 = TEST_CONF['img_path']["img_3"]
-
 def rs_mock() -> pd.DataFrame:
     
     clients = pd.DataFrame(
@@ -23,7 +18,7 @@ def rs_mock() -> pd.DataFrame:
         data= [
             ["John Doe", 'address 1', 1],
             ["Jane Doe", 'address 2', 2],
-            ["John Smith", 'address 3', 1],
+            ["John Smith", 'address 3', 1]
         ]
     )
 
@@ -32,7 +27,7 @@ def rs_mock() -> pd.DataFrame:
         data= [
             [1, "Jane doe", "address 2", ["product_1", "product_2", "product_3"], "27.01.2024"],
             [2, "Jane doe", "address 2", ["product_2", "product_2"], "14.03.2024"],
-            [3, "John doe", "address 1", ["product_2", "product_3"], "09.06.2024"],
+            [3, "John doe", "address 1", ["product_2", "product_3"], "09.06.2024"]
         ]
     )
 
@@ -47,9 +42,9 @@ def rs_mock() -> pd.DataFrame:
     products = pd.DataFrame(
         columns= ['product_id', 'product_name', 'price', 'photo'],
         data= [
-            ['product_1', 'suitcase_a', 98.50, IMG_1],
-            ['product_2', 'phone_charger_b', 7.99, IMG_2],
-            ['product_3', 'lotr_dvd', 15.50, IMG_3]
+            ['product_1', 'suitcase_a', 98.50, "../data/images/suitcase.jpg"],
+            ['product_2', 'phone_case', 7.99, "../data/images/phonecase.jpg"],
+            ['product_3', 'nail_file', 15.50, "../data/images/nail file.jpg"]
         ]
     )
 
@@ -69,18 +64,18 @@ def rs_mock() -> pd.DataFrame:
         ['products', 'product_id', "INTEGER", "", 'Y', "", ""],
         ['products', 'product_name', "TEXT", "", "", "", ""],
         ['products', 'price', "FLOAT", "", "", "", ""],
-        ['products', 'photo', "TEXT", "", "", "", ""],
+        ['products', 'photo', "TEXT", "", "", "", ""]
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_REF = pd.DataFrame(
-            columns=list(METAREF_ATT.values())[0:3],
-            data=[
-                [1, 'Identifier', "fake_doi"],
-                [5, "PublicationYear", 2024],
-            
-            ]
-        )
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
+        ]
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
+    )
     
     fields_ddict_tables = ["table", "caption"]
     values_ddict_tables = [
@@ -129,7 +124,7 @@ def rs_mock() -> pd.DataFrame:
         'cities': cities,
         'products': products,
         INFO: tables_info,
-        METAREF: table_REF,
+        METAREF: table_ref,
         DDICT_T: ddict_tables,
         DDICT_A: ddict_attr,
         METAEXTRA: meta_extra
@@ -153,43 +148,41 @@ class TestDBCreate(unittest.TestCase):
 
         self.assertTrue(os.path.exists(db_file_path))
 
-        if os.path.exists(db_file_path):
-            os.remove(db_file_path)
+        shutil.rmtree(output_path)
 
-    #! file modification date is not updated
-    # def test_insert_data_and_meta_tables_create(self):
-    #     """Check that insert_data and meta_tables_create 
-    #     modify the sqlite file
-    #     """
-    #     checked_data = MagicMock(return_value=rs_mock())
-    #     data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx', checked_data)
-    #     output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
-    #     db_name = f"{data.db_name}.sqlite"
-    #     db_file_path = os.path.join(output_path, db_name)
+    def test_insert_data_and_meta_tables_create(self):
+        """Check that insert_data and meta_tables_create 
+        modify the sqlite file
+        """
 
-    #     self.assertFalse(os.path.exists(db_file_path))
-    #     sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
-    #     sqlite_db.create_db()
+        data = GetSpreadsheetData('fakepath/to/spreadsheet/db_orders.xlsx', rs_mock())
 
-    #     initial_modification_time = os.path.getmtime(db_file_path)
+        output_path = os.path.abspath(os.path.normpath("tests/tests_outputs/"))
+        db_name = f"{data.db_name}.sqlite"
+        db_file_path = os.path.join(output_path, db_name)
 
-    #     # the modification is done too fast so we simulate more time
-    #     time.sleep(0.2)
-    #     sqlite_db.insert_data()
+        sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
 
-    #     first_modification_time = os.path.getmtime(db_file_path)
+        sqlite_db.create_db()
 
-    #     self.assertGreater(first_modification_time, initial_modification_time)
+        initial_modification_time = os.path.getmtime(db_file_path)
 
-    #     time.sleep(0.2)
-    #     sqlite_db.meta_tables_create()
+        # the modification is done too fast so we simulate more time
+        time.sleep(0.2)
+        sqlite_db.insert_data()
 
-    #     second_modification_time = os.path.getmtime(db_file_path)
+        first_modification_time = os.path.getmtime(db_file_path)
 
-    #     self.assertGreater(second_modification_time, first_modification_time)
+        self.assertGreater(first_modification_time, initial_modification_time)
 
-    #     if os.path.exists(db_file_path):
-    #         os.remove(db_file_path)
+        time.sleep(0.2)
+        sqlite_db.meta_tables_create()
+
+        second_modification_time = os.path.getmtime(db_file_path)
+
+        self.assertGreater(second_modification_time, first_modification_time)
+
+        shutil.rmtree(output_path)
 
     def test_ddict_schema_create(self):
         """Check that ddict_schema_create modify the sqlite
@@ -202,7 +195,7 @@ class TestDBCreate(unittest.TestCase):
         db_file_path = os.path.join(output_path, db_name)
 
         if os.path.exists(db_file_path):
-            os.remove(db_file_path)
+            shutil.rmtree(db_file_path)
 
         sqlite_db = sqliteCreate(getData=data, output_dir=output_path)
 
@@ -226,5 +219,4 @@ class TestDBCreate(unittest.TestCase):
         # check ERD image is created
         self.assertTrue(os.path.exists(erd_file_path))
 
-        if os.path.exists(db_file_path):
-            os.remove(db_file_path)
+        shutil.rmtree(output_path)

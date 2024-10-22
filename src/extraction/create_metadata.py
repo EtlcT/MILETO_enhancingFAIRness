@@ -182,7 +182,7 @@ class GenerateMeta:
         self.sheets_dict[METAEXTRA] = meta_extra
         return meta_extra
 
-# TODO ?
+# TODO
 def update_metatable(self):
     """Update metadata tables:
     - remove attributes that does not exist anymore,
@@ -192,24 +192,4 @@ def update_metatable(self):
 
     pass
 
-# TODO ?
-def get_diff(self, former_info) -> pd.DataFrame:
-    """Return a dataframe of comparison between former 
-    and actual tables_infos like below
-
-    ```Markdown table.
-    |  table   | attribute  |   state      |
-    | :------- | :--------  | :---------:  |
-    | table_A  |  A_col_1   | both         |
-    | table_A  |  A_col_2   | left_only    |
-    | table_B  |  B_col_1   | right_only   |
-    ```
-
-    state both means that the attribute still exist
-    state left_only means the attribute has been removed
-    state right_only means the attribute has been added
-    """
-
-    comparison_df = former_info.merge()
-    pass
     

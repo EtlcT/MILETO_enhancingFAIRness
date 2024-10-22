@@ -8,7 +8,7 @@ from gui import main_gui
 # Configure logging
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
-                    handlers=[logging.FileHandler("Ss2db.log"),
+                    handlers=[logging.FileHandler("logs"),
                               logging.StreamHandler()])
 
 # access binaries

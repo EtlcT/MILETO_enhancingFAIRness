@@ -62,12 +62,13 @@ def read_spreadsheet_mock():
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_ref = pd.DataFrame(
-        columns=list(METAREF_ATT.values())[1:3], # ["property", "value"]
-        data=[
-            ["Date", 2024],
-            ["Title", "2022_Example#/Template_v2_1; " ]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
 
     fields_ddict_a = list(DDICT_A_ATT.values())
@@ -137,12 +138,14 @@ def rs_mock_pk_duplicate():
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_ref = pd.DataFrame(
-        columns=[list(METAREF_ATT.values())[i] for i in [1, 3]],
-        data=[
-            ["Date", 2024],
-            ["Title", "2022_Example#/Template_v2_1; " ]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
     
     fields_ddict_a = list(DDICT_A_ATT.values())
@@ -191,12 +194,13 @@ def rs_mock_with_meta():
         ]
     )
 
-    table_ref = pd.DataFrame(
-        columns=list(METAREF_ATT.values())[1:3],
-        data= [
-            ["Date", 2024],
-            ["Title", "test_db"]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
 
     tables_info = pd.DataFrame(
@@ -269,12 +273,13 @@ def rs_mock_cpk_duplicate():
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_ref = pd.DataFrame(
-        columns=list(METAREF_ATT.values())[1:3],
-        data=[
-            ["Date", 2024],
-            ["Title", "2022_Example#/Template_v2_1; " ]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
 
     fields_ddict_a = list(DDICT_A_ATT.values())
@@ -336,12 +341,13 @@ def rs_mock_fk_not_unique():
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_ref = pd.DataFrame(
-        columns=list(METAREF_ATT.values())[1:3],
-        data=[
-            ["Date", 2024],
-            ["Title", "2022_Example#/Template_v2_1; "]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
 
     fields_ddict_a = list(DDICT_A_ATT.values())
@@ -402,12 +408,13 @@ def rs_mock_fk_not_exist():
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_ref = pd.DataFrame(
-        columns=list(METAREF_ATT.values())[1:3],
-        data=[
-            ["Date", 2024],
-            ["Title", "2022_Example#/Template_v2_1; " ]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
     
     fields_ddict_a = list(DDICT_A_ATT.values())
@@ -469,13 +476,14 @@ def rs_mock_fk_without_ref():
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
+        ]
     table_ref = pd.DataFrame(
-            columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
-            data=[
-                ["Date", 2024],
-                ["Title", "2022_Example#/Template_v2_1; " ]
-            ]
-        )
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
+    )
 
     fields_ddict_a = list(DDICT_A_ATT.values())
     values_ddict_a = [
@@ -535,12 +543,13 @@ def rs_mock_undefined_pk():
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_ref = pd.DataFrame(
-        columns=list(METAREF_ATT.values())[1:3],
-        data=[
-            ["Date", 2024],
-            ["Title", "2022_Example#/Template_v2_1; " ]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    table_ref = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
 
     fields_ddict_a = list(DDICT_A_ATT.values())
@@ -601,13 +610,14 @@ def rs_mock_shared_name() -> pd.DataFrame:
     ]
     tables_info = pd.DataFrame(data=values_info, columns=fields_info)
 
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
+        ]
     table_ref = pd.DataFrame(
-            columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3],
-            data=[
-                ["Date", 2024],
-                ["Title", "2022_Example#/Template_v2_1; " ]
-            ]
-        )
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
+    )
     
     fields_ddict_a = list(DDICT_A_ATT.values())
     values_ddict_a = [
@@ -721,11 +731,11 @@ class TestCheckSpreadsheet(unittest.TestCase):
 
             if expected_exception:
                 with self.assertRaises(check.InvalidTemplate) as context:
-                    checker = check.CheckSpreadsheet(sheet_dict)
+                    checker = check.CheckSpreadsheet(sheet_dict, "fake_path")
                 exception_message = context.exception.errors
                 self.assertTrue(any(expected_exception.__name__ in msg for msg in exception_message))
             else:
                 try:
-                    checker = check.CheckSpreadsheet(sheet_dict)
+                    checker = check.CheckSpreadsheet(sheet_dict, "kafe_path")
                 except check.CheckSpreadsheetError:
                     self.fail(f"{name} raised CheckSpreadsheetError unexpectedly!")

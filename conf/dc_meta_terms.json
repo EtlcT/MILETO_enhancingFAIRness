@@ -7,11 +7,11 @@
             },
             "creators": {
                 "id": "2",
-                "type": "list"
+                "type": "list_of_object"
             },
             "titles": {
                 "id": "3",
-                "type": "list"
+                "type": "list_of_object"
             },
             "publisher": {
                 "id": "4",
@@ -29,58 +29,55 @@
         "other": {
             "subjects": {
                 "id": "6",
-                "type": "list"
+                "type": "list_of_object"
             },
             "contributors": {
                 "id": "7",
-                "type": "list"
+                "type": "list_of_object"
             },
             "dates": {
                 "id": "8",
-                "type": "list"
+                "type": "list_of_object"
             },
             "alternateIdentifiers": {
                 "id": "11",
-                "type": "list"
+                "type": "list_of_object"
             },
             "relatedidentifiers": {
                 "id": "12",
-                "type": "list"
+                "type": "list_of_object"
             },
             "sizes": {
                 "id": "13",
-                "type": "list",
-                "no_sub": 1
+                "type": "list"
             },
             "formats": {
                 "id": "14",
-                "type": "list",
-                "no_sub": 1
+                "type": "list"
             },
             "version": {
                 "id": "15",
-                "type": "string",
-                "no_sub": 1
+                "type": "string"
             },
             "rightsList": {
                 "id": "16",
-                "type": "list"
+                "type": "list_of_object"
             },
             "descriptions": {
                 "id": "17",
-                "type": "list"
+                "type": "list_of_object"
             },
             "geolocations": {
                 "id": "18",
-                "type": "list"
+                "type": "list_of_object"
             },
             "fundingReferences": {
                 "id": "19",
-                "type": "list"
+                "type": "list_of_object"
             },
             "relatedItems": {
                 "id": "20",
-                "type": "list"
+                "type": "list_of_object"
             }
         }
     },
@@ -754,7 +751,6 @@
         },
         "16": {
             "name": "rights",
-            "required": 0,
             "has_o": [
                 "16.a",
                 "16.b",
@@ -800,6 +796,7 @@
                 "17.a"
             ],
             "occurrences": "1-n",
+            "long_string": true,
             "help": "All additional information that does not fit in any of the other categories. May be used for technical information or detailed information associated with a scientific instrument.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/"
         },
@@ -819,13 +816,11 @@
             ]
         },
         "18": {
-            "name": "geoLocation",
-            "required": 0,
+            "name": "geoLocations",
             "has_o": [
                 "18.1",
                 "18.2",
-                "18.3",
-                "18.4"
+                "18.3"
             ],
             "occurrences": "1-n",
             "help": "Spatial region or named place where the data was gathered or about which the data is focused.",
@@ -904,69 +899,8 @@
             "help": "Description of a geographic location.",
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#geolocationplace"
         },
-        "18.4": {
-            "name": "geoLocationPolygon",
-            "required": 0,
-            "has_r": [
-                "18.4.1",
-                "18.4.1.1",
-                "18.4.1.2"
-            ],
-            "has_o": [
-                "18.4.2"
-            ],
-            "occurrences": "1-n",
-            "help": "A drawn polygon area, defined by a set of points and lines connecting the points in a closed chain.",
-            "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#geolocationpolygon"
-        },
-        "18.4.1": {
-            "name": "polygonPoint",
-            "required": 0,
-            "occurrences": "4-n",
-            "help": "A point location in a polygon. There must be at least 4 non-aligned points to make a closed curve, with the last point described the same as the first point.",
-            "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#polygonpoint"
-        },
-        "18.4.1.1": {
-            "name": "pointLongitude",
-            "required": 0,
-            "occurrences": "1",
-            "help": "Longitudinal dimension of point expressed in decimal degrees (positive east).",
-            "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#id13"
-        },
-        "18.4.1.2": {
-            "name": "pointLatitude",
-            "required": 0,
-            "occurrences": "1",
-            "help": "Latitudinal dimension of point expressed in decimal degrees (positive north).",
-            "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#id15"
-        },
-        "18.4.2": {
-            "name": "inPolygonPoint",
-            "required": 0,
-            "has_o": [
-                "18.4.2.1",
-                "18.4.2.2"
-            ],
-            "occurrences": "1",
-            "help": "For any bound area that is larger than half the earth, define a (random) point inside.",
-            "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#inpolygonpoint"
-        },
-        "18.4.2.1": {
-            "name": "pointLongitude",
-            "required": 0,
-            "occurrences": "1",
-            "help": "Longitudinal dimension of point expressed in decimal degrees (positive east).",
-            "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#id19"
-        },
-        "18.4.2.2": {
-            "name": "pointLatitude",
-            "required": 0,
-            "occurrences": "1",
-            "help": "Latitudinal dimension of point expressed in decimal degrees (positive north).",
-            "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/geolocation/#id21"
-        },
         "19": {
-            "name": "fundingReference",
+            "name": "fundingReferences",
             "has_r": [
                 "19.1"
             ],
@@ -1035,7 +969,7 @@
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/fundingreference/#awardtitle"
         },
         "20": {
-            "name": "relatedItem",
+            "name": "relatedItems",
             "has_r": [
                 "20.a",
                 "20.b"
@@ -1215,7 +1149,7 @@
             "link": "https://datacite-metadata-schema.readthedocs.io/en/4.5/properties/relateditem/#creator"
         },
         "20.2.1": {
-            "name": "creatorName",
+            "name": "name",
             "required": 0,
             "has_o": [
                 "20.2.1.a"
@@ -1340,7 +1274,6 @@
         },
         "20.12": {
             "name": "contributor",
-            "required": 0,
             "has_r": [
                 "20.12.a",
                 "20.12.1"
@@ -1384,7 +1317,7 @@
             ]
         },
         "20.12.1": {
-            "name": "contributorName",
+            "name": "name",
             "required": 0,
             "has_o": [
                 "20.12.1.a"

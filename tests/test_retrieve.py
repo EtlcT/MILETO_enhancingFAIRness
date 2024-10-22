@@ -41,7 +41,7 @@ def _read_spreadsheet_mock():
     ]
     table_D = pd.DataFrame(data=values_D, columns=fields_D)
 
-    fields_info = list(TEMP_CONF["tables_info"]["tab_attr"].values())
+    fields_info = list(INFO_ATT.values())
     values_info = [
         ['Table_A', 'Attribute_A1', "TEXT", "", 'Y', np.nan, np.nan],
         ['Table_A', 'Attribute_A2', "TEXT", "", np.nan, np.nan, np.nan],
@@ -58,14 +58,16 @@ def _read_spreadsheet_mock():
         ['Table_D', 'Attribute_D2', "TEXT", "", np.nan, np.nan, np.nan],
         ['Table_D', 'Attribute_A1', "TEXT", "", np.nan, 'Y','Table_A'],
     ]
+    
     table_info = pd.DataFrame(data=values_info, columns=fields_info)
 
-    table_REF = pd.DataFrame(
-        columns=list(TEMP_CONF["meta_references"]["tab_attr"].values())[1:3], # ['property', 'value']
-        data=[
-            ['Date', 2024],
-            ['Title', '2022_Example#/Template_v2_1; ' ]
+    meta_terms_info = [
+            ['publicationYear', 2024],
+            ['Title', 'Example dataset for NFS-FAIR-DDP']
         ]
+    table_REF = pd.DataFrame(
+        columns=list(METAREF_ATT.values()),
+        data=meta_terms_info
     )
 
     return {
@@ -74,7 +76,7 @@ def _read_spreadsheet_mock():
         'Table_C': table_C,
         'Table_D': table_D,
         INFO: table_info,
-        TEMP_CONF["meta_references"]["tab_name"]: table_REF
+        METAREF: table_REF
     }
 
 def df1_no_duplicate():

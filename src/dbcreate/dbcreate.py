@@ -40,6 +40,8 @@ class sqliteCreate():
         This function create a sqlite file
         """
 
+        os.makedirs(self.output_dir, exist_ok=True)
+
         db_file = self.output_sqlite
         conn = sqlite3.connect(database=db_file)
         
@@ -127,8 +129,8 @@ class sqliteCreate():
         return
 
     def meta_tables_create(self) -> None:
-        """ Create non data table
-        """
+        """ Create non data table"""
+
         db_file = self.output_sqlite
         conn = sqlite3.connect(db_file)
 
@@ -148,7 +150,7 @@ class sqliteCreate():
 
     def ddict_schema_create(self) -> None:
         """
-        Create DDict_schema table and 
+        Create datadict_schema table and 
         insert the Entity-Relationship Diagram and sql statement
         """
 
@@ -159,14 +161,14 @@ class sqliteCreate():
         conn = sqlite3.connect(database=self.output_sqlite)
 
         create_query = (
-            "CREATE TABLE IF NOT EXISTS DDict_schema"
+            f"CREATE TABLE IF NOT EXISTS {DDICT_S}"
             "(ERD BLOB, sql_statement TEXT)"
         )
 
         conn.execute(create_query)
 
         insert_query = (
-            f"INSERT INTO DDict_schema (ERD, sql_statement) VALUES(?,?)"
+            f"INSERT INTO {DDICT_S} (ERD, sql_statement) VALUES(?,?)"
         )
 
         conn.execute(insert_query, (blob_image, sql_statement))

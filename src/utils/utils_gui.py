@@ -1,6 +1,6 @@
 import tkinter as tk
 import customtkinter as ctk
-import json
+import re
 from json import JSONDecodeError
 import textwrap
 
@@ -42,25 +42,19 @@ def get_authorized_type(current_type):
                return ["REAL", "TEXT"]
           case _:
                return None
+
+def get_sub_item_id(data, ancestor_id, sub_item_name):
+    """ Return sub_item index value based on
+    ancestor index and sub_item name
+
+    Example: get_sub_item_id(DC_TERMS, 2, "nameIdentifier") return 2.4
+    
+    """
+    for item_idx, item_info in data.items():
+        if re.match(f"{ancestor_id}(?!\d)", item_idx) and item_info.get("name") is not None:
+            if sub_item_name == item_info.get("name"):
+                return item_idx
           
-# def recurse_str_to_dict(json_str):
-#     try:
-#         # Check if the input is a string, then attempt to load it as JSON
-#         if isinstance(json_str, str):
-#             loaded_d = json.loads(json_str)
-#         elif isinstance(json_str, dict):
-#             loaded_d = json_str
-#         else:
-#             return json_str  # If it's neither a string nor a dict, return as-is
-          
-#         # Recurse through the dictionary's items
-#         for k, v in loaded_d.items():
-#             loaded_d[k] = recurse_str_to_dict(v)
-#     except (json.JSONDecodeError, TypeError):
-#         return json_str  # Return the original string or object if loading fails
-#     return loaded_d
-            
-     
 # # Function to calculate the required row height
 # def get_max_lines_per_row(data_frame):
 #     """Calculate required row height based on break line"""

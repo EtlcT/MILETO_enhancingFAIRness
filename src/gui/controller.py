@@ -63,7 +63,7 @@ class Controller:
             current_heading = self.view.data_sheet.heading(column_id)['text']
 
             # open dialog to ask for new heading value
-            new_heading_window = self.view.open_edition_window(region, current_heading)
+            new_heading_window = self.view.open_edition_window("header", current_heading)
             new_heading_window.bind("<<ConfirmClick>>", lambda e: on_confirm())
             new_heading_window.bind("<<CancelClick>>", lambda e: on_cancel())
             
@@ -164,7 +164,7 @@ class Controller:
                                 values[object_name][term].append(sub_dict)
                         else:
                             values[object_name][term] = entry[0].get()
-                case "list":
+                case "list_of_object":
                     values[object_name] = []
                     for occurrence, occurrence_details in content.items():
                         occurrence_dict = {}
@@ -182,6 +182,20 @@ class Controller:
                                 else:
                                     occurrence_dict[term] = value[0].get()
                         values[object_name].append(occurrence_dict)
+                case "list":
+                    values[object_name] = []
+                    for idx, info in content.items():
+                        for name, value in info.items():
+                            if type(value) == ctk.CTkTextbox:
+                                values[object_name].append(value[0].get("0.0"), "end")
+                            else:
+                                values[object_name].append(value[0].get())
+                case "int":
+                    for term, entry in content.items():
+                        try:
+                            values[object_name] = int(entry[0].get())
+                        except:
+                            values[object_name] = entry[0].get()
                 case _:
                     for term, entry in content.items():
                         values[object_name] = entry[0].get()

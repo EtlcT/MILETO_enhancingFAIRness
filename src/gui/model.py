@@ -127,6 +127,7 @@ class Model:
         filename = os.path.splitext(self.input_path)[0]
         checker = CheckSpreadsheet(self.tmp_data, filename)
         checker.validate_spreadsheet()
+        checker.validate_meta_terms()
 
         self.checked_data = checker.sheets_dict
 

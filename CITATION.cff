@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it with these metadata"
-title: "FAIR_spreadlite"
+title: "NFS-FAIR-DDP"
 authors:
   - family-names: Casalta-Badetti
   - given-names: Agathe

@@ -55,6 +55,7 @@ def main_cli():
             # check data in spreadsheet is valid and save metadata terms in json
             checker = CheckSpreadsheet(input_path, os.path.splitext(input_path)[0])
             checker.validate_spreadsheet()
+            checker.validate_meta_terms()
 
             data = GetSpreadsheetData(
                         filepath=input_path,

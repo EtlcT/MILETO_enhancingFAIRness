@@ -125,8 +125,9 @@ class docCreate():
             "</ul>"
         )
 
-        keywords = [subject["subject"]
-                    for subject in meta_ref["data"]["attributes"]["subjects"]]
+        keywords = [subject["subject"] for subject in meta_ref["data"]["attributes"]["subjects"] if subject["subject"] is not None]
+        if keywords:
+            keywords = ", ".join(keywords)
 
         extra_synthesis = next((item["description"] for item in meta_ref["data"]
                                ["attributes"]["descriptions"] if item["descriptionType"] == "Abstract"), "")
@@ -167,7 +168,7 @@ class docCreate():
             'db_name': self.data.db_name,
             'DOI_a_tag': doi_a_tag,
             'software_repo_ul_tag': software_repo_ul_tag,
-            'keywords': ", ".join(keywords),
+            'keywords': keywords,
             'extra_synthesis': format_as_pre(extra_synthesis),
             'extra_description': format_as_pre(extra_desc),
             'img_tag_erd': img_tag_erd,
@@ -276,8 +277,9 @@ class sqlite2pdf():
             "</ul>"
         )
 
-        keywords = [subject["subject"]
-                    for subject in meta_ref["data"]["attributes"]["subjects"]]
+        keywords = [subject["subject"] for subject in meta_ref["data"]["attributes"]["subjects"] if subject["subject"] is not None]
+        if keywords:
+            keywords = ", ".join(keywords)
 
         extra_synthesis = next((item["description"] for item in meta_ref["data"]
                                ["attributes"]["descriptions"] if item["descriptionType"] == "Abstract"), "")
