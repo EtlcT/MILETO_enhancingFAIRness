@@ -166,8 +166,6 @@ class CheckSpreadsheet:
                         if rm_whitespace(meta_terms["data"]["attributes"][key][value]) in [None, ""]:
                             missing_req.append(value)
                     case _:
-                        print(key)
-                        print(meta_terms["data"]["attributes"][key])
                         if rm_whitespace(meta_terms["data"]["attributes"][key]) in [None, ""]:
                             missing_req.append(value)
             return missing_req
