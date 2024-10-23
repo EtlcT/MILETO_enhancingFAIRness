@@ -1,6 +1,6 @@
 import sys
 import tkinter as tk
-import tkinter as ctk
+import customtkinter as ctk
 
 from src.gui.view import View
 from src.gui.model import Model
@@ -11,7 +11,7 @@ from src.utils.utils import resource_path
 def main_gui():
 
     model = Model()
-
+    ctk.set_appearance_mode("dark")
     # open in fullscreen mode
     if(sys.platform.startswith('linux')):
         geometry = get_zoomed_geometry()
