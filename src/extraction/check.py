@@ -10,7 +10,7 @@ from src.utils.utils_extraction import get_datatables_list, rm_extra_tables, pro
 
 logging.basicConfig(level=logging.ERROR, 
                     format="%(asctime)s %(levelname)s %(message)s",
-                    handlers=[logging.FileHandler("Ss2db.log"),
+                    handlers=[logging.FileHandler("logs"),
                               logging.StreamHandler()])
 
 class CheckSpreadsheet:

@@ -5,7 +5,7 @@ import os
 # Configure logging
 logging.basicConfig(level=logging.ERROR, 
                     format='%(asctime)s %(levelname)s %(message)s',
-                    handlers=[logging.FileHandler("logs.log"),
+                    handlers=[logging.FileHandler("logs"),
                               logging.StreamHandler()])
 
 from src.extraction.retrieve_data import GetSpreadsheetData
