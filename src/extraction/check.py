@@ -440,9 +440,12 @@ class CheckSpreadsheet:
     def check_pk_defined(self) -> None:
         """Raise AssertionError if a table has no Primary Key defined"""
 
+        table_no_pk = []
         for table, table_info in self.tables_info.groupby(by=INFO_ATT["table"]):
             if not ("Y" in table_info[INFO_ATT["isPK"]].values) :
-                raise PrimaryKeyMissingError(table)
+                table_no_pk.append(table)
+        if table_no_pk:
+            raise PrimaryKeyMissingError(table_no_pk)
         
         return
     
@@ -508,8 +511,8 @@ class InvalidTemplate(CheckSpreadsheetError):
 
 class PrimaryKeyMissingError(CheckSpreadsheetError):
     """Raised whan a table lacks a Primary Key"""
-    def __init__(self, table):
-        super().__init__(f"Table {table} has no Primary Key defined")
+    def __init__(self, table_list):
+        super().__init__(f"The following table(s) has no Primary Key defined: \n {table_list}")
     
 class PrimaryKeyNonUniqueError(CheckSpreadsheetError):
     """Raised if a Primary Key is not unique,
