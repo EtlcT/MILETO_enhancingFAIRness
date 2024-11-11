@@ -1,10 +1,33 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it with these metadata"
-title: "NFS-FAIR-DDP"
+title: NFS-FAIR-DDP
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
 authors:
+  - given-names: Roberto
+    family-names: Scotti
+    affiliation: Nuoro Forestry School
+    orcid: 'https://orcid.org/0000-0001-7394-4473'
   - family-names: Casalta-Badetti
-  - given-names: Agathe
-  - affiliation: "Università degli Studi di Sassari (UNISS)"
-  - orcid: 0009-0000-2101-6800
-repository-code: "https://github.com/EtlcT/MILETTO_enhancingFAIRness"
-repository-artifact: "https://gitlab.com/NuoroForestrySchool/miletto_enhancingfairness"
+    given-names: Agathe
+    orcid: 'https://orcid.org/0009-0000-2101-6800'
+    affiliation: Università degli studi di Sassari
+    email: a.casaltab@gmail.com
+repository-code: 'https://github.com/EtlcT/MILETTO_enhancingFAIRness'
+repository: >-
+  https://gitlab.com/NuoroForestrySchool/miletto_enhancingfairness
+abstract: >-
+  This software aims to facilitate data sharing and reuse of
+  datasets throught the adoption of SQLite structured format
+  and the inclusion of data dictionaries. It act as a
+  gateway for the transition from spreadsheet to relational
+  databases.
+keywords:
+  - FAIR
+  - datasets
+  - converter
+  - spreadsheet
+  - SQLite
+  - relational database
+license: Apache-2.0
