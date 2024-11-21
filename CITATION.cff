@@ -24,7 +24,7 @@ repository: >-
 abstract: >-
   This software aims to facilitate data sharing and reuse of
   datasets throught the adoption of SQLite structured format
-  and the inclusion of data dictionaries. It act as a
+  and the inclusion of data dictionaries with rich metadata. It acts as a
   gateway for the transition from spreadsheet to relational
   databases.
 keywords:
