@@ -204,15 +204,20 @@ The executable has been created using <a href="https://pyinstaller.org/en/stable
 ```bash
 # Linux
 python -m PyInstaller \
---name "Ss2db_v0_0_1-prealpha" \
---add-data "path_to/MILETO_enhancingFAIRness/conf/template_conf.json:conf/" \
---add-data "path_to/MILETO_enhancingFAIRness/src/templates/:src/templates" \
---add-binary "/usr/lib/x86_64-linux-gnu/graphviz:graphviz/" \
---add-binary "/usr/bin/wkhtmltopdf:wkhtmltopdf/" \
---add-binary "/usr/lib/x86_64-linux-gnu/qt5/plugins:qt5/plugins" \
---distpath "path_to_output_dir/dist" \
---workpath "path_to_output_dir/build" \
---specpath "path_to_output_dir/" \
+--name "NFS-FAIR-DDP_v1_1_0_beta" \
+--add-data "/path_to/MILETO_enhancingFAIRness/conf/:conf/" \
+--add-data "/path_to/MILETO_enhancingFAIRness/src/templates/:src/templates" \
+--add-data "/path_to/MILETO_enhancingFAIRness/src/gui/assets/:src/gui/assets" \
+--add-data "/path_to/MILETO_enhancingFAIRness/assets/logo.ico:assets/" \
+--add-binary "/usr/lib/x86_64-linux-gnu/graphviz:graphviz" \
+--add-binary "/usr/bin/dot:graphviz" \
+--add-binary "/usr/bin/wkhtmltopdf:wkhtmltopdf" \
+--add-binary "/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms:qt5/plugins/platforms" \
+--hidden-import tkinter \
+--hidden-import PIL._tkinter_finder \
+--distpath "/path_to_output_dir/dist" \
+--workpath "/path_to_output_dir/build" \
+--specpath "/path_to_output_dir/" \
 --onedir app.py
 ```
 
