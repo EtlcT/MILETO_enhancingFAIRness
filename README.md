@@ -224,16 +224,20 @@ python -m PyInstaller \
 ```Powershell
 # Windows
 python -m PyInstaller `
---additional-hooks-dir "path_to_\MILETO_enhancingFAIRness\hooks" `
---name "Ss2db_v0_0_1-prealpha" `
---add-data "path_to_\MILETO_enhancingFAIRness\conf\template_conf.json:conf\" `
---add-data "path_to_\MILETO_enhancingFAIRness\src\templates\:src\templates" `
---add-binary "C:\Program Files\Graphviz\bin\*:graphviz_bin" `
---add-binary "C:\Program Files\wkhtmltopdf\bin\*:wkhtml_bin" `
---hidden-import MySQLdb `
---hidden-import psycopg2 `
+--name "NFS-FAIR-DDP" `
+--add-data "path_to\MILETO_enhancingFAIRness\conf\template_conf.json:conf\" `
+--add-data "path_to\MILETO_enhancingFAIRness\conf\dc_meta_terms.json:conf\" `
+--add-data "path_to\MILETO_enhancingFAIRness\conf\metadata_properties.json:conf\" `
+--add-data "path_to\MILETO_enhancingFAIRness\src\templates\:src\templates" `
+--add-data "path_to\MILETO_enhancingFAIRness\assets\logo.ico:assets\" `
+--add-data "path_to\MILETO_enhancingFAIRness\src\gui\assets\:src\gui\assets\" `
+--add-binary "C:\Program Files\Graphviz\bin\*:graphviz" `
+--add-binary "C:\Program Files\wkhtmltopdf\bin\*:wkhtmltopdf" `
+-i "path_to\MILETO_enhancingFAIRness\assets\logo.ico" `
 --distpath "path_to_output_dir\dist" `
 --workpath "path_to_output_dir\build" `
 --specpath "path_to_output_dir\" `
+--hide-console hide-early `
+--noconfirm `
 --onedir app.py
 ```
