@@ -48,14 +48,11 @@ A brief description of files and folders of interests is made ## IN UPPERCASE
 |       template_conf.json ## TO MODIFY WHEN CHANGES APPLY TO EXCEL TEMPLATE
 |       
 +---data ## SOME EXCEL FILES FOR TESTING PURPOSE
-|   |   2018_ErosionExperiment_Marganai_v2024.xlsx
+|   |   ErosionExperiment_Marganai_v2024.xlsx
 |   |   2024_ExampleDataSet.xlsx
 |   |   db_orders.xlsx
 |   |   
 |   +---images ## IMAGES FOR DB_ORDERS.XLSX
-|   |   |   lotr_dvd.jpg
-|   |   |   phone_charger.jpg
-|   |   |   suitcase.jpg
 |   |   
 |   \---output
 +---doc
@@ -88,7 +85,6 @@ A brief description of files and folders of interests is made ## IN UPPERCASE
 |           doc.html
 |           
 +---tests 
-    |   conf.json
     |   test_dbcreate.py
     |   test_extraction.py
     |   __init__.py
