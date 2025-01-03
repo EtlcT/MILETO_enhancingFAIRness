@@ -9,7 +9,7 @@
 <p style="text-align: justify; font-weight: bold">The Enhancing FAIRness project is born from the MILETO research project that focuses on the detection and analysis of so-called
 'protection' forests.
 Enhancing FAIRness project aims, as its name suggest, to improve data FAIRness by facilitating the sharing of researchers' datasets.
-This project begets to Ss2db python software, that allows to easily convert a spreadsheet that respects a specific template into a sqlite database with a documentation and an Entity Relationship Diagram (ERD).</p>
+This project begets to NFS-FAIR-DDP python software, that allows to easily convert a spreadsheet that respects a specific template into a sqlite database with a documentation and an Entity Relationship Diagram (ERD).</p>
 <p>
 CSV is a widespread open format for sharing but it presents limitations in terms of reuse. Ss2db offers to convert spreadsheets with 'one sheets per table' into corresponding database. Mains benefits of Ss2db regarding FAIRness are the following:</p>
 <ul>
